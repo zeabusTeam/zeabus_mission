@@ -3,6 +3,15 @@
 
 class Control:
 
+    def __init__(self, senderName):
+        """Control wrapper class for Mission Planner
+
+        Keyword Arguments:
+            senderName {str}
+                -- Everyone that use this class must to privide your name.
+        """
+        self.senderName = senderName
+
     def moveDist(self, direction=[0, 0, 0, 0, 0, 0]):
         """Tell robot to move ... meter(s).
 
