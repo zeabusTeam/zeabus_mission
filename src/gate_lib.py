@@ -6,49 +6,56 @@ class Gate:
 
     def __init__(self, gate_proxy):
         self.gate_proxy = gate_proxy
+        self.param = {
+            'firstFinding': {
+                'threshold': 0.5,
+                'rotateAngle': 3,
+                'maxAngle': 360  # Should be ~120 when switch is used.
+            },
+            'forwardToGate': {
+                'cxThresold': 0.5,
+                'rotateAngle': 4,
+                'moveDist': 0.2,
+            },
+            'finalMoveDist': 2.0,
+            'endThreshold': 0.1,
+            'visionStatusHistory': 20,
+        }
 
     listGateStatus = [0]
 
     def setGateStatus(self, status=0):
         self.listGateStatus.append(status)
-        if len(self.listGateStatus) > 20:
+        if len(self.listGateStatus) > self.param['visionStatusHistory']:
             del self.listGateStatus[0]
 
     def getGateStatus(self):
         return sum(self.listGateStatus)/len(self.listGateStatus)
 
     def isEnd(self):
-        return self.getGateStatus() < 0.1
+        return self.getGateStatus() < self.param['endThreshold']
 
     def step01_rotateAndFindGate(self):
         """
             TODO: check switch (middle switch = ccw, edge switch = cw)
-            if notfound:
-                turn left
-            elif center x is negative and less than ... (might be -0.5) and not in turning phase:
-                turn left until ... (might be -0.1)
-            elif center x is positive and more than ... (might be 0.5) and not in turning phase:
-                turn right until ... (might be 0.1)
-
         """
         rotate_count = 0
         while not rospy.is_shutdown():
             vision_resp = self.gate_proxy()
             if vision_resp.found == 1:
                 self.setGateStatus(1)
-            if self.getGateStatus() >= 0.4:
+            if self.getGateStatus() >= self.param['firstFinding']['threshold']:
                 return True
             # Code when switch is available
             # if rotate_count > 90:
-            if rotate_count > 360:
+            if rotate_count > self.param['firstFinding']['maxAngle']:
                 return False
-            # rotate command ccw 4 deg
-            rotate_count += 3
+            # rotate command ccw self.param['firstFinding']['rotateAngle'] deg
+            rotate_count += self.param['firstFinding']['rotateAngle']
             rospy.sleep(1/10)
 
     def step02_forwardWithRotate(self):
         """
-            TODO: check switch (middle switch = ccw, edge switch = cw)
             if center x is negative and less than ... (might be -0.5) and not in turning phase:
                 turn left until ... (might be -0.1)
             elif center x is positive and more than ... (might be 0.5) and not in turning phase:
@@ -59,11 +66,11 @@ class Gate:
             vision_resp = self.gate_proxy()
             if vision_resp.found == 1:
                 self.setGateStatus(1)
-            if vision_resp.cx1 < -0.5:
-                # rotate command ccw 4 deg
+            if vision_resp.cx1 < -self.param['forwardToGate']['cxThresold']:
+                # rotate command ccw self.param['forwardToGate']['rotateAngle'] deg
                 pass
-            elif vision_resp.cx1 > 0.5:
-                # rotate command cw 4 deg
+            elif vision_resp.cx1 > self.param['forwardToGate']['cxThresold']:
+                # rotate command cw self.param['forwardToGate']['rotateAngle'] deg
                 pass
             else:
                 # move forward
@@ -84,11 +91,11 @@ class Gate:
             vision_resp = self.gate_proxy()
             if vision_resp.found == 1:
                 self.setGateStatus(1)
-            if vision_resp.cx1 < -0.5:
-                # move left 0.2m
+            if vision_resp.cx1 < -self.param['forwardToGate']['cxThresold']:
+                # move left self.param['forwardToGate']['moveDist'] m
                 pass
-            elif vision_resp.cx1 > 0.5:
-                # move right 0.2m
+            elif vision_resp.cx1 > self.param['forwardToGate']['cxThresold']:
+                # move right self.param['forwardToGate']['moveDist'] m
                 pass
             else:
                 # move forward
