@@ -10,10 +10,13 @@ class Control:
             direction {list} -- [x, y, z, roll, pitch, yaw]
                 (default: {[0,0,0,0,0,0]})
 
+        Returns:
+            {bool} -- Command sending status
+
         Note:
             Use right hand rules for angle input.
         """
-        pass
+        return False
 
     def move(self, speed=[0, 0, 0, 0, 0, 0]):
         """Tell robot to move with speed until stop sending command.
@@ -24,12 +27,18 @@ class Control:
                 roll, pitch and yaw is in deg/s.
                 (default: {[0,0,0,0,0,0]})
 
+        Returns:
+            {bool} -- Command sending status
+
         Note:
             Use right hand rules for angle input.
         """
-        pass
+        return False
 
     def stop(self):
         """Moving stop command
+
+        Returns:
+            {bool} -- Command sending status
         """
-        pass
+        return False
