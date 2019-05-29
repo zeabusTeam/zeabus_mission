@@ -1,12 +1,5 @@
 #!/usr/bin/python2
 
-"""
-FILE		: ROBOSUB_gate.py
-Maintain	: Phitchawat Lukkanathiti
-Create on	: 2019 , MAY 27
-Purpose		: For competition in ROBOSUB2019 gate mission
-"""
-
 from __future__ import print_function
 
 import rospy
