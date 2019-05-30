@@ -1,5 +1,5 @@
 import rospy
-# w8ing for control command
+from control_lib import Control
 
 
 class Gate:
@@ -16,11 +16,14 @@ class Gate:
                 'cxThresold': 0.5,
                 'rotateAngle': 4,
                 'moveDist': 0.2,
+                'normalDist': 0.5,
             },
             'finalMoveDist': 2.0,
             'endThreshold': 0.1,
             'visionStatusHistory': 20,
         }
+        rospy.init_node('gate_lib', anonymous=True)
+        self.control = Control('Gate')
 
     listGateStatus = [0]
 
@@ -51,8 +54,14 @@ class Gate:
             if rotate_count > self.param['firstFinding']['maxAngle']:
                 return False
             # rotate command ccw self.param['firstFinding']['rotateAngle'] deg
-            rotate_count += self.param['firstFinding']['rotateAngle']
+            result = self.control.moveDist(
+                [0, 0, 0, 0, 0, self.param['firstFinding']['rotateAngle']])
+            if result:
+                rotate_count += self.param['firstFinding']['rotateAngle']
+            else:
+                return False
             rospy.sleep(1/10)
+        return True
 
     def step02_forwardWithRotate(self):
         """
@@ -66,18 +75,20 @@ class Gate:
             vision_resp = self.gate_proxy()
             if vision_resp.found == 1:
                 self.setGateStatus(1)
-            if vision_resp.cx1 < -self.param['forwardToGate']['cxThresold']:
-                # rotate command ccw self.param['forwardToGate']['rotateAngle'] deg
-                pass
-            elif vision_resp.cx1 > self.param['forwardToGate']['cxThresold']:
-                # rotate command cw self.param['forwardToGate']['rotateAngle'] deg
-                pass
-            else:
-                # move forward
-                pass
-            rospy.sleep(1/10)
             if self.isEnd():
                 return True
+            if vision_resp.cx1 < -self.param['forwardToGate']['cxThresold']:
+                result = self.control.moveDist(
+                    [0, 0, 0, 0, 0, self.param['forwardToGate']['rotateAngle']])
+            elif vision_resp.cx1 > self.param['forwardToGate']['cxThresold']:
+                result = self.control.moveDist(
+                    [0, 0, 0, 0, 0, -self.param['forwardToGate']['rotateAngle']])
+            else:
+                result = self.control.moveDist(
+                    [self.param['forwardToGate']['normalDist'], 0, 0, 0, 0, 0])
+            if not result:
+                return False
+            rospy.sleep(1/10)
 
     def step02_forwardWithMoveLeftRight(self):
         """
@@ -91,19 +102,21 @@ class Gate:
             vision_resp = self.gate_proxy()
             if vision_resp.found == 1:
                 self.setGateStatus(1)
-            if vision_resp.cx1 < -self.param['forwardToGate']['cxThresold']:
-                # move left self.param['forwardToGate']['moveDist'] m
-                pass
-            elif vision_resp.cx1 > self.param['forwardToGate']['cxThresold']:
-                # move right self.param['forwardToGate']['moveDist'] m
-                pass
-            else:
-                # move forward
-                pass
-            rospy.sleep(1/10)
             if self.isEnd():
                 return True
+            if vision_resp.cx1 < -self.param['forwardToGate']['cxThresold']:
+                result = self.control.moveDist(
+                    [0, self.param['forwardToGate']['moveDist'], 0, 0, 0, 0])
+            elif vision_resp.cx1 > self.param['forwardToGate']['cxThresold']:
+                result = self.control.moveDist(
+                    [0, -self.param['forwardToGate']['moveDist'], 0, 0, 0, 0])
+            else:
+                result = self.control.moveDist(
+                    [self.param['forwardToGate']['normalDist'], 0, 0, 0, 0, 0])
+            if not result:
+                return False
+            rospy.sleep(1/10)
 
     def step03_moveForward(self):
-        # forward command with fixed distrace
-        pass
+        return self.control.moveDist(
+            [self.param['finalMoveDist'], 0, 0, 0, 0, 0])
