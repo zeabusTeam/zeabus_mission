@@ -26,7 +26,7 @@ class Control:
         self.proxy = rospy.ServiceProxy(
             self.CtlCmdSrvName, SendControlCommand)
 
-    def moveDist(self, direction=[0, 0, 0, 0, 0, 0]):
+    def moveDist(self, direction=[0, 0, 0, 0, 0, 0], ignoreZero=False):
         """Tell robot to move ... meter(s).
 
         Keyword Arguments:
@@ -39,6 +39,9 @@ class Control:
         Note:
             Use right hand rules for angle input.
         """
+
+        rospy.loginfo('Move %s command is executed.' % str(direction))
+
         head = Header()
         head.seq = self.seq
         head.stamp = rospy.Time.now()
@@ -47,7 +50,7 @@ class Control:
         command = ControlCommand()
         command.header = head
         command.target = direction
-        command.mask = [x != 0 for x in direction]
+        command.mask = [(ignoreZero or (x != 0)) for x in direction]
 
         self.seq += 1
 
@@ -82,4 +85,4 @@ class Control:
         Returns:
             {bool} -- Command sending status
         """
-        return False
+        return self.moveDist([0, 0, 0, 0, 0, 0], True)
