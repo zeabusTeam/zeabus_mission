@@ -1,4 +1,8 @@
 #! /usr/bin/python2
+import rospy
+from zeabus_utility.srv import SendControlCommand
+from zeabus_utility.msg import ControlCommand
+from std_msgs.msg import Header
 
 
 class Control:
@@ -10,7 +14,17 @@ class Control:
             senderName {str}
                 -- Everyone that use this class must to privide your name.
         """
-        self.senderName = senderName
+        rospy.init_node('MissionControlLib', anonymous=True)
+
+        self.CtlCmdSrvName = 'SendControlCommand'
+        self.seq = 0  # init first sequence no.
+        self.senderName = rospy.get_name()+'.'+senderName
+
+        rospy.loginfo('Waiting for %S srv to be available.' %
+                      self.CtlCmdSrvName)
+        rospy.wait_for_service(self.CtlCmdSrvName)
+        self.proxy = rospy.ServiceProxy(
+            self.CtlCmdSrvName, SendControlCommand)
 
     def moveDist(self, direction=[0, 0, 0, 0, 0, 0]):
         """Tell robot to move ... meter(s).
@@ -25,7 +39,25 @@ class Control:
         Note:
             Use right hand rules for angle input.
         """
-        return False
+        head = Header()
+        head.seq = self.seq
+        head.stamp = rospy.Time.now()
+        head.frame_id = self.senderName
+
+        command = ControlCommand()
+        command.header = head
+        command.target = direction
+        command.mask = [x != 0 for x in direction]
+
+        self.seq += 1
+
+        try:
+            self.proxy(command)
+        except rospy.ServiceException as exc:
+            rospy.logerr('Cannot send control command: %s' % exc)
+            return False
+
+        return True
 
     def move(self, speed=[0, 0, 0, 0, 0, 0]):
         """Tell robot to move with speed until stop sending command.
