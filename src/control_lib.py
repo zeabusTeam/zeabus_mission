@@ -14,7 +14,7 @@ class Control:
             senderName {str}
                 -- Everyone that use this class must to privide your name.
         """
-        rospy.init_node('MissionControlLib', anonymous=True)
+        # rospy.init_node('MissionControlLib', anonymous=True)
 
         self.CtlCmdSrvName = 'SendControlCommand'
         self.seq = 0  # init first sequence no.
