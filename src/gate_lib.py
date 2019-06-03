@@ -22,7 +22,6 @@ class Gate:
             'endThreshold': 0.1,
             'visionStatusHistory': 20,
         }
-        rospy.init_node('gate_lib', anonymous=True)
         self.control = Control('Gate')
 
     listGateStatus = [0]
