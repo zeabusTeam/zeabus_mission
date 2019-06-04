@@ -1,4 +1,5 @@
 import rospy
+import time
 from control_lib import Control
 
 
@@ -8,18 +9,19 @@ class Gate:
         self.gate_proxy = gate_proxy
         self.param = {
             'firstFinding': {
-                'threshold': 0.5,
+                'threshold': 0.8,
                 'rotateAngle': 3,
-                'maxAngle': 360  # Should be ~120 when switch is used.
+                'maxAngle': 360,  # Should be ~120 when switch is used.
             },
             'forwardToGate': {
                 'cxThresold': 0.5,
                 'rotateAngle': 4,
                 'moveDist': 0.2,
                 'normalDist': 0.5,
+                'timeLimit': 30,
             },
             'finalMoveDist': 2.0,
-            'endThreshold': 0.1,
+            'endThreshold': 0.9,
             'visionStatusHistory': 20,
         }
         self.control = Control('Gate')
@@ -44,13 +46,17 @@ class Gate:
         rotate_count = 0
         while not rospy.is_shutdown():
             vision_resp = self.gate_proxy()
+            # print(vision_resp)
             if vision_resp.found == 1:
                 self.setGateStatus(1)
+            else:
+                self.setGateStatus(0)
             if self.getGateStatus() >= self.param['firstFinding']['threshold']:
                 return True
             # Code when switch is available
             # if rotate_count > 90:
             if rotate_count > self.param['firstFinding']['maxAngle']:
+                rospy.logwarn('Reach maximum finding angle')
                 return False
             # rotate command ccw self.param['firstFinding']['rotateAngle'] deg
             result = self.control.moveDist(
@@ -58,6 +64,7 @@ class Gate:
             if result:
                 rotate_count += self.param['firstFinding']['rotateAngle']
             else:
+                rospy.logerr('Cannot connect to Control system')
                 return False
             rospy.sleep(1/10)
         return True
@@ -70,11 +77,14 @@ class Gate:
                 turn right until ... (might be 0.1)
             continue_forward_command
         """
+        start = time.time()
         while not rospy.is_shutdown():
             vision_resp = self.gate_proxy()
             if vision_resp.found == 1:
                 self.setGateStatus(1)
-            if self.isEnd():
+            else:
+                self.setGateStatus(0)
+            if self.isEnd() and (time.time()-start > self.param['forwardToGate']['timeLimit']):
                 return True
             if vision_resp.cx1 < -self.param['forwardToGate']['cxThresold']:
                 result = self.control.moveDist(
@@ -97,11 +107,14 @@ class Gate:
                 move right until ... (might be 0.1)
             continue_forward_command
         """
+        start = time.time()
         while not rospy.is_shutdown():
             vision_resp = self.gate_proxy()
             if vision_resp.found == 1:
                 self.setGateStatus(1)
-            if self.isEnd():
+            else:
+                self.setGateStatus(0)
+            if self.isEnd() and (time.time()-start > self.param['forwardToGate']['timeLimit']):
                 return True
             if vision_resp.cx1 < -self.param['forwardToGate']['cxThresold']:
                 result = self.control.moveDist(
