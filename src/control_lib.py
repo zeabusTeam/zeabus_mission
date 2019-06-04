@@ -19,10 +19,11 @@ class Control:
         self.CtlCmdSrvName = 'SendControlCommand'
         self.seq = 0  # init first sequence no.
         self.senderName = rospy.get_name()+'.'+senderName
+        self.DEBUG = False
 
-        rospy.loginfo('Waiting for %S srv to be available.' %
+        rospy.loginfo('Waiting for %s srv to be available.' %
                       self.CtlCmdSrvName)
-        rospy.wait_for_service(self.CtlCmdSrvName)
+        # rospy.wait_for_service(self.CtlCmdSrvName)
         self.proxy = rospy.ServiceProxy(
             self.CtlCmdSrvName, SendControlCommand)
 
@@ -58,7 +59,7 @@ class Control:
             self.proxy(command)
         except rospy.ServiceException as exc:
             rospy.logerr('Cannot send control command: %s' % exc)
-            return False
+            return (False or self.DEBUG)
 
         return True
 
@@ -77,7 +78,7 @@ class Control:
         Note:
             Use right hand rules for angle input.
         """
-        return False
+        return (False or self.DEBUG)
 
     def stop(self):
         """Moving stop command
