@@ -10,6 +10,7 @@ from gate_lib import Gate
 
 
 def main():
+    rospy.init_node('GateMission')
     rospy.wait_for_service('gate_service')
     try:
         gate_srv = rospy.ServiceProxy('gate_service', VisionGate)
