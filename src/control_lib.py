@@ -156,7 +156,8 @@ class Control:
             self.rememberCurrent()
         curr = self.getCurrent()
         diff = [
-            curr[i]-dat for i, dat in enumerate(self.savedState)
+            self.angleDiff(dat, curr[i])
+            for i, dat in enumerate(self.savedState)
         ]
         imok = True
         lastCommand = self.lastCommand
@@ -175,3 +176,18 @@ class Control:
         #         'mask': None
         #     }
         return imok
+
+    def angleDiff(self, first, second):
+        """Calculate difference between two angle. (second - first)
+
+        Arguments:
+            first {float} -- angle in first or old state.
+            second {float} -- the new angle.
+        """
+        diff = second - first
+        if diff < -180:
+            diff += 360
+        elif diff > 180:
+            diff -= 360
+
+        return diff
