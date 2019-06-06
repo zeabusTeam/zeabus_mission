@@ -82,6 +82,7 @@ class Control:
             rospy.logerr('Cannot send control command: %s' % exc)
             return False
 
+        self.rememberCurrent()
         self.lastCommand['type'] = 1
         self.lastCommand['target'] = command.target
         self.lastCommand['mask'] = command.mask
