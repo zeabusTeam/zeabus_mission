@@ -3,6 +3,7 @@ import rospy
 import time
 from control_lib import Control
 
+
 class Gate:
 
     def __init__(self, gate_proxy):
@@ -53,24 +54,25 @@ class Gate:
             else:
                 self.setGateStatus(0)
             if self.getGateStatus() >= self.param['firstFinding']['threshold']:
+                self.control.stop()
                 rospy.loginfo('[LookToTheLeftLookToTheRight] Found gate.')
                 return True
             # Code when switch is available
             # if rotate_count > 90:
             if rotate_count > self.param['firstFinding']['maxAngle']:
+                self.control.stop()
                 rospy.logwarn('Reach maximum finding angle')
                 return False
             # rotate command ccw self.param['firstFinding']['rotateAngle'] deg
-            okornot = self.control.isOkay(
-                acceptableAngle=self.param['firstFinding']['rotateAngle']/2)
-            if okornot:
-                result = self.control.moveDist(
-                    [0, 0, 0, 0, 0, self.param['firstFinding']['rotateAngle']])
-                if result:
-                    rotate_count += self.param['firstFinding']['rotateAngle']
-                else:
-                    rospy.logerr('Cannot connect to Control system')
-                    return False
+            result = self.control.moveDist(
+                [0, 0, 0, 0, 0, self.param['firstFinding']['rotateAngle']],
+                True)
+            if result:
+                rotate_count += self.param['firstFinding']['rotateAngle']
+            else:
+                self.control.stop()
+                rospy.logerr('Cannot connect to Control system')
+                return False
             r.sleep()
         return True
 
@@ -94,25 +96,26 @@ class Gate:
                        (time.time()-start >
                         self.param['forwardToGate']['timeLimit']))
             if endCond:
+                self.control.stop()
                 rospy.loginfo('[GoToGate] Passed gate.')
                 return True
-            okornot = self.control.isOkay(
-                acceptableAngle=self.param['forwardToGate']['rotateAngle']/2)
-            if okornot:
-                if vsResp.cx1 < -self.param['forwardToGate']['cxThresold']:
-                    result = self.control.moveDist(
-                        [0, 0, 0, 0, 0,
-                         self.param['forwardToGate']['rotateAngle']])
-                elif vsResp.cx1 > self.param['forwardToGate']['cxThresold']:
-                    result = self.control.moveDist(
-                        [0, 0, 0, 0, 0,
-                         -self.param['forwardToGate']['rotateAngle']])
-                else:
-                    result = self.control.moveDist(
-                        [self.param['forwardToGate']['normalDist'],
-                         0, 0, 0, 0, 0])
-                if not result:
-                    return False
+            if vsResp.cx1 < -self.param['forwardToGate']['cxThresold']:
+                result = self.control.moveDist(
+                    [0, 0, 0, 0, 0,
+                        self.param['forwardToGate']['rotateAngle']],
+                    True)
+            elif vsResp.cx1 > self.param['forwardToGate']['cxThresold']:
+                result = self.control.moveDist(
+                    [0, 0, 0, 0, 0,
+                        -self.param['forwardToGate']['rotateAngle']],
+                    True)
+            else:
+                result = self.control.moveDist(
+                    [self.param['forwardToGate']['normalDist'],
+                        0, 0, 0, 0, 0], True)
+            if not result:
+                self.control.stop()
+                return False
             r.sleep()
 
     def step02_forwardWithMoveLeftRight(self):
@@ -135,25 +138,25 @@ class Gate:
                        (time.time()-start >
                         self.param['forwardToGate']['timeLimit']))
             if endCond:
+                self.control.stop()
                 rospy.loginfo('[GoToGate] Passed gate.')
                 return True
-            okornot = self.control.isOkay(
-                acceptableAngle=self.param['forwardToGate']['rotateAngle']/2)
-            if okornot:
-                if vsResp.cx1 < -self.param['forwardToGate']['cxThresold']:
-                    result = self.control.moveDist(
-                        [0, self.param['forwardToGate']['moveDist'],
-                         0, 0, 0, 0])
-                elif vsResp.cx1 > self.param['forwardToGate']['cxThresold']:
-                    result = self.control.moveDist(
-                        [0, -self.param['forwardToGate']['moveDist'],
-                         0, 0, 0, 0])
-                else:
-                    result = self.control.moveDist(
-                        [self.param['forwardToGate']['normalDist'],
-                         0, 0, 0, 0, 0])
-                if not result:
-                    return False
+            if vsResp.cx1 < -self.param['forwardToGate']['cxThresold']:
+                result = self.control.moveDist(
+                    [0, self.param['forwardToGate']['moveDist'],
+                        0, 0, 0, 0],
+                    True)
+            elif vsResp.cx1 > self.param['forwardToGate']['cxThresold']:
+                result = self.control.moveDist(
+                    [0, -self.param['forwardToGate']['moveDist'],
+                        0, 0, 0, 0], True)
+            else:
+                result = self.control.moveDist(
+                    [self.param['forwardToGate']['normalDist'],
+                        0, 0, 0, 0, 0], True)
+            if not result:
+                self.control.stop()
+                return False
             r.sleep()
 
     def step03_moveForward(self):
@@ -161,6 +164,11 @@ class Gate:
             '[MoveMore] I need more move to passed the gate all of robot.'
         )
         result = self.control.moveDist(
-            [self.param['finalMoveDist'], 0, 0, 0, 0, 0])
+            [self.param['finalMoveDist'], 0, 0, 0, 0, 0], True)
+        r = rospy.Rate(10)
+        while True:
+            if self.control.isOkay(0.3, None):
+                break
+            r.sleep()
         rospy.loginfo('[MoveMore] Passed gate.')
         return result
