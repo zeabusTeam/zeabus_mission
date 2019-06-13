@@ -40,6 +40,19 @@ class Gate:
     def isEnd(self):
         return self.getGateStatus() < self.param['endThreshold']
 
+    def step00_checkDeep(self):
+        x, y, z, r, p, y = self.control.getCurrent()
+        if z > -1.3 or z < -1.5:
+            rospy.loginfo('Z not be as wanted.c')
+            rospy.loginfo('Adjusting deep.')
+            self.control.moveDist([0, 0, z-1.4, 0, 0, 0])
+            r = rospy.Rate(10)
+            while not rospy.is_shutdown():
+                if self.control.isOkay(0.05, None):
+                    break
+                r.sleep()
+        return True
+
     def step01_rotateAndFindGate(self):
         """
             TODO: check switch (middle switch = ccw, edge switch = cw)
@@ -166,7 +179,7 @@ class Gate:
         result = self.control.moveDist(
             [self.param['finalMoveDist'], 0, 0, 0, 0, 0], True)
         r = rospy.Rate(10)
-        while True:
+        while not rospy.is_shutdown():
             if self.control.isOkay(0.3, None):
                 break
             r.sleep()
