@@ -9,6 +9,10 @@ class Gate:
     def __init__(self, gate_proxy):
         self.gate_proxy = gate_proxy
         self.param = {
+            'checkDeep': {
+                'wanted': -1.4,
+                'acceptableError': 0.10,
+            },
             'firstFinding': {
                 'threshold': 0.7,
                 'rotateAngle': 3,
@@ -42,10 +46,16 @@ class Gate:
 
     def step00_checkDeep(self):
         x, y, z, r, p, y = self.control.getCurrent()
-        if z > -1.3 or z < -1.5:
+        deepcond = (z > self.param['checkDeep']['wanted'] +
+                    self.param['checkDeep']['acceptableError']
+
+                    or z < self.param['checkDeep']['wanted'] -
+                    self.param['checkDeep']['acceptableError'])
+        if deepcond:
             rospy.loginfo('Z not be as wanted.c')
             rospy.loginfo('Adjusting deep.')
-            self.control.moveDist([0, 0, z-1.4, 0, 0, 0])
+            self.control.moveDist(
+                [0, 0, z+self.param['checkDeep']['wanted'], 0, 0, 0])
             r = rospy.Rate(10)
             while not rospy.is_shutdown():
                 if self.control.isOkay(0.05, None):
