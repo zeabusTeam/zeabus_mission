@@ -10,12 +10,14 @@ import math
 
 class Control:
 
-    def __init__(self, senderName):
+    def __init__(self, senderName, debug=False):
         """Control wrapper class for Mission Planner
 
         Keyword Arguments:
             senderName {str}
                 -- Everyone that use this class must to privide your name.
+            debug {boolean}
+                -- Enable debug mode
         """
         # rospy.init_node('MissionControlLib', anonymous=True)
 
@@ -24,7 +26,7 @@ class Control:
         self.seq = 0  # init first sequence no.
         self.senderName = rospy.get_name()+'.'+senderName
         self.savedState = None
-        self.DEBUG = False
+        self.DEBUG = debug
 
         rospy.loginfo('Waiting for %s srv to be available.' %
                       self.CtlCmdSrvName)
@@ -209,16 +211,18 @@ class Control:
             current {list} -- current state
             command {list} -- command
         """
-        x_plus = command[0]*math.cos(current[5]) - command[1]*math.sin(current[5])
-        y_plus = command[0]*math.sin(current[5]) + command[1]*math.cos(current[5])
-        
+        x_plus = command[0]*math.cos(current[5]) - \
+            command[1]*math.sin(current[5])
+        y_plus = command[0]*math.sin(current[5]) + \
+            command[1]*math.cos(current[5])
+
         newPos = [
-            current[0]+x_plus,
-            current[1]+y_plus,
-            current[2]+command[2],
-            current[3]+command[3],
-            current[4]+command[4],
-            current[5]+command[5]
+            round(current[0]+x_plus, 6),
+            round(current[1]+y_plus, 6),
+            round(current[2]+command[2], 6),
+            round(current[3]+command[3], 6),
+            round(current[4]+command[4], 6),
+            round(current[5]+command[5], 6)
         ]
 
         return newPos
