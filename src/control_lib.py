@@ -204,7 +204,7 @@ class Control:
     def calcNewPosition(self, current, command):
         """Calculate new position from user command
         It'll return new pos for sending to control.
-        
+
         Arguments:
             current {list} -- current state
             command {list} -- command
