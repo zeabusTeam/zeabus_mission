@@ -90,7 +90,7 @@ class Gate:
             # rotate command ccw self.param['firstFinding']['rotateAngle'] deg
             if self.control.isOkay():
                 result = self.control.moveDist(
-                        [0, 0, 0, 0, 0, self.param['firstFinding']['rotateAngle']])
+                    [0, 0, 0, 0, 0, self.param['firstFinding']['rotateAngle']])
                 if result:
                     rotate_count += self.param['firstFinding']['rotateAngle']
                 else:
