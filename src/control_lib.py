@@ -210,6 +210,10 @@ class Control:
         """
         diff = second - first
         diff %= 2*math.pi
+        if diff > math.pi:
+            diff -= 2*math.pi
+        if diff < -math.pi:
+            diff += 2*math.pi
 
         return diff
 
