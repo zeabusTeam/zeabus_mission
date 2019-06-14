@@ -72,6 +72,11 @@ class Control:
                 newPos[i] = 0.0
             mask.append(ignoreZero or (x != 0))
 
+        if self.lastCommand['type'] is not None:
+            for i, x in enumerate(direction):
+                if x == 0 and self.lastCommand['target'][i] == 0:
+                    mask[i] = False
+
         rospy.logdebug('Old:%s Command:%s New:%s' %
                        (str(currentPos), str(direction), str(newPos)))
 
