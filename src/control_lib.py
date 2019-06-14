@@ -19,8 +19,8 @@ class Control:
         """
         # rospy.init_node('MissionControlLib', anonymous=True)
 
-        self.AuvStateSrvName = 'GetAUVState'
-        self.CtlCmdSrvName = 'SendControlCommand'
+        self.AuvStateSrvName = '/fusion/auv_state'
+        self.CtlCmdSrvName = '/control/interfaces'
         self.seq = 0  # init first sequence no.
         self.senderName = rospy.get_name()+'.'+senderName
         self.savedState = None
@@ -61,7 +61,10 @@ class Control:
         # Convert deg to rad
         direction[3:6] = [x*math.pi/180 for x in direction[3:6]]
 
-        rospy.logdebug('Move %s command is executed.' % str(direction))
+        currentPos = self.getCurrent()
+        newPos = self.calcNewPosition(currentPos, direction)
+
+        rospy.logdebug('Move to %s command is executed.' % str(newPos))
 
         head = Header()
         head.seq = self.seq
@@ -70,7 +73,7 @@ class Control:
 
         command = ControlCommand()
         command.header = head
-        command.target = direction
+        command.target = newPos
         command.mask = [(ignoreZero or (x != 0)) for x in direction]
 
         self.seq += 1
@@ -157,9 +160,14 @@ class Control:
             self.rememberCurrent()
         curr = self.getCurrent()
         diff = [
-            self.angleDiff(dat, curr[i])
-            for i, dat in enumerate(self.savedState)
+            curr[i] - dat
+            for i, dat in enumerate(self.savedState[0:3])
         ]
+        diff2 = [
+            self.angleDiff(dat, curr[i+3])
+            for i, dat in enumerate(self.savedState[3:6])
+        ]
+        diff += diff2
         imok = True
         lastCommand = self.lastCommand
         if lastCommand['type'] == 1:
@@ -192,3 +200,25 @@ class Control:
             diff -= 360
 
         return diff
+
+    def calcNewPosition(self, current, command):
+        """Calculate new position from user command
+        It'll return new pos for sending to control.
+        
+        Arguments:
+            current {list} -- current state
+            command {list} -- command
+        """
+        x_plus = command[0]*math.cos(current[5]) - command[1]*math.sin(current[5])
+        y_plus = command[0]*math.sin(current[5]) + command[1]*math.cos(current[5])
+        
+        newPos = [
+            current[0]+x_plus,
+            current[1]+y_plus,
+            current[2]+command[2],
+            current[3]+command[3],
+            current[4]+command[4],
+            current[5]+command[5]
+        ]
+
+        return newPos
