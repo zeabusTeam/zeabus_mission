@@ -58,7 +58,7 @@ class Gate:
                 [0, 0, z+self.param['checkDeep']['wanted'], 0, 0, 0])
             r = rospy.Rate(10)
             while not rospy.is_shutdown():
-                if self.control.isOkay(0.05, None):
+                if self.control.isOkay(0.05):
                     break
                 r.sleep()
         rospy.loginfo('AUV Deep is as wanted.')
@@ -193,7 +193,7 @@ class Gate:
             [self.param['finalMoveDist'], 0, 0, 0, 0, 0])
         r = rospy.Rate(10)
         while not rospy.is_shutdown():
-            if self.control.isOkay(0.3, None):
+            if self.control.isOkay(0.3):
                 break
             r.sleep()
         rospy.loginfo('[MoveMore] Passed gate.')
