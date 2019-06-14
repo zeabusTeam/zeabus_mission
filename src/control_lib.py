@@ -220,9 +220,9 @@ class Control:
             round(current[0]+x_plus, 6),
             round(current[1]+y_plus, 6),
             round(current[2]+command[2], 6),
-            round(current[3]+command[3], 6),
-            round(current[4]+command[4], 6),
-            round(current[5]+command[5], 6)
+            round((current[3]+command[3]) % (2*math.pi), 6),
+            round((current[4]+command[4]) % (2*math.pi), 6),
+            round((current[5]+command[5]) % (2*math.pi), 6)
         ]
 
         return newPos
