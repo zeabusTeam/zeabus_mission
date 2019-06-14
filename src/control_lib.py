@@ -25,7 +25,7 @@ class Control:
         self.CtlCmdSrvName = '/control/interfaces'
         self.seq = 0  # init first sequence no.
         self.senderName = rospy.get_name()+'.'+senderName
-        self.savedState = None
+        self.targetState = None
         self.DEBUG = debug
 
         rospy.loginfo('Waiting for %s srv to be available.' %
@@ -66,7 +66,14 @@ class Control:
         currentPos = self.getCurrent()
         newPos = self.calcNewPosition(currentPos, direction)
 
-        rospy.logdebug('Move to %s command is executed.' % str(newPos))
+        mask = []
+        for i, x in enumerate(direction):
+            if x == 0:
+                newPos[i] = 0.0
+            mask.append(ignoreZero or (x != 0))
+
+        rospy.logdebug('Old:%s Command:%s New:%s' %
+                       (str(currentPos), str(direction), str(newPos)))
 
         head = Header()
         head.seq = self.seq
@@ -76,7 +83,7 @@ class Control:
         command = ControlCommand()
         command.header = head
         command.target = newPos
-        command.mask = [(ignoreZero or (x != 0)) for x in direction]
+        command.mask = mask
 
         self.seq += 1
 
@@ -87,7 +94,10 @@ class Control:
             rospy.logerr('Cannot send control command: %s' % exc)
             return (False or self.DEBUG)
 
-        self.rememberCurrent()
+        self.setTargetToCurrentState()
+        for i, mk in enumerate(mask):
+            if mk:
+                self.targetState[i] = command.target[i]
         self.lastCommand['type'] = 1
         self.lastCommand['target'] = command.target
         self.lastCommand['mask'] = command.mask
@@ -128,7 +138,7 @@ class Control:
         if self.DEBUG:
             return [0.0 for _ in range(6)]
         resp = self.AUVStateProxy()
-        AUVStateData = resp.data  # Odometry
+        AUVStateData = resp.auv_state.data  # Odometry
         orientation_q = AUVStateData.pose.pose.orientation
         orientation_list = [orientation_q.x,
                             orientation_q.y,
@@ -141,8 +151,15 @@ class Control:
                          position_q.z]
         return position_list+[roll, pitch, yaw]
 
+    def setTargetToCurrentState(self):
+        self.targetState = self.getCurrent()
+
     def rememberCurrent(self):
-        self.savedState = self.getCurrent()
+        """DEPRECATED
+        It'll not be used after ROBOSUB2019
+        and it'll throw an exception.
+        """
+        self.setTargetToCurrentState()
 
     def isOkay(self, acceptableDist=None, acceptableAngle=None):
         """Check is done last command
@@ -155,51 +172,44 @@ class Control:
             {boolean} -- same method name if okay = True. Else False
         """
         if acceptableAngle is None:
-            acceptableAngle = 5*math.pi/180
+            acceptableAngle = 7*math.pi/180
+        else:
+            acceptableAngle *= math.pi/180
         if acceptableDist is None:
-            acceptableDist = 0.2
-        if self.savedState is None:
-            self.rememberCurrent()
+            acceptableDist = 0.1
+        if self.targetState is None:
+            self.setTargetToCurrentState()
         curr = self.getCurrent()
         diff = [
-            curr[i] - dat
-            for i, dat in enumerate(self.savedState[0:3])
+            dat - curr[i]
+            for i, dat in enumerate(self.targetState[0:3])
         ]
         diff2 = [
-            self.angleDiff(dat, curr[i+3])
-            for i, dat in enumerate(self.savedState[3:6])
+            self.angleDiff(curr[i+3], dat)
+            for i, dat in enumerate(self.targetState[3:6])
         ]
         diff += diff2
-        imok = True
+        OKay = True
         lastCommand = self.lastCommand
         if lastCommand['type'] == 1:
             for i, cond in enumerate(lastCommand['mask']):
                 if not cond:
                     continue
                 if i < 3 and math.fabs(diff[i]) > acceptableDist:
-                    imok = False
+                    OKay = False
                 if i >= 3 and math.fabs(diff[i]) > acceptableAngle:
-                    imok = False
-        # if imok:
-        #     self.lastCommand = {
-        #         'type': None,
-        #         'target': None,
-        #         'mask': None
-        #     }
-        return imok
+                    OKay = False
+        return OKay
 
     def angleDiff(self, first, second):
         """Calculate difference between two angle. (second - first)
 
         Arguments:
-            first {float} -- angle in first or old state.
-            second {float} -- the new angle.
+            first {float} -- angle in first or old state. (rad)
+            second {float} -- the new angle. (rad)
         """
         diff = second - first
-        if diff < -180:
-            diff += 360
-        elif diff > 180:
-            diff -= 360
+        diff %= 2*math.pi
 
         return diff
 
