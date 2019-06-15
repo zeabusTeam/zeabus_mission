@@ -5,7 +5,7 @@ from zeabus_utility.srv import VisionSrvQualification
 from std_msgs.msg import String
 from control_lib import Control
 
-# control = Control('Qualify')
+control = Control('Qualify')
 
 def main():
     service_name = 'vision/qualification'
@@ -15,14 +15,14 @@ def main():
     call = rospy.ServiceProxy(service_name, VisionSrvQualification)
     i = 0
     last = 0
-    last_move = True
+    last_move = False 
     finish_marker = False
     old_cx = 0.5
-    #control.moveDist([0,0,-1.2,0,0,0])
-    # while control.isOkey() == False :
-        # continue
+    control.moveDist([0,0,-1.2,0,0,0])
+    while control.isOkay(0.05) == False :
+        continue
     while not rospy.is_shutdown():
-        # current = control.getCurrent()
+        current = control.getCurrent()
         try:
             res = call(String('qualification'),String('gate'))
             print (res.data.point1)
@@ -42,9 +42,9 @@ def main():
                 print('Calling {} times'.format(i))
                 if res.data.type.data == 0 :
                     print ("Not Find Moving Forward")
-                    # control.moveDist([1,0,0,0,0,0])
-                    # while control.isOkey() == False :
-                        # continue
+                    control.moveDist([0,1,0,0,0,0])
+                    while control.isOkay(0.05) == False :
+                        continue
                 elif res.data.type.data > 0 :
                     while area <= 0.85 :
                         print ("---------------- Finding Gate --------------")
@@ -55,26 +55,26 @@ def main():
                         print ("cx = " + str(cx))
                         if cx <= -0.1 and old_cx - cx <= 0.1:
                             print ("Moving Left")
-                            # control.moveDist([0,0.1,0,0,0,0])
-                            # while control.isOkey() == False :
-                                # continue
+                            control.moveDist([0,-0.1,0,0,0,0])
+                            while control.isOkay(0.05) == False :
+                                continue
                         elif cx >= 0.1 and old_cx - cx <= 0.1:
                             print ("Moving Right")
-                            # control.moveDist([0,-0.1,0,0,0,0])
-                            # while control.isOkey() == False :
-                                # continue
+                            control.moveDist([0,0.1,0,0,0,0])
+                            while control.isOkay(0.05) == False :
+                                continue
                         else :
                             print ("Moving Forward")
-                            #control.moveDist([0.1,0,0,0,0,0])
-                            # while control.isOkey() == False :
-                                # continue
+                            control.moveDist([0.1,0,0,0,0,0])
+                            while control.isOkay(0.05) == False :
+                                continue
                         old_cx = cx
                     # rospy.sleep(0.5)
                     print ("Last Move")
                     last_move = True
-                    #control.moveDist([2,0,0,0,0,0])
-                    # while control.isOkey() == False :
-                        # continue
+                    control.moveDist([2,0,0,0,0,0])
+                    while control.isOkay(0.05) == False :
+                        continue
         elif not finish_marker and last_move :
             print ("---------------- Finding Marker --------------")
             res = call(String('qualification'),String('marker'))
@@ -86,12 +86,12 @@ def main():
                 print('Calling {} times'.format(i))
                 if res.data.type.data == 0 :
                     print ("Not Find Moving Forward")
-                    # control.moveDist([1,0,0,0,0,0])
-                    # while control.isOkey() == False :
-                        # continue
-                # else :
-                if True :
-                # elif res.data.type.data > 0 :
+                    control.moveDist([1,0,0,0,0,0])
+                    while control.isOkay() == False :
+                        continue
+                #else :
+                #if True :
+                elif res.data.type.data > 0 :
                     while area <= 0.2:
                         print ("---------------- Finding Marker --------------")
                         print ("    ---------------- Step 1 ---------------")
@@ -154,4 +154,5 @@ def main():
         rospy.sleep(0.5)
 
 if __name__ == "__main__":
+    rospy.init_node('mission_qualify',anonymous=False)
     main()
