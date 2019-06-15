@@ -17,6 +17,7 @@ def main():
     except rospy.ServiceException, e:
         print("Service call failed: %s" % e)
     obj = Gate(gate_srv)
+    obj.step00_checkDeep()
     obj.step01_rotateAndFindGate()
     obj.step02_forwardWithMoveLeftRight()
     """

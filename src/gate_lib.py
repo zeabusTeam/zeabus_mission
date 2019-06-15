@@ -9,16 +9,20 @@ class Gate:
     def __init__(self, gate_proxy):
         self.gate_proxy = gate_proxy
         self.param = {
+            'checkDeep': {
+                'wanted': -1.4,
+                'acceptableError': 0.10,
+            },
             'firstFinding': {
                 'threshold': 0.7,
-                'rotateAngle': 3,
+                'rotateAngle': 30,
                 'maxAngle': 360,  # Should be ~120 when switch is used.
             },
             'forwardToGate': {
-                'cxThresold': 0.5,
-                'rotateAngle': 4,
-                'moveDist': 0.2,
-                'normalDist': 0.5,
+                'cxThresold': 0.1,
+                'rotateAngle': 10,
+                'moveDist': 2.0,
+                'normalDist': 2.0,
                 'timeLimit': 30,
             },
             'finalMoveDist': 2.0,
@@ -39,6 +43,26 @@ class Gate:
 
     def isEnd(self):
         return self.getGateStatus() < self.param['endThreshold']
+
+    def step00_checkDeep(self):
+        x, y, z, r, p, y = self.control.getCurrent()
+        deepcond = (z > self.param['checkDeep']['wanted'] +
+                    self.param['checkDeep']['acceptableError']
+
+                    or z < self.param['checkDeep']['wanted'] -
+                    self.param['checkDeep']['acceptableError'])
+        if deepcond:
+            rospy.loginfo('Z not be as wanted.c')
+            rospy.loginfo('Adjusting deep.')
+            self.control.moveDist(
+                [0, 0, z+self.param['checkDeep']['wanted'], 0, 0, 0])
+            r = rospy.Rate(10)
+            while not rospy.is_shutdown():
+                if self.control.isOkay(0.05):
+                    break
+                r.sleep()
+        rospy.loginfo('AUV Deep is as wanted.')
+        return True
 
     def step01_rotateAndFindGate(self):
         """
@@ -64,16 +88,17 @@ class Gate:
                 rospy.logwarn('Reach maximum finding angle')
                 return False
             # rotate command ccw self.param['firstFinding']['rotateAngle'] deg
-            result = self.control.moveDist(
-                [0, 0, 0, 0, 0, self.param['firstFinding']['rotateAngle']],
-                True)
-            if result:
-                rotate_count += self.param['firstFinding']['rotateAngle']
-            else:
-                self.control.stop()
-                rospy.logerr('Cannot connect to Control system')
-                return False
+            if self.control.isOkay():
+                result = self.control.moveDist(
+                    [0, 0, 0, 0, 0, self.param['firstFinding']['rotateAngle']])
+                if result:
+                    rotate_count += self.param['firstFinding']['rotateAngle']
+                else:
+                    self.control.stop()
+                    rospy.logerr('Cannot connect to Control system')
+                    return False
             r.sleep()
+        self.control.stop()
         return True
 
     def step02_forwardWithRotate(self):
@@ -102,17 +127,15 @@ class Gate:
             if vsResp.cx1 < -self.param['forwardToGate']['cxThresold']:
                 result = self.control.moveDist(
                     [0, 0, 0, 0, 0,
-                        self.param['forwardToGate']['rotateAngle']],
-                    True)
+                        self.param['forwardToGate']['rotateAngle']])
             elif vsResp.cx1 > self.param['forwardToGate']['cxThresold']:
                 result = self.control.moveDist(
                     [0, 0, 0, 0, 0,
-                        -self.param['forwardToGate']['rotateAngle']],
-                    True)
+                        -self.param['forwardToGate']['rotateAngle']])
             else:
                 result = self.control.moveDist(
                     [self.param['forwardToGate']['normalDist'],
-                        0, 0, 0, 0, 0], True)
+                        0, 0, 0, 0, 0])
             if not result:
                 self.control.stop()
                 return False
@@ -141,22 +164,25 @@ class Gate:
                 self.control.stop()
                 rospy.loginfo('[GoToGate] Passed gate.')
                 return True
-            if vsResp.cx1 < -self.param['forwardToGate']['cxThresold']:
-                result = self.control.moveDist(
-                    [0, self.param['forwardToGate']['moveDist'],
-                        0, 0, 0, 0],
-                    True)
-            elif vsResp.cx1 > self.param['forwardToGate']['cxThresold']:
-                result = self.control.moveDist(
-                    [0, -self.param['forwardToGate']['moveDist'],
-                        0, 0, 0, 0], True)
-            else:
-                result = self.control.moveDist(
-                    [self.param['forwardToGate']['normalDist'],
-                        0, 0, 0, 0, 0], True)
-            if not result:
-                self.control.stop()
-                return False
+            if self.control.isOkay():
+                if vsResp.cx1 < -self.param['forwardToGate']['cxThresold']:
+                    rospy.loginfo("[GoToGate] Too left")
+                    result = self.control.moveDist(
+                        [0, self.param['forwardToGate']['moveDist'],
+                            0, 0, 0, 0])
+                elif vsResp.cx1 > self.param['forwardToGate']['cxThresold']:
+                    rospy.loginfo("[GoToGate] Too right")
+                    result = self.control.moveDist(
+                        [0, -self.param['forwardToGate']['moveDist'],
+                            0, 0, 0, 0])
+                else:
+                    rospy.loginfo("[GoToGate] Forward")
+                    result = self.control.moveDist(
+                        [self.param['forwardToGate']['normalDist'],
+                            0, 0, 0, 0, 0])
+                if not result:
+                    self.control.stop()
+                    return False
             r.sleep()
 
     def step03_moveForward(self):
@@ -164,10 +190,10 @@ class Gate:
             '[MoveMore] I need more move to passed the gate all of robot.'
         )
         result = self.control.moveDist(
-            [self.param['finalMoveDist'], 0, 0, 0, 0, 0], True)
+            [self.param['finalMoveDist'], 0, 0, 0, 0, 0])
         r = rospy.Rate(10)
-        while True:
-            if self.control.isOkay(0.3, None):
+        while not rospy.is_shutdown():
+            if self.control.isOkay(0.3):
                 break
             r.sleep()
         rospy.loginfo('[MoveMore] Passed gate.')
