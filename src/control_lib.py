@@ -12,7 +12,6 @@ class Control:
 
     def __init__(self, senderName, debug=False):
         """Control wrapper class for Mission Planner
-
         Keyword Arguments:
             senderName {str}
                 -- Everyone that use this class must to privide your name.
@@ -48,14 +47,11 @@ class Control:
 
     def moveDist(self, direction=[0, 0, 0, 0, 0, 0], ignoreZero=False):
         """Tell robot to move ... meter(s).
-
         Keyword Arguments:
             direction {list} -- [x, y, z, roll, pitch, yaw]
                 (default: [0,0,0,0,0,0])
-
         Returns:
             {bool} -- Command sending status
-
         Note:
             Use right hand rules for angle input.
         """
@@ -111,16 +107,13 @@ class Control:
 
     def move(self, speed=[0, 0, 0, 0, 0, 0]):
         """Tell robot to move with speed until stop sending command.
-
         Keyword Arguments:
             speed {list} -- [x, y, z, roll, pitch, yaw]
                 x, y and z is in m/s.
                 roll, pitch and yaw is in deg/s.
                 (default: [0,0,0,0,0,0])
-
         Returns:
             {bool} -- Command sending status
-
         Note:
             Use right hand rules for angle input.
         """
@@ -128,7 +121,6 @@ class Control:
 
     def stop(self):
         """Moving stop command
-
         Returns:
             {bool} -- Command sending status
         """
@@ -136,7 +128,6 @@ class Control:
 
     def getCurrent(self):
         """Get Current robot state
-
         Returns:
             list of float --  [x, y, z, roll, pitch, yaw]
         """
@@ -168,11 +159,9 @@ class Control:
 
     def isOkay(self, acceptableDist=None, acceptableAngle=None):
         """Check is done last command
-
         Keyword Arguments:
             acceptableDist {float} -- acceptable dist in each axis in metre
             acceptableAngle {float} -- acceptable angle in each axis in degree
-
         Returns:
             {boolean} -- same method name if okay = True. Else False
         """
@@ -208,7 +197,6 @@ class Control:
 
     def angleDiff(self, first, second):
         """Calculate difference between two angle. (second - first)
-
         Arguments:
             first {float} -- angle in first or old state. (rad)
             second {float} -- the new angle. (rad)
@@ -225,7 +213,6 @@ class Control:
     def calcNewPosition(self, current, command):
         """Calculate new position from user command
         It'll return new pos for sending to control.
-
         Arguments:
             current {list} -- current state
             command {list} -- command
