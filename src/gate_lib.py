@@ -19,9 +19,9 @@ class Gate:
                 'maxAngle': 360,  # Should be ~120 when switch is used.
             },
             'forwardToGate': {
-                'cxThresold': 0.1,
+                'cxThresold': 0.2,
                 'rotateAngle': 10,
-                'moveDist': 2.0,
+                'moveDist': 0.5,
                 'normalDist': 2.0,
                 'timeLimit': 30,
             },
