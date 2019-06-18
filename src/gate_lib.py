@@ -10,7 +10,7 @@ class Gate:
         self.gate_proxy = gate_proxy
         self.param = {
             'checkDeep': {
-                'wanted': -1.4,
+                'wanted': -1.2,
                 'acceptableError': 0.10,
             },
             'firstFinding': {
@@ -19,10 +19,10 @@ class Gate:
                 'maxAngle': 360,  # Should be ~120 when switch is used.
             },
             'forwardToGate': {
-                'cxThresold': 0.1,
+                'cxThresold': 0.2,
                 'rotateAngle': 10,
-                'moveDist': 2.0,
-                'normalDist': 2.0,
+                'moveDist': 0.5,
+                'normalDist': 1.0,
                 'timeLimit': 30,
             },
             'finalMoveDist': 2.0,
@@ -45,8 +45,10 @@ class Gate:
         return self.getGateStatus() < self.param['endThreshold']
 
     def step00_checkDeep(self):
+        rospy.loginfo('RESETING STATE')
+        self.control.reset_state()
         rospy.loginfo('Adjusting deep.')
-        self.control.absolute_z(-1.2)
+        self.control.absolute_z(self.param['checkDeep']['wanted'])
         r = rospy.Rate(10)
         while not rospy.is_shutdown():
             if self.control.check_z(0.15):
