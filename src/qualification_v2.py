@@ -69,7 +69,6 @@ def main():
                             control.relative_xy(0,-0.2)
                             while control.check_xy(0.15 , 0.15) == False and not rospy.is_shutdown():
                                 continue
-                        else :
                             print ("Moving Forward")
                             control.relative_xy(0.2,0)
                             while control.relative_xy(0.15 , 0.15) == False and not rospy.is_shutdown():

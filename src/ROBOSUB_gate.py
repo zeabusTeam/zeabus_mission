@@ -11,9 +11,9 @@ from gate_lib import Gate
 
 def main():
     rospy.init_node('GateMission')
-    rospy.wait_for_service('gate_service')
+    rospy.wait_for_service('/vision/gate')
     try:
-        gate_srv = rospy.ServiceProxy('gate_service', VisionGate)
+        gate_srv = rospy.ServiceProxy('/vision/gate', VisionGate)
     except rospy.ServiceException, e:
         print("Service call failed: %s" % e)
     obj = Gate(gate_srv)
