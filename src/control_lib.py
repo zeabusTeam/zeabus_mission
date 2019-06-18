@@ -66,14 +66,20 @@ class Control:
         for i, x in enumerate(direction):
             if x == 0:
                 newPos[i] = 0.0
-            mask.append(ignoreZero or (x != 0))
+            mask.append(ignoreZero or (x != 0) or (i < 2 and sum(direction[0:2])==0))
 
         if self.lastCommand['type'] is not None:
             for i, x in enumerate(direction):
                 if x == 0 and self.lastCommand['target'][i] == 0:
                     mask[i] = False
 
-        rospy.logdebug('Old:%s Command:%s New:%s' %
+        for i, x in enumerate(direction[3:6]):
+            if x > math.pi:
+                newPos[i+3] -= math.pi
+
+
+
+        rospy.loginfo('Old:%s Command:%s New:%s' %
                        (str(currentPos), str(direction), str(newPos)))
 
         head = Header()
@@ -124,7 +130,33 @@ class Control:
         Returns:
             {bool} -- Command sending status
         """
-        return self.moveDist([0, 0, 0, 0, 0, 0], True)
+        currentPos = self.getCurrent()
+        head = Header()
+        head.seq = self.seq
+        head.stamp = rospy.Time.now()
+        head.frame_id = self.senderName
+
+        command = ControlCommand()
+        command.header = head
+        command.target = currentPos
+        command.mask = [True for _ in range(6)]
+
+        self.seq += 1
+
+        try:
+            if not self.DEBUG:
+                self.proxy(command)
+        except rospy.ServiceException as exc:
+            rospy.logerr('Cannot send control command: %s' % exc)
+            return (False or self.DEBUG)
+
+        self.setTargetToCurrentState()
+        self.lastCommand['type'] = 1
+        self.lastCommand['target'] = command.target
+        self.lastCommand['mask'] = command.mask
+
+        return True
+
 
     def getCurrent(self):
         """Get Current robot state
@@ -166,11 +198,11 @@ class Control:
             {boolean} -- same method name if okay = True. Else False
         """
         if acceptableAngle is None:
-            acceptableAngle = 7*math.pi/180
+            acceptableAngle = 10*math.pi/180
         else:
             acceptableAngle *= math.pi/180
         if acceptableDist is None:
-            acceptableDist = 0.1
+            acceptableDist = 0.15
         if self.targetState is None:
             self.setTargetToCurrentState()
         curr = self.getCurrent()
