@@ -9,7 +9,7 @@ from std_msgs.msg import String
 control = CommandInterfaces('mission_qualify_2')
 
 def main():
-    rospy.sleep(20)
+    # rospy.sleep(20)
     service_name = 'vision/qualification'
     print('wait service')
     rospy.wait_for_service(service_name)
@@ -20,8 +20,12 @@ def main():
     last_move = False 
     finish_marker = False
     old_cx = 0.5
+    control.reset_state()
     control.absolute_z(-1.2)
-    while control.checek_z(0.15) == False :
+    r = rospy.Rate(10)
+    while control.check_z(0.15) == False :
+        print ("Wait for Z")
+        r.sleep()
         continue
     while not rospy.is_shutdown():
         current = control.get_state()
@@ -45,10 +49,10 @@ def main():
                 if res.data.type.data == 0 :
                     print ("Not Find Moving Forward")
                     control.relative_xy(0.2 , 0)
-                    while control.check_xy(0.15 , 0.15) == False :
+                    while control.check_xy(0.15 , 0.15) == False and not rospy.is_shutdown():
                         continue
                 elif res.data.type.data > 0 :
-                    while area <= 0.85 :
+                    while area <= 0.85 and not rospy.is_shutdown():
                         print ("---------------- Finding Gate --------------")
                         res = call(String('qualification'),String('gate'))
                         area = res.data.area.data
@@ -57,25 +61,24 @@ def main():
                         print ("cx = " + str(cx))
                         if cx <= -0.1 and old_cx - cx <= 0.1:
                             print ("Moving Left")
-                            control.relative_xy(0,-0.2)
-                            while control.isOkay(0.15 , 0.15) == False :
+                            control.relative_xy(0,0.2)
+                            while control.check_xy(0.15 , 0.15) == False and not rospy.is_shutdown():
                                 continue
                         elif cx >= 0.1 and old_cx - cx <= 0.1:
                             print ("Moving Right")
-                            control.relative_xy(0,0.2)
-                            while control.check_xy(0.15 , 0.15) == False :
+                            control.relative_xy(0,-0.2)
+                            while control.check_xy(0.15 , 0.15) == False and not rospy.is_shutdown():
                                 continue
-                        else :
                             print ("Moving Forward")
                             control.relative_xy(0.2,0)
-                            while control.relative_xy(0.15 , 0.15) == False :
+                            while control.relative_xy(0.15 , 0.15) == False and not rospy.is_shutdown():
                                 continue
                         old_cx = cx
                     # rospy.sleep(0.5)
                     print ("Last Move")
                     last_move = True
                     control.relative_xy(3,0)
-                    while control.check_xy(0.15 , 0.15) == False :
+                    while control.check_xy(0.15 , 0.15) == False and not rospy.is_shutdown():
                         continue
         elif not finish_marker and last_move :
             print ("---------------- Finding Marker --------------")
@@ -89,12 +92,12 @@ def main():
                 if res.data.type.data == 0 :
                     print ("Not Find Moving Forward")
                     control.relative_xy(0.2 , 0)
-                    while control.check_xy(0.15 , 0.15) == False :
+                    while control.check_xy(0.15 , 0.15) == False and not rospy.is_shutdown():
                         continue
                 #else :
                 #if True :
                 elif res.data.type.data > 0 :
-                    while area <= 0.2:
+                    while area <= 0.2 and not rospy.is_shutdown():
                         print ("---------------- Finding Marker --------------")
                         print ("    ---------------- Step 1 ---------------")
                         res = call(String('qualification'),String('marker'))
@@ -103,67 +106,61 @@ def main():
                         if cx <= -0.1 :
                             print ("Moving Left")
                             control.relative_xy(0,-0.2)
-                            while control.check_xy(0.15 , 0.15) == False :
+                            while control.check_xy(0.15 , 0.15) == False and not rospy.is_shutdown():
                                 continue
                         elif cx >= 0.1 :
                             print ("Moving Right")
                             control.relative_xy(0,0.2)
-                            while control.check_xy(0.15 , 0.15) == False :
+                            while control.check_xy(0.15 , 0.15) == False and not rospy.is_shutdown():
                                 continue
                         else :
                             print ("Moving Forward")
                             control.relative_xy(0.2,0)
-                            while control.check_xy(0.15 , 0.15) == False :
+                            while control.check_xy(0.15 , 0.15) == False and not rospy.is_shutdown():
                                 continue
                             # continue
                     front_marker = control.get_state()
-                    while res.data.point2.x != -1 :
+                    while res.data.point2.x != -1 and not rospy.is_shutdown():
                         print ("---------------- Finding Marker --------------")
                         print ("    ---------------- Step 2 ---------------")
                         res = call(String('qualification'),String('marker'))
                         area = res.data.area.data
                         print ("Moving Right")
                         control.relative_xy(0,0.2)
-                        while control.check_xy(0.15 , 0.15) == False :
+                        while control.check_xy(0.15 , 0.15) == False and not rospy.is_shudown():
                             continue
                     print ("    ---------------- Step 3 ---------------")  
                     print ("Moving Forward")
                     control.relative_xy(3,0)
                     rf_marker = control.get_state()
-                    while control.check_xy(0.15,0.15) == False :
+                    while control.check_xy(0.15,0.15) == False and not rospy.is_shutdown():
                         continue                     
                     print ("    ---------------- Step 4 ---------------")  
                     print ("Moving Left")        
                     control.relative_xy(rf_marker[0],rf_marker[1]-3)
-                    while control.check_xy(0.15,0.15) == False :
+                    while control.check_xy(0.15,0.15) == False and not rospy.is_shutdown():
                         continue      
                     rl_marker = control.gat_state()
                     print ("    ---------------- Step 5 ---------------")  
                     print ("Moving back")     
                     control.absolute_xy(rl_marker[0] , front_marker[1])
-                    while control.check_xy(0.15,0.15) == False :
+                    while control.check_xy(0.15,0.15) == False and not rospy.is_shutdown():
                         continue
                     print ("    ---------------- Step 6 ---------------")
                     print ("Moving To Front Of Marker")  
                     control.absolute_xy(front_marker[0] , front_marker[1])
-                    while control.check_xy(0.15,0.15) == False :
+                    while control.check_xy(0.15,0.15) == False and not rospy.is_shutdown():
                         continue   
                     print ("    ---------------- Step 6 ---------------")
                     print ("Turning Back")
                     control.relative_yaw(math.pi)
-                    while control.check_yaw(0.15) :
+                    while control.check_yaw(0.15) == False and not rospy.is_shutdown():
                         continue
                 last_move = False
                 finish_marker = True
         elif finish_marker and last_move :
             print ("*-*-*-*-*-* FINISH QUALIFICATION *-*-*-*-*-*")
-            while True :
-                control.absolute_xy(0,0)
-                while control.check_xy(0.15,0.15) == False :
-                    continue 
-                control.absolute_z(0)
-                while control.check_z(0.15,0.15) == False :
-                    continue 
+            control.deactivate(["x","y","z","roll","pitch","yaw"])
         last = res.data.type               
         rospy.sleep(0.5)
 

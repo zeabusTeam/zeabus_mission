@@ -1,7 +1,7 @@
 from __future__ import division
 import rospy
 import time
-from control_lib import Control
+from zeabus.control.command_interfaces import CommandInterfaces
 
 
 class Gate:
@@ -10,7 +10,7 @@ class Gate:
         self.gate_proxy = gate_proxy
         self.param = {
             'checkDeep': {
-                'wanted': -1.4,
+                'wanted': -1.2,
                 'acceptableError': 0.10,
             },
             'firstFinding': {
@@ -19,17 +19,17 @@ class Gate:
                 'maxAngle': 360,  # Should be ~120 when switch is used.
             },
             'forwardToGate': {
-                'cxThresold': 0.1,
+                'cxThresold': 0.2,
                 'rotateAngle': 10,
-                'moveDist': 2.0,
-                'normalDist': 2.0,
+                'moveDist': 0.5,
+                'normalDist': 1.0,
                 'timeLimit': 30,
             },
             'finalMoveDist': 2.0,
             'endThreshold': 0.2,
             'visionStatusHistory': 20,
         }
-        self.control = Control('Gate')
+        self.control = CommandInterfaces('Gate')
 
     listGateStatus = [0]
 
@@ -45,22 +45,15 @@ class Gate:
         return self.getGateStatus() < self.param['endThreshold']
 
     def step00_checkDeep(self):
-        x, y, z, r, p, y = self.control.getCurrent()
-        deepcond = (z > self.param['checkDeep']['wanted'] +
-                    self.param['checkDeep']['acceptableError']
-
-                    or z < self.param['checkDeep']['wanted'] -
-                    self.param['checkDeep']['acceptableError'])
-        if deepcond:
-            rospy.loginfo('Z not be as wanted.c')
-            rospy.loginfo('Adjusting deep.')
-            self.control.moveDist(
-                [0, 0, z+self.param['checkDeep']['wanted'], 0, 0, 0])
-            r = rospy.Rate(10)
-            while not rospy.is_shutdown():
-                if self.control.isOkay(0.05):
-                    break
-                r.sleep()
+        rospy.loginfo('RESETING STATE')
+        self.control.reset_state()
+        rospy.loginfo('Adjusting deep.')
+        self.control.absolute_z(self.param['checkDeep']['wanted'])
+        r = rospy.Rate(10)
+        while not rospy.is_shutdown():
+            if self.control.check_z(0.15):
+                break
+            r.sleep()
         rospy.loginfo('AUV Deep is as wanted.')
         return True
 
@@ -78,68 +71,23 @@ class Gate:
             else:
                 self.setGateStatus(0)
             if self.getGateStatus() >= self.param['firstFinding']['threshold']:
-                self.control.stop()
+                self.control.reset_state()
                 rospy.loginfo('[LookToTheLeftLookToTheRight] Found gate.')
                 return True
             # Code when switch is available
             # if rotate_count > 90:
             if rotate_count > self.param['firstFinding']['maxAngle']:
-                self.control.stop()
+                self.control.reset_state()
                 rospy.logwarn('Reach maximum finding angle')
                 return False
             # rotate command ccw self.param['firstFinding']['rotateAngle'] deg
-            if self.control.isOkay():
-                result = self.control.moveDist(
-                    [0, 0, 0, 0, 0, self.param['firstFinding']['rotateAngle']])
-                if result:
-                    rotate_count += self.param['firstFinding']['rotateAngle']
-                else:
-                    self.control.stop()
-                    rospy.logerr('Cannot connect to Control system')
-                    return False
+            if self.control.check_yaw(0.15):
+                self.control.relative_yaw(
+                    self.param['firstFinding']['rotateAngle'])
+                rotate_count += self.param['firstFinding']['rotateAngle']
             r.sleep()
-        self.control.stop()
+        self.control.reset_state()
         return True
-
-    def step02_forwardWithRotate(self):
-        """
-            if center x is negative and less than ... (might be -0.5) and not in turning phase:
-                turn left until ... (might be -0.1)
-            elif center x is positive and more than ... (might be 0.5) and not in turning phase:
-                turn right until ... (might be 0.1)
-            continue_forward_command
-        """
-        start = time.time()
-        r = rospy.Rate(10)
-        while not rospy.is_shutdown():
-            vsResp = self.gate_proxy()
-            if vsResp.found == 1:
-                self.setGateStatus(1)
-            else:
-                self.setGateStatus(0)
-            endCond = (self.isEnd() and
-                       (time.time()-start >
-                        self.param['forwardToGate']['timeLimit']))
-            if endCond:
-                self.control.stop()
-                rospy.loginfo('[GoToGate] Passed gate.')
-                return True
-            if vsResp.cx1 < -self.param['forwardToGate']['cxThresold']:
-                result = self.control.moveDist(
-                    [0, 0, 0, 0, 0,
-                        self.param['forwardToGate']['rotateAngle']])
-            elif vsResp.cx1 > self.param['forwardToGate']['cxThresold']:
-                result = self.control.moveDist(
-                    [0, 0, 0, 0, 0,
-                        -self.param['forwardToGate']['rotateAngle']])
-            else:
-                result = self.control.moveDist(
-                    [self.param['forwardToGate']['normalDist'],
-                        0, 0, 0, 0, 0])
-            if not result:
-                self.control.stop()
-                return False
-            r.sleep()
 
     def step02_forwardWithMoveLeftRight(self):
         """
@@ -161,40 +109,34 @@ class Gate:
                        (time.time()-start >
                         self.param['forwardToGate']['timeLimit']))
             if endCond:
-                self.control.stop()
+                self.control.reset_state()
                 rospy.loginfo('[GoToGate] Passed gate.')
                 return True
-            if self.control.isOkay():
+            if self.control.check_xy(0.15, 0.15):
                 if vsResp.cx1 < -self.param['forwardToGate']['cxThresold']:
                     rospy.loginfo("[GoToGate] Too left")
-                    result = self.control.moveDist(
-                        [0, self.param['forwardToGate']['moveDist'],
-                            0, 0, 0, 0])
+                    self.control.relative_xy(
+                        0, self.param['forwardToGate']['moveDist'])
                 elif vsResp.cx1 > self.param['forwardToGate']['cxThresold']:
                     rospy.loginfo("[GoToGate] Too right")
-                    result = self.control.moveDist(
-                        [0, -self.param['forwardToGate']['moveDist'],
-                            0, 0, 0, 0])
+                    self.control.relative_xy(
+                        0, -self.param['forwardToGate']['moveDist'])
                 else:
                     rospy.loginfo("[GoToGate] Forward")
-                    result = self.control.moveDist(
-                        [self.param['forwardToGate']['normalDist'],
-                            0, 0, 0, 0, 0])
-                if not result:
-                    self.control.stop()
-                    return False
+                    self.control.relative_xy(
+                        self.param['forwardToGate']['normalDist'], 0)
             r.sleep()
 
     def step03_moveForward(self):
         rospy.loginfo(
             '[MoveMore] I need more move to passed the gate all of robot.'
         )
-        result = self.control.moveDist(
-            [self.param['finalMoveDist'], 0, 0, 0, 0, 0])
+        self.control.relative_xy(
+            self.param['finalMoveDist'], 0)
         r = rospy.Rate(10)
         while not rospy.is_shutdown():
-            if self.control.isOkay(0.3):
+            if self.control.check_xy(0.15, 0.15):
                 break
             r.sleep()
         rospy.loginfo('[MoveMore] Passed gate.')
-        return result
+        return True
