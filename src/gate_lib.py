@@ -4,25 +4,50 @@ import time
 from zeabus.control.command_interfaces import CommandInterfaces
 
 
+def mean(data):
+    """Return the sample arithmetic mean of data."""
+    n = len(data)
+    if n < 1:
+        raise ValueError('mean requires at least one data point')
+    return sum(data)/n # in Python 2 use sum(data)/float(n)
+
+def _ss(data):
+    """Return sum of square deviations of sequence data."""
+    c = mean(data)
+    ss = sum((x-c)**2 for x in data)
+    return ss
+
+def stddev(data, ddof=0):
+    """Calculates the population standard deviation
+    by default; specify ddof=1 to compute the sample
+    standard deviation."""
+    n = len(data)
+    if n < 2:
+        raise ValueError('variance requires at least two data points')
+    ss = _ss(data)
+    pvar = ss/(n-ddof)
+    return pvar**0.5
+
+
 class Gate:
 
     def __init__(self, gate_proxy):
         self.gate_proxy = gate_proxy
         self.param = {
             'checkDeep': {
-                'wanted': -1.4,
+                'wanted': -0.7,
                 'acceptableError': 0.10,
             },
             'firstFinding': {
                 'threshold': 0.7,
-                'rotateAngle': 30,
-                'maxAngle': 360,  # Should be ~120 when switch is used.
+                'rotateAngle': 10*3.1416/180,
+                'maxAngle': 120*3.1416/180,  # Should be ~120 when switch is used.
             },
             'forwardToGate': {
                 'cxThresold': 0.2,
                 'rotateAngle': 10,
-                'moveDist': 0.5,
-                'normalDist': 2.0,
+                'moveDist': 0.25,
+                'normalDist': 0.5,
                 'timeLimit': 30,
             },
             'finalMoveDist': 2.0,
@@ -45,6 +70,7 @@ class Gate:
         return self.getGateStatus() < self.param['endThreshold']
 
     def step00_checkDeep(self):
+        self.control.reset_state()
         rospy.loginfo('Adjusting deep.')
         self.control.absolute_z(-1.2)
         r = rospy.Rate(10)
@@ -79,12 +105,13 @@ class Gate:
                 rospy.logwarn('Reach maximum finding angle')
                 return False
             # rotate command ccw self.param['firstFinding']['rotateAngle'] deg
-            if self.control.check_yaw(0.15):
+            if self.control.check_yaw(0.0873):
                 self.control.relative_yaw(
                     self.param['firstFinding']['rotateAngle'])
                 rotate_count += self.param['firstFinding']['rotateAngle']
             r.sleep()
         self.control.reset_state()
+        self.control.absolute_yaw(self.control.current_pose[5])
         return True
 
     def step02_forwardWithMoveLeftRight(self):
@@ -95,10 +122,16 @@ class Gate:
                 move right until ... (might be 0.1)
             continue_forward_command
         """
+	yaws = [-100 for _ in range(40)]
         start = time.time()
         r = rospy.Rate(10)
         while not rospy.is_shutdown():
             vsResp = self.gate_proxy()
+            yaws.append(self.control.current_pose[5])
+            del yaws[0]
+            if stddev(yaws) > 5*3.1416/180:
+                r.sleep()
+                continue
             if vsResp.found == 1:
                 self.setGateStatus(1)
             else:
@@ -114,11 +147,11 @@ class Gate:
                 if vsResp.cx1 < -self.param['forwardToGate']['cxThresold']:
                     rospy.loginfo("[GoToGate] Too left")
                     self.control.relative_xy(
-                        0, self.param['forwardToGate']['moveDist'])
+                        self.param['forwardToGate']['normalDist'], self.param['forwardToGate']['moveDist'])
                 elif vsResp.cx1 > self.param['forwardToGate']['cxThresold']:
                     rospy.loginfo("[GoToGate] Too right")
                     self.control.relative_xy(
-                        0, -self.param['forwardToGate']['moveDist'])
+                        self.param['forwardToGate']['normalDist'], -self.param['forwardToGate']['moveDist'])
                 else:
                     rospy.loginfo("[GoToGate] Forward")
                     self.control.relative_xy(
