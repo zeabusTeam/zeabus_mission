@@ -19,6 +19,7 @@ def main():
     obj = Gate(gate_srv)
     obj.step00_checkDeep()
     obj.step01_rotateAndFindGate()
+    obj.step01_5_lockYawToGate()
     obj.step02_forwardWithMoveLeftRight()
     """
     PLAN:
