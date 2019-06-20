@@ -38,11 +38,11 @@ class Gate:
         self.gate_proxy = gate_proxy
         self.param = {
             'checkDeep': {
-                'wanted': -0.7,
+                'wanted': -0.85,
                 'acceptableError': 0.10,
             },
             'firstFinding': {
-                'threshold': 0.7,
+                'threshold': 0.8,
                 'rotateAngle': 10*3.1416/180,
                 # Should be ~120 when switch is used.
                 'maxAngle': 120*3.1416/180,
@@ -54,7 +54,7 @@ class Gate:
                 'normalDist': 0.5,
                 'timeLimit': 30,
             },
-            'finalMoveDist': 3.0,
+            'finalMoveDist': 4.0,
             'endThreshold': 0.2,
             'visionStatusHistory': 20,
         }
@@ -109,12 +109,13 @@ class Gate:
             if rotate_count > self.param['firstFinding']['maxAngle']:
                 self.control.reset_state()
                 rospy.logwarn('Reach maximum finding angle')
+                self.gateYaw = 1.570
                 return False
             # rotate command ccw self.param['firstFinding']['rotateAngle'] deg
             if self.control.check_yaw(0.0873):
                 self.control.relative_yaw(
                     self.param['firstFinding']['rotateAngle'])
-                rotate_count += self.param['firstFinding']['rotateAngle']
+                rotate_count += abs(self.param['firstFinding']['rotateAngle'])
             r.sleep()
         self.control.reset_state()
         return True
@@ -150,13 +151,15 @@ class Gate:
         gateAngle = self.estimateAngle(sum(cxs)/len(cxs), self.gateDist)
         self.gateYaw += gateAngle
         self.control.absolute_yaw(self.gateYaw)
+        rospy.loginfo('GateDist: %.2fm, GateAngle: %.4f' %
+                      (self.gateDist, gateAngle))
         # overide parameter.
-        if self.gateDist/5 > self.param['forwardToGate']['moveDist']*1.5:
-            self.param['forwardToGate']['normalDist'] = self.gateDist/5
+        if self.gateDist/3 > self.param['forwardToGate']['moveDist']*1.5:
+            self.param['forwardToGate']['normalDist'] = self.gateDist/3
 
     def estimateDist(self, width):
         realGateW = 3.048  # meters
-        return realGateW/width/2
+        return realGateW/width
 
     def estimateAngle(self, cx, dist):
         return math.atan(cx/dist)
@@ -179,11 +182,11 @@ class Gate:
             if stddev(yaws) > 5*3.1416/180:
                 r.sleep()
                 continue
+            if vsResp.found == 1:
+                self.setGateStatus(1)
+            else:
+                self.setGateStatus(0)
             if self.control.check_xy(0.15, 0.15) and self.control.check_yaw(0.15):
-                if vsResp.found == 1:
-                    self.setGateStatus(1)
-                else:
-                    self.setGateStatus(0)
                 endCond = (self.isEnd() and
                            (time.time()-start >
                             self.param['forwardToGate']['timeLimit']))
