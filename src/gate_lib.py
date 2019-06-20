@@ -149,6 +149,9 @@ class Gate:
         gateAngle = self.estimateAngle(sum(cxs)/len(cxs), self.gateDist)
         self.gateYaw += gateAngle
         self.control.absolute_yaw(self.gateYaw)
+        # overide parameter.
+        if self.gateDist/5 > self.param['forwardToGate']['moveDist']*1.5:
+            self.param['forwardToGate']['normalDist'] = self.gateDist/5
 
     def estimateDist(self, width):
         realGateW = 3.048  # meters
@@ -181,7 +184,7 @@ class Gate:
                 else:
                     self.setGateStatus(0)
                 endCond = (self.isEnd() and
-                        (time.time()-start >
+                           (time.time()-start >
                             self.param['forwardToGate']['timeLimit']))
                 if endCond:
                     self.control.reset_state()
