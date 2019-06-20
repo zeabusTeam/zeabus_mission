@@ -74,9 +74,10 @@ class Gate:
         return self.getGateStatus() < self.param['endThreshold']
 
     def step00_checkDeep(self):
+        rospy.loginfo('RESETING STATE')
         self.control.reset_state()
         rospy.loginfo('Adjusting deep.')
-        self.control.absolute_z(-1.2)
+        self.control.absolute_z(self.param['checkDeep']['wanted'])
         r = rospy.Rate(10)
         while not rospy.is_shutdown():
             if self.control.check_z(0.15):
