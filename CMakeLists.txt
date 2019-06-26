@@ -18,8 +18,8 @@ include_directories(
 )
 
 set( PYTHON_CODE 
-    src/square_2.py
     src/gate_lib.py
+    src/path.py
 )
 
 catkin_install_python(
