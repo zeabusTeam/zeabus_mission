@@ -16,16 +16,16 @@ class Gate:
             },
             'firstFinding': {
                 'threshold': 0.8,
-                'rotateAngle': 10*3.1416/180,
+                'rotateAngle': 10*3.1416/180, # Tune value
                 # Should be ~120 when switch is used.
                 'maxAngle': 120*3.1416/180,
             },
             'forwardToGate': {
-                'cxThresold': 0.2,
+                'cxThresold': 0.2, # Tune value
                 'rotateAngle': 10,
                 'moveDist': 0.25,
                 'normalDist': 0.5,
-                'timeLimit': 30,
+                'timeLimit': 30, # If don't found gat will go to last mode. Use in Step02
             },
             'finalMoveDist': 4.0,
             'endThreshold': 0.2,
