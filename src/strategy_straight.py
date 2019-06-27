@@ -100,11 +100,17 @@ class StrategyStraight:
 
         self.mission_path.start_mission()
 
-    def callback_service( self ):
-        if( not self.current_play ):
-            self.current_play = True
+    def callback_service( self , request ):
+
+        if( request.data == True ): # Want to play
+            if( not self.current_play ):
+                self.current_play = True
+            else:
+                rospy.logfatal( "Warning node alredy play you can't do that" )
         else:
-            rospy.logfatal( "Warning node already play you can't do that" )
+            rospy.loginfo( "Service call to code node")
+            rospy.shutdown()
+
         return SendBoolResponse()
 
 if __name__=="__main__":
