@@ -8,6 +8,7 @@
 
 # REFERENCE
 #   ref01   : http://wiki.ros.org/rospy_tutorials/Tutorials/Logging
+#   ref02   : http://wiki.ros.org/rospy/Overview/Initialization%20and%20Shutdown
 
 from __future__ import print_function
 
@@ -39,8 +40,8 @@ class StrategyStraight:
         try:
             gate_srv = rospy.ServiceProxy('/vision/gate', VisionGate)
         except rospy.ServiceException, e:
-        print("Service call failed: %s" % e)
-        self.vision_gate = Gate(gate_srv)
+            print("Service call failed: %s" % e)
+        self.mission_gate = Gate(gate_srv)
 
         # Step setup mission Path 
         self.mission_path = Path()
@@ -65,9 +66,12 @@ class StrategyStraight:
         self.control.publish_data( "Now I will run code doing mission gate")
 
         self.mission_gate.step00_checkDeep()
-        self.mission_gate.step01_rotateAndFindGate()
-        self.mission_gate.step01_5_lockYawToGate()
-        self.mission_gate.step02_forwardWithMoveLeftRight()
+        if( not rospy.is_shutdown() ):
+            self.mission_gate.step01_rotateAndFindGate()
+        if( not rospy.is_shutdown() ):
+            self.mission_gate.step01_5_lockYawToGate()
+        if( not rospy.is_shutdown() ):
+            self.mission_gate.step02_forwardWithMoveLeftRight()
 
         self.control.publish_data( "Finish to search gate I will move forward will serach path")
         
@@ -109,7 +113,7 @@ class StrategyStraight:
                 rospy.logfatal( "Warning node alredy play you can't do that" )
         else:
             rospy.loginfo( "Service call to code node")
-            rospy.shutdown()
+            rospy.signal_shutdown( "Service call to close or stop mission")
 
         return SendBoolResponse()
 
