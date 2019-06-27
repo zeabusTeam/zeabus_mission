@@ -53,6 +53,7 @@ class StrategyStraight:
         self.service_service = rospy.Service(
             '/mission/strategy' , SendBool() , self.callback_service )
 
+        self.control.publish_data( "Waiting command to run mission")
         while( not rospy.is_shutdown() ):
             if( self.current_play ):
                 self.main()
