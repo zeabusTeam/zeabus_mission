@@ -87,7 +87,7 @@ class StrategyStraight:
         while( not self.control.check_xy( 0.1 , 0.1 ) ):
             self.rate.sleep()
             self.vision_path.call_data()
-            self.vision.echo_data()
+            self.vision_path.echo_data()
             if( self.vision_path.num_point != 0 ):
                 count += 1
             else:
