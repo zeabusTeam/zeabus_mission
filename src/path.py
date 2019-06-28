@@ -19,7 +19,7 @@ class Path:
 
     def __init__( self ):
 
-        self.vision = AnalysisPath()
+        self.vision = AnalysisPath( "base_path")
         self.control = CommandInterfaces( "GAP" )
 
         self.rate = rospy.Rate( 5 )
@@ -63,6 +63,14 @@ class Path:
                 self.rate.sleep()
 
             if( count_found == 3 ):
+                temp_x = self.vision.y_point[0] * 0.5 / 100
+                temp_y = -1 * self.vision.x_point[0] * 0.8 / 100
+                self.control.publish_data( "I found path and move xy --> " 
+                    + str( temp_x ) + " : "
+                    + str( temp_y ) )
+                self.control.relative_xy( temp_x , temp_y )
+                while( not self.control.check_xy( 0.15 , 0.15 ) ):
+                    self.rate.sleep()
                 self.control.publish_data( "I found path and will go depth" )
                 self.control.absolute_z( -2.5 )
                 while( not self.control.check_z( 0.15 ) ):
@@ -102,18 +110,18 @@ class Path:
             if( self.vision.num_point == 0 ):
                 relative_y = 0
             elif( self.vision.x_point[0] > 20 ):
-                relative_y = -0.2
+                relative_y = -0.1
             elif( self.vision.x_point[0] < -20 ):
-                relative_y = +0.2
+                relative_y = +0.1
             else:
                 ok_y = True
 
             if( self.vision.num_point == 0):
-                relative_x = 0.4
+                relative_x = 0.25
             elif( self.vision.y_point[0] > 20 ):
-                relative_x = 0.2
+                relative_x = 0.1
             elif( self.vision.y_point[0] < -20 ):
-                relative_x = -0.2
+                relative_x = -0.1
             else:
                 ok_x = True
         
@@ -128,9 +136,12 @@ class Path:
 
         count = 0
         temp_yaw = []
-        while( not rospy.is_shutdown() and count < 5):
+        while( not rospy.is_shutdown() and count < 1):
             self.rate.sleep()
-            self.control.get_state()
+            self.control.publish_data( "Waiting yaw for calculate" )
+            while( not self.control.check_yaw( 0.1 ) ):
+                self.rate.sleep()
+            self.control.publish_data( "Calculate yaw" )
             self.vision.call_data()
             self.vision.echo_data()   
             temp_yaw.append( 
@@ -141,7 +152,7 @@ class Path:
             self.control.publish_data("temp_yaw " + repr( temp_yaw ) )
             self.status_mission = 3
 
-        self.first_yaw = zeabus_math.bound_radian( sum( temp_yaw ) / 5 )
+        self.first_yaw = zeabus_math.bound_radian( sum( temp_yaw ) / 1 )
         self.control.publish_data( "Now I will absolute yaw is " + str( self.first_yaw ) )
         self.control.absolute_yaw( self.first_yaw )
         self.moving_on_path()
@@ -156,7 +167,7 @@ class Path:
                 count = 0 
             self.rate.sleep()
 
-        self.control.relative_xy( 0.40 , 0 )
+        self.control.relative_xy( 0.60 , 0 )
         self.control.publish_data( "Now waiting xy are ok")
         count = 0 
         while( ( not rospy.is_shutdown() ) and count < self.ok_count ):
