@@ -13,6 +13,7 @@
 from __future__ import print_function
 
 import rospy
+import math
 
 # For doing gate mission
 from gate_lib import Gate
@@ -25,6 +26,9 @@ from zeabus.vision.analysis_path import AnalysisPath
 
 # Standard for connect with control
 from zeabus.control.command_interfaces import CommandInterfaces
+
+_CONSTANT_PATH_1_MOVEMENT_X_ = 0.5
+_CONSTANT_PATH_1_MOVEMENT_Y_ = 0.2
 
 class StrategyStraight:
 
@@ -44,7 +48,7 @@ class StrategyStraight:
         self.mission_gate = Gate(gate_srv)
 
         # Step setup mission Path 
-        self.mission_path = Path()
+        self.mission_path = Path( _CONSTANT_PATH_1_MOVEMENT_X_ , _CONSTANT_PATH_1_MOVEMENT_Y_)
         self.vision_path = AnalysisPath()
 
         self.current_play = False
@@ -82,8 +86,12 @@ class StrategyStraight:
             self.rate.sleep()
 
         self.control.publish_data( "I will move forward by parameter of gate with find path")
-        self.control.relative_xy( self.mission_gate.param['finalMoveDist'], 0)
+        self.control.relative_xy( self.mission_gate.param['finalMoveDist'] + 1, 0)
         count = 0
+        # This step will use to movement with rotation yaw
+        self.control.update_target()
+        collect_yaw = self.control.target_pose[5]
+        self.control.publish_data( "SPIN PASS GATE")
         while( not self.control.check_xy( 0.1 , 0.1 ) ):
             self.rate.sleep()
             self.vision_path.call_data()
@@ -96,7 +104,18 @@ class StrategyStraight:
             if( count == 2 ):
                 self.control.publish_data( "I found path 2 round at here reset now")
                 self.control.reset_state()
+                self.control.publish_data( "Sleep 1 second wait to reset state" )
+                rospy.sleep( 2 )
                 break
+
+            if( self.control.check_yaw( 0.6 ) ):
+                self.control.publish_data( "Adding spin yaw" )
+                self.control.relative_yaw( math.pi / 1.5 )
+
+        self.control.publish_data( "Return absolute yaw " + str( collect_yaw ) )
+        self.control.absolute_yaw( collect_yaw )
+        while( not self.control.check_yaw( 0.15 ) ):
+            self.rate.sleep()
 
         if( count == 2 ):
             self.control.publish_data( "I start path by ever found path" )

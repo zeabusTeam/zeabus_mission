@@ -17,7 +17,7 @@ from zeabus.vision.analysis_path import AnalysisPath
 
 class Path:
 
-    def __init__( self ):
+    def __init__( self , move_x , move_y):
 
         self.vision = AnalysisPath( "base_path")
         self.control = CommandInterfaces( "GAP" )
@@ -28,7 +28,10 @@ class Path:
 
         self.ok_count = 5
 
-    def start_mission( self ): # status_mission is 0
+        self.move_x = move_x
+        self.move_y = move_y 
+
+    def start_mission( self): # status_mission is 0
 
         self.control.publish_data( "Start doing message path" )        
 
@@ -79,7 +82,7 @@ class Path:
                 break
             else:
                 self.control.publish_data( "Don't found move forward continous search" )
-                self.control.relative_xy( 0.5 , 0)
+                self.control.relative_xy( self.move_x , self.move_y )
             
         if( self.status_mission == 2 ):
             self.setup_point()
