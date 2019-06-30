@@ -86,7 +86,7 @@ class StrategyStraight:
             self.rate.sleep()
 
         self.control.publish_data( "I will move forward by parameter of gate with find path")
-        self.control.relative_xy( self.mission_gate.param['finalMoveDist'] + 1, 0)
+        self.control.relative_xy( self.mission_gate.param['finalMoveDist'], 0)
         count = 0
         # This step will use to movement with rotation yaw
         self.control.update_target()

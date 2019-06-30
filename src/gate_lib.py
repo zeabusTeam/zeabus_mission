@@ -15,8 +15,8 @@ class Gate:
                 'acceptableError': 0.10,
             },
             'firstFinding': {
-                'threshold': 0.7,
-                'rotateAngle': 30*3.1416/180,  # Tune value
+                'threshold': 0.9,
+                'rotateAngle': -30*3.1416/180,  # Tune value
                 # Should be ~120 when switch is used.
                 'maxAngle': 120*3.1416/180,
             },
@@ -121,7 +121,7 @@ class Gate:
 
     def estimateDist(self, width):
         realGateW = 3.048  # meters
-        return realGateW/width
+        return 2*realGateW/width
 
     def estimateAngle(self, cx, dist):
         return -math.atan(cx/dist)
@@ -134,9 +134,13 @@ class Gate:
                 move right until ... (might be 0.1)
             continue_forward_command
         """
+        curDist = 0
+        estDist = self.gateDist
         start = time.time()
         r = rospy.Rate(10)
         while not rospy.is_shutdown():
+            self.param['forwardToGate']['moveDist'] = ((estDist-curDist)**2)/50+0.25
+            print("MoveDist: %.2f m"%self.param['forwardToGate']['moveDist'])
             vsResp = self.gate_proxy()
             if vsResp.found == 1:
                 self.setGateStatus(1)
@@ -145,7 +149,8 @@ class Gate:
             if self.control.check_xy(0.15, 0.15) and self.control.check_yaw(0.15):
                 endCond = (self.isEnd() and
                            (time.time()-start >
-                            self.param['forwardToGate']['timeLimit']))
+                            self.param['forwardToGate']['timeLimit']) or
+                          curDist >= estDist)
                 if endCond:
                     rospy.loginfo('[GoToGate] Passed gate.')
                     return True
@@ -162,6 +167,7 @@ class Gate:
                     rospy.loginfo("[GoToGate] Forward")
                     self.control.relative_xy(
                         self.param['forwardToGate']['normalDist'], 0)
+                curDist += self.param['forwardToGate']['normalDist']
             r.sleep()
 
     def step03_moveForward(self):
