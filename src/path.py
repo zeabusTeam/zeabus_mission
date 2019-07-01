@@ -20,7 +20,7 @@ class Path:
     def __init__( self , move_x , move_y):
 
         self.vision = AnalysisPath( "base_path")
-        self.control = CommandInterfaces( "GAP" )
+        self.control = CommandInterfaces( "PATH" )
 
         self.rate = rospy.Rate( 5 )
 
@@ -33,7 +33,7 @@ class Path:
 
     def start_mission( self): # status_mission is 0
 
-        self.control.publish_data( "Start doing message path" )        
+        self.control.publish_data( "Start doing mission path" )        
 
         # Reset state
         self.control.reset_state( 0 , 0 )
