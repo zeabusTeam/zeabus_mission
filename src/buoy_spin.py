@@ -296,7 +296,7 @@ class Buoy:
                 self.vision.call_data()
                 self.vision.echo_data()
                 if( self.vision.found ):
-                    dash_distance = self.vision.analysis['x'] 
+                    dash_distance = self.vision.analysis['x'] / 100
                     if( ( abs( self.vision.analysis['z'] ) > 20 ) 
                             and ( abs( self.vision.analysis['y'] ) > 30 ) ):
                         self.control.publish_data( "tune center move x and y" 
@@ -319,8 +319,8 @@ class Buoy:
                         else:
                             self.control.publish_data( "Tune distance x " 
                                 + str( self.vision.analysis['x'] ) )
-                            self.relative_xy( 0 , self.vision.analysis['x'] / 150 )
-                            dash_distance -= self.vision.analysis['x'] / 150
+                            self.relative_xy( 0 , self.vision.analysis['x'] / 100 )
+                            dash_distance -= self.vision.analysis['x'] / 100
                 else:
                     unfound += 1
                     if( unfound == 2 ):
@@ -329,7 +329,42 @@ class Buoy:
         self.dash_mode( dash_distance )
 
     def dash_mode( self , distance ):
-        pass
+        self.control.publish_data( "Waiting yaw before dash mode " + str(distance) )
+        while( not self.control.check_yaw( 0.15 ) ):
+            self.rate.sleep()
+
+        self.control.deactivate( ["x" , "y"] )
+        
+        self.control.force_xy( 1 , 0 , True)
+        start_time = rospy.get_rostime()
+        limit_time = distance*100 / 5
+        self.control.publish_data( "Move forward limit time at " + str( limit_time ) )
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while(  diff_time < limit_time ):
+            self.rate.sleep()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            temp = self.control.force_xy( 1 , 0 )
+            self.control.publish_data( "Now distance is " + str( temp ) )
+            if( temp > diff_time ):
+                break
+        self.control.force_xy( 0 , 0 )
+        self.control.activate( ["x" , "y"])
+
+        self.control.publish_data( "Finish dash mode move back")
+        self.finish_task()
+
+    def finish_task( self ):
+        self.control.relative_xy( -0.8 , 0 )
+        self.control.publish_data( "Wait to move back")
+        while( not self.control.check_xy( 0.15 , 0.15 ) ):
+            self.rate.sleep()
+        
+        self.control.publish_data( "Wait to survey" )
+        self.control.relative_xy( 0.0 , -1.3 )
+        while( not self.control.check_xy( 0.15 , 0.15 ) ):
+            self.rate.sleep()
+
+        self.control.publish_data( "Finish")
  
     def check_target( self , distance , yaw ):
         self.control.publish_data( "Save point before move to check")
