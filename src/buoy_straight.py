@@ -141,7 +141,6 @@ class Buoy:
 
         self.lock_target()
 
-
     def lock_target( self ): # status_mission = 2
 
         self.control.publish_data( "Welcome to mode lock target" )
@@ -150,8 +149,15 @@ class Buoy:
 
         distance = 3
         limit_time = 10
+        warning_time = 10
 
-        while( not rospy.is_shutdown() ):
+        time_out = 30 # time_out seconds when you have lock target
+        self.control.publish_data( "You have limit time in mode lock_target " + str( time_out ))
+
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+
+        while( ( not rospy.is_shutdown() ) and ( diff_time < limit_time ) ):
 
             while( not self.control.check_z( 0.15 ) ):
                 self.rate.sleep()
@@ -182,8 +188,8 @@ class Buoy:
 
                 if( self.vision.result['area'] > 8 ):
                     self.control.publish_data( "Break from area condition") 
-                    distance = 5
-                    limit_time = 15
+                    distance = 2
+                    limit_time = 8.5
                     break 
                     
 
@@ -202,6 +208,13 @@ class Buoy:
                 if( unfound == 2 ):
                     self.control.publish_data( "Move to dash_mode")
                     break
+
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            if( ( diff_time / warning_time ) > 1 ):
+                self.control.publish_data( "Warning over {:6.2f} limit at {:6.2f}".format(
+                    warning_time , time_out ) )
+                warning_time += 10
+
         self.dash_mode( distance , limit_time )
 
     def dash_mode( self , distance , limit_time ):
