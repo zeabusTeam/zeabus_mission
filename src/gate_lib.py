@@ -16,7 +16,7 @@ class Gate:
             },
             'firstFinding': {
                 'threshold': 0.9,
-                'rotateAngle': -30*3.1416/180,  # Tune value
+                'rotateAngle': 30*3.1416/180,  # Tune value
                 # Should be ~120 when switch is used.
                 'maxAngle': 120*3.1416/180,
             },
@@ -147,9 +147,9 @@ class Gate:
             else:
                 self.setGateStatus(0)
             if self.control.check_xy(0.15, 0.15) and self.control.check_yaw(0.15):
-                endCond = (self.isEnd() and
+                endCond = ((self.isEnd() and
                            (time.time()-start >
-                            self.param['forwardToGate']['timeLimit']) or
+                            self.param['forwardToGate']['timeLimit'])) or
                           curDist >= estDist)
                 if endCond:
                     rospy.loginfo('[GoToGate] Passed gate.')

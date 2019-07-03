@@ -92,14 +92,14 @@ class Buoy:
         while( not rospy.is_shutdown() ):
             self.rate.sleep()
 
-            while( self.control.check_xy( 0.15 , 0.15 ) ):
+            while( not self.control.check_xy( 0.15 , 0.15 ) ):
                 self.rate.sleep()
             
-            while( self.control.check_yaw( 0.15 ) ):
+            while( not self.control.check_yaw( 0.15 ) ):
                 self.rate.sleep()
 
             count = 0
-            while( not rospy.is_shutdown() ):
+            while( (not rospy.is_shutdown()) and (count < 2) ):
                 self.vision.call_data()
                 if( self.vision.result['found'] ):
                     count += 1
@@ -144,16 +144,16 @@ class Buoy:
         unfound = 0 
 
         distance = 3
-        limit_time = 10
+        limit_time = 10 *1.5
         warning_time = 10
 
-        time_out = 30 # time_out seconds when you have lock target
+        time_out = 45 # time_out seconds when you have lock target
         self.control.publish_data( "You have limit time in mode lock_target " + str( time_out ))
 
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
-        while( ( not rospy.is_shutdown() ) and ( diff_time < limit_time ) ):
+        while( ( not rospy.is_shutdown() ) and ( diff_time < time_out ) ):
 
             while( not self.control.check_z( 0.15 ) ):
                 self.rate.sleep()
@@ -166,7 +166,7 @@ class Buoy:
             while( not self.control.check_yaw( 0.15 ) ):
                 self.rate.sleep()
 
-            self.control.publish_data( "mode lock_target find target")
+            self.control.publish_data( "mode lock_target call vision")
             self.vision.call_data()
             self.vision.echo_data()
 

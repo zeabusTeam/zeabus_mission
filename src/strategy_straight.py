@@ -25,7 +25,7 @@ from path import Path
 from zeabus.vision.analysis_path import AnalysisPath
 
 # For doing buoy mission
-from buoy import Buoy
+from buoy_straight import Buoy
 from zeabus.vision.analysis_buoy import AnalysisBuoy
 
 # Standard for connect with control
@@ -152,15 +152,15 @@ class StrategyStraight:
 
         self.control.publish_data( "Finish play buoy next I will play path move up")
         self.control.absolute_z( -1 )
-        while( not rospy.is_shutdown() ):
+        while( not self.control.check_z(0.15)):
             self.rate.sleep()
     
         self.control.publish_data( "Waiting xy")
-        while( not rospy.is_shutdown() ):
+        while( not self.control.check_xy(0.15,0.15)):
             self.rate.sleep()
 
         self.control.publish_data( "Waiting yaw")
-        while( not rospy.is_shutdown() ):
+        while( not self.control.check_yaw(0.15)):
             self.rate.sleep()
 
         self.control.publish_data( "Move forward and searching 2.5 meter" )

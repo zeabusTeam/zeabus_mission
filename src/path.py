@@ -62,7 +62,7 @@ class Path:
         # p3 -> p1 move ( +1 , +1 ) # round_move = 4
         # round_move 5 is check and end
 
-        self.control.absolute_z( -1.5 )
+        self.control.absolute_z( -1 )
         self.control.publish_data( "We have go to depth 1.5 meters")
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
@@ -131,15 +131,18 @@ class Path:
                 relative_x = 0
                 relative_y = 0
                 if( round_move == 1 ):
-                    relative_x = -1 
+                    relative_x = -1
                     relative_y = +1
                 elif( round_move == 2 ):
-                    relative_x = +2 
-                    relative_y = -1
+                    relative_x = +3 
+                    relative_y = 0
                 elif( round_move == 3 ):
-                    relative_x = -2
-                    relative_y = -1
+                    relative_x = +0 
+                    relative_y = -2
                 elif( round_move == 4 ):
+                    relative_x = -3
+                    relative_y = 0
+                elif( round_move == 5 ):
                     relative_x = +1
                     relative_y = +1
                 else:
@@ -252,7 +255,7 @@ class Path:
         self.vision.call_data()
         self.vision.echo_data()
 
-        if( self.vision.rotation[ self.vision.num_point - 2 ] < math.pi ):
+        if( self.vision.rotation[ self.vision.num_point - 2 ] < math.pi/2 ):
             self.control.publish_data( "rotation right" )       
             self.control.relative_yaw( math.pi / -4 , True )
         else:
