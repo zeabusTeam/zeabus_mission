@@ -45,11 +45,7 @@ class Buoy:
 
     def start_mission( self ): # status_mission is 0
 
-        self.control.activate( ['x' , 'y' , 'z' , 'roll' , 'pitch' , 'yaw' ] )
-
-        self.control.relative_xy( 0 , 0 )
-        self.control.relative_z( 0 )
-        self.control.relative_yaw( 0 )
+        self.control.reset_state()
 
         self.control.publish_data( " Waiting z depth")
         self.control.absolute_z( -2 )
