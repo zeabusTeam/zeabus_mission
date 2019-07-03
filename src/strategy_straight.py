@@ -24,8 +24,15 @@ from zeabus_utility.srv import SendBoolResponse
 from path import Path
 from zeabus.vision.analysis_path import AnalysisPath
 
+# For doing buoy mission
+from buoy import Buoy
+from zeabus.vision.analysis_buoy import AnalysisBuoy
+
 # Standard for connect with control
 from zeabus.control.command_interfaces import CommandInterfaces
+
+# Import math bound radian
+from zeabus.math import general as zeabus_math
 
 _CONSTANT_PATH_1_MOVEMENT_X_ = 0.5
 _CONSTANT_PATH_1_MOVEMENT_Y_ = 0.2
@@ -51,6 +58,10 @@ class StrategyStraight:
         self.mission_path = Path( _CONSTANT_PATH_1_MOVEMENT_X_ , _CONSTANT_PATH_1_MOVEMENT_Y_)
         self.vision_path = AnalysisPath()
 
+        # Step setup mission buoy
+        self.mission_buoy = Buoy()
+        self.vision_buoy = AnalysisBuoy()
+
         self.current_play = False
 
         # Step setup service of strategy_mission
@@ -64,6 +75,8 @@ class StrategyStraight:
                 self.current_play = False
                 break
             self.rate.sleep()
+
+    # Start part of all mission
 
     def main( self ):
 
@@ -104,13 +117,14 @@ class StrategyStraight:
             if( count == 2 ):
                 self.control.publish_data( "I found path 2 round at here reset now")
                 self.control.reset_state()
-                self.control.publish_data( "Sleep 1 second wait to reset state" )
+                self.control.publish_data( "Sleep 2 second wait to reset state" )
                 rospy.sleep( 2 )
                 break
 
             if( self.control.check_yaw( 0.6 ) ):
                 self.control.publish_data( "Adding spin yaw" )
                 self.control.relative_yaw( math.pi / 1.5 )
+        # End part of movement with rotation yaw
 
         self.control.publish_data( "Return absolute yaw " + str( collect_yaw ) )
         self.control.absolute_yaw( collect_yaw )
@@ -122,7 +136,72 @@ class StrategyStraight:
         else:
             self.control.publish_data( "I start path by never found path" )
 
-        self.mission_path.start_mission()
+        result = self.mission_path.find_path()
+
+        if( result ):
+            self.control.publish_data( "Congratulation we know you pass path")
+        else:
+            self.control.publish_data( "It bad you failure mission path" )
+            self.control.absolute_yaw( zeabus_math.bound_radian( collect_yaw - (math.pi / 2) ) )
+
+        self.control.publish_data( "Waiting yaw before send process to buoy_straight")
+        while( not self.control.check_yaw( 0.15 ) ):
+            self.rate.sleep()
+
+        self.mission_buoy.start_mission()
+
+        self.control.publish_data( "Finish play buoy next I will play path move up")
+        self.control.absolute_z( -1 )
+        while( not rospy.is_shutdown() ):
+            self.rate.sleep()
+    
+        self.control.publish_data( "Waiting xy")
+        while( not rospy.is_shutdown() ):
+            self.rate.sleep()
+
+        self.control.publish_data( "Waiting yaw")
+        while( not rospy.is_shutdown() ):
+            self.rate.sleep()
+
+        self.control.publish_data( "Move forward and searching 2.5 meter" )
+        self.control.relative_xy( 2.5 , 0 )
+
+        # Start path move forward and searching
+        count = 0
+        while( not self.control.check_xy( 0.1 , 0.1 ) ):
+            self.rate.sleep()
+            self.vision_path.call_data()
+            self.vision_path.echo_data()
+            if( self.vision_path.num_point != 0 ):
+                count += 1
+            else:
+                count = 0
+
+            if( count == 2 ):
+                self.control.publish_data( "I found path 2 round at here reset now")
+                self.control.reset_state()
+                self.control.publish_data( "Sleep 2 second wait to reset state" )
+                rospy.sleep( 2 )
+                break
+        # End part to search
+
+        if( count == 2 ):
+            self.control.publish_data( "I start path by ever found path" )
+        else:
+            self.control.publish_data( "I start path by never found path" )
+
+        result = self.mission_path.find_path()
+
+        if( result ):
+            self.control.publish_data( "Congratulation we know you pass path")
+        else:
+            self.control.publish_data( "It bad you failure mission path" )
+            self.control.absolute_yaw( zeabus_math.bound_radian( collect_yaw - (math.pi / 2) ) )
+
+    # End part of play all mission
+
+        self.control.publish_data( "Finish all strategy mission" )
+        self.control.deactivate( ["x", "y", "z", "roll", "pitch", "yaw"])
 
     def callback_service( self , request ):
 
