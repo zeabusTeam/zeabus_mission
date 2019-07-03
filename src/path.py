@@ -47,14 +47,61 @@ class Path:
 
     def find_path( self ): # status_mission is 1
 
+        # In function find_path we move to triangle pattern to find path 
+        # You can think I will survey around area of triangle
+        #               p4
+        #              /  \
+        #             /    \
+        #            /  p1  \
+        #           /        \
+        #          /          \
+        #         p2----------p3
+        # p1 -> p2 move ( -1 , +1 ) # round_move = 1 
+        # p2 -> p4 move ( +2 , -1 ) # round_move = 2
+        # p4 -> p3 move ( -2 , -1 ) # round_move = 3
+        # p3 -> p1 move ( +1 , +1 ) # round_move = 4
+        # round_move 5 is check and end
+
+        self.control.absolute_z( -1.5 )
+        self.control.publish_data( "We have go to depth 1.5 meters")
+        while( not self.control.check_z( 0.15 ) ):
+            self.rate.sleep()
+
+        result = False
+        round_move = 0
+
         while( not rospy.is_shutdown() ):
+            round_move += 1
 
-            self.control.publish_data( "Waiting ok xy" )
-            while( not self.control.check_xy( 0.1, 0.1 ) ):
-                self.rate.sleep()
-
-            self.control.publish_data( "Try to find pictur")
             count_found = 0
+            self.control.publish_data( "Waiting ok xy and search duration move" )
+            while( ( not self.control.check_xy( 0.12, 0.12 ) ) and count_found < 3):
+                self.rate.sleep()
+                self.vision.call_data()
+                self.vision.echo_data()
+                if( self.vision.num_point != 0 ):
+                    self.control.publish_data( "Vision found have to stop move and check" )
+                    self.control.update_target()
+                    save_point = ( self.control.target_pose[0] , self.control.target_pose[1] )
+                    self.control.publish_data( "Save point is " + repr( save_point ) )
+                    self.control.relative_xy( self.vision.y_point[0] * 0.5 / 100 
+                        , self.vision.x_point[0] * -0.8 / 100 )
+                    count_found += 1
+                    while( not rospy.is_shutdown() and count_found < 3 ):
+                        self.rate.sleep()
+                        self.vision.call_data()
+                        self.vision.echo_data()
+                        if( self.vision.num_point != 0 ):
+                            count_found += 1
+                        else:
+                            self.control.absolute_xy( save_point[0] , save_point[1])
+                            count_found = 0
+                            break
+                else:
+                    self.count_found = 0
+                            
+            if( count_found == 0 ):
+                self.control.publish_data( "Try to find picture when alive destination")
             while( ( not rospy.is_shutdown() ) and count_found < 3):
                 self.vision.call_data()
                 self.vision.echo_data()
@@ -81,11 +128,32 @@ class Path:
                 self.status_mission = 2
                 break
             else:
-                self.control.publish_data( "Don't found move forward continous search" )
-                self.control.relative_xy( self.move_x , self.move_y )
+                relative_x = 0
+                relative_y = 0
+                if( round_move == 1 ):
+                    relative_x = -1 
+                    relative_y = +1
+                elif( round_move == 2 ):
+                    relative_x = +2 
+                    relative_y = -1
+                elif( round_move == 3 ):
+                    relative_x = -2
+                    relative_y = -1
+                elif( round_move == 4 ):
+                    relative_x = +1
+                    relative_y = +1
+                else:
+                    self.control.publish_data( "Don't found target abort part mission" )
+                    break
+                self.control.publish_data( "Don't found move (x , y ) : {:6.3f} {:6.3f}".format( 
+                     relative_x , relative_y ) )
+                self.control.relative_xy( relative_x , relative_y )
             
         if( self.status_mission == 2 ):
             self.setup_point()
+            result = True
+
+        return result 
 
     def setup_point( self ): # status_mission = 2
 
@@ -180,7 +248,17 @@ class Path:
                 count = 0 
             self.rate.sleep()
 
-        self.control.relative_yaw( math.pi / -4 , True )
+        self.control.publish_data( "I want data to dicision want target I have to use")
+        self.vision.call_data()
+        self.vision.echo_data()
+
+        if( self.vision.rotation[ self.vision.num_point - 2 ] < math.pi ):
+            self.control.publish_data( "rotation right" )       
+            self.control.relative_yaw( math.pi / -4 , True )
+        else:
+            self.control.publish_data( "rotation left" )       
+            self.control.relative_yaw( math.pi / 4 , True )
+
         self.control.publish_data( "Now waiting yaw are ok")
         count = 0 
         while( ( not rospy.is_shutdown() ) and count < self.ok_count ):
