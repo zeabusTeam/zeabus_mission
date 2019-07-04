@@ -110,6 +110,7 @@ class StrategyStraight:
             self.vision_path.call_data()
             self.vision_path.echo_data()
             if( self.vision_path.num_point != 0 ):
+                self.control.get_state()
                 count += 1
             else:
                 count = 0
@@ -119,6 +120,16 @@ class StrategyStraight:
                 self.control.reset_state()
                 self.control.publish_data( "Sleep 2 second wait to reset state" )
                 rospy.sleep( 2 )
+                self.control.publish_data( "Wakeup I will waiting yaw")
+                while( not self.control.check_yaw( 0.15 ) ):
+                    self.rate.sleep()
+                relative_x = self.vision_path.y_point[ 0 ] * 0.6 / 100 
+                relative_y = self.vision_path.x_point[ 0 ] * -1 / 100
+                self.control.publish_data( "Move go to path ( x , y ) : " 
+                    + repr( (relative_x , relative_y ) ) )
+                self.control.relative_xy( relative_x , relative_y )
+                while( not self.control.check_xy( 0.15 , 0.15 ) ):
+                    self.rate.sleep()
                 break
 
             if( self.control.check_yaw( 0.6 ) ):
@@ -142,7 +153,7 @@ class StrategyStraight:
             self.control.publish_data( "Congratulation we know you pass path")
         else:
             self.control.publish_data( "It bad you failure mission path" )
-            self.control.absolute_yaw( zeabus_math.bound_radian( collect_yaw - (math.pi / 2) ) )
+            self.control.absolute_yaw( zeabus_math.bound_radian( collect_yaw + (math.pi / 2) ) )
 
         self.control.publish_data( "Waiting yaw before send process to buoy_straight")
         while( not self.control.check_yaw( 0.15 ) ):

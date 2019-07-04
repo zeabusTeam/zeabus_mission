@@ -184,18 +184,18 @@ class Path:
             if( self.vision.num_point == 0 ):
                 relative_y = 0
             elif( self.vision.x_point[0] > 20 ):
-                relative_y = -0.1
+                relative_y = -0.15
             elif( self.vision.x_point[0] < -20 ):
-                relative_y = +0.1
+                relative_y = +0.15
             else:
                 ok_y = True
 
             if( self.vision.num_point == 0):
                 relative_x = 0.25
             elif( self.vision.y_point[0] > 20 ):
-                relative_x = 0.1
+                relative_x = 0.15
             elif( self.vision.y_point[0] < -20 ):
-                relative_x = -0.1
+                relative_x = -0.15
             else:
                 ok_x = True
         

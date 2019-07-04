@@ -60,22 +60,23 @@ class Buoy:
         while( not self.control.check_yaw( 0.15 ) ):
             self.rate.sleep()
 
-        self.control.publish_data( "mode lock_target find target")
+        self.control.publish_data( "Start mision find target")
         self.vision.call_data()
         self.vision.echo_data()
         if( self.vision.result['found'] ):
-            self.control.publish_data( "Find target move lock target")
+            temp_y = self.vision.result['center_x'] * -2 / 100
+            self.control.publish_data( "Find target change to lock target and survey " 
+                + str(temp_y))
+            self.control.relative_xy( 2 , temp_y )
             self.lock_target()
         else:
             self.find_target()
-
-
 
     def find_target( self ): # status_mission = 1
         # Please thinking about plus sign to estimate value
         self.control.publish_data( "Welcome to mode find_target" )
 
-        self.control.publish_data( "Have to waiting depth before go to find target")
+        self.control.publish_data( "Find target Have to waiting depth before go to find target")
 
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
@@ -83,18 +84,20 @@ class Buoy:
         relative_y = -0.8
         relative_x = 1
 
-        self.control.publish_data( "move relative y " + str( relative_y ) )
+        self.control.publish_data( "Find target move relative y " + str( relative_y ) )
         self.control.relative_xy( 0 , relative_y )
         relative_y *= -2
         # mode 0 is forward , mode 1 is survey
-        mode = 0
+        mode = 1
 
         while( not rospy.is_shutdown() ):
             self.rate.sleep()
 
+            self.control.publish_data( "Find target waiting xy")
             while( not self.control.check_xy( 0.15 , 0.15 ) ):
                 self.rate.sleep()
             
+            self.control.publish_data( "Find target waiting yaw")
             while( not self.control.check_yaw( 0.15 ) ):
                 self.rate.sleep()
 
@@ -107,33 +110,35 @@ class Buoy:
                     break
 
             if( count == 2 ):
-                self.control.publish_data( "Found two round move to mode lock_target now")
+                self.control.publish_data( "Find target Found 2 round move to mode lock_target")
                 break
 
             if( mode == 0 ):
-                self.control.publish_data( "Move forward " + str( relative_x ) + " meter" )
+                self.control.publish_data( "Find target forward " +str( relative_x ) +" meter" )
                 self.control.relative_xy( relative_x , 0 )
                 mode = 1
             else:
                 mode = 0
-                self.control.publish_data( "Move survey " + str( relative_y ) + " meter" )
+                self.control.publish_data( "Find target survey " + str( relative_y ) + " meter" )
+                self.rate.sleep()
                 self.control.relative_xy( 0 , relative_y )
+                self.rate.sleep()
                 relative_y *= -1
                  
 
-        temp_y = self.vision.result['center_x'] / 100
+        temp_y = ( self.vision.result['center_x'] / 100 ) * 1.5
         temp_x = 1 
-        self.control.publish_data( "Move relative (x,y) : " + repr( ( temp_x , temp_y ) ) ) 
+        self.control.publish_data( "Find target Move (x,y) : " + repr( ( temp_x , temp_y ) ) ) 
         self.control.relative_xy( temp_x , temp_y )
 
-        if( self.vision.result[ 'center_y' ] > 80 ):
+        if( self.vision.result[ 'center_y' ] > 70 ):
             self.control.publish_data( "Move up") 
             self.control.relative_z( 0.05 )
-        elif( self.vision.result[ 'center_y'] < -80 ):
-            self.control.publish_data( "Move dowm") 
+        elif( self.vision.result[ 'center_y'] < -70 ):
+            self.control.publish_data( "Find target Move dowm") 
             self.control.relative_z( -0.05)
         else:
-            self.control.publish_data( "Don't move in axis z") 
+            self.control.publish_data( "Find target Don't move in axis z") 
 
         self.lock_target()
 
@@ -158,26 +163,24 @@ class Buoy:
             while( not self.control.check_z( 0.15 ) ):
                 self.rate.sleep()
 
-            self.control.publish_data( " Waiting xy ok")
+            self.control.publish_data( "Lock Target Waiting xy ok")
             while( not self.control.check_xy( 0.15 , 0.15) ):
                 self.rate.sleep()
 
-            self.control.publish_data( "Waiting yaw ok")
+            self.control.publish_data( "Lock Target Waiting yaw ok")
             while( not self.control.check_yaw( 0.15 ) ):
                 self.rate.sleep()
 
-            self.control.publish_data( "mode lock_target call vision")
+            self.control.publish_data( "Lock Target mode lock_target call vision")
             self.vision.call_data()
             self.vision.echo_data()
 
             if( self.vision.result['found'] ):
                 unfound = 0
-                if( self.vision.result['center_x'] < -20 ):
-                    self.control.publish_data( "Move left")
-                    self.control.relative_xy( 0 , 0.3 )
-                elif( self.vision.result['center_x'] > 20 ):
-                    self.control.publish_data( "Move right")
-                    self.control.relative_xy( 0 , -0.3 )
+                if( abs( self.vision.result['center_x'] ) > 30 ):
+                    temp_y = ( self.vision.result['center_x'] * -1.3 )/ 100.0
+                    self.control.publish_data( "Lock target Move survey " + str( temp_y ) )
+                    self.control.relative_xy( 0 , temp_y )
                 else:
                     self.control.publish_data( "Move forward" )
                     self.control.relative_xy( 1.5 , 0)
@@ -231,18 +234,18 @@ class Buoy:
             temp = self.control.force_xy( 1 , 0 )
             self.control.publish_data( "Now distance is " + str( temp ) 
                 + " and time is " + str( diff_time ) )
-            if( temp > distance ):
-                break
-            elif( diff_time > limit_time ):
+#            if( temp > distance ):
+#                break
+            if( diff_time > limit_time ):
                 break
         self.control.force_xy( 0 , 0 )
-        self.control.activate( ["x" , "y"])
+        self.control.activate( ["x" , "y"] )
 
         self.control.publish_data( "Finish dash mode move back")
         self.finish_task()
 
     def finish_task( self ):
-        self.control.relative_xy( -0.5 , -0.8 )
+        self.control.relative_xy( -1 , -1.2 )
         self.control.publish_data( "Finish this task, Move back")
         while( not self.control.check_xy( 0.15 , 0.15 ) ):
             self.rate.sleep()
@@ -250,6 +253,11 @@ class Buoy:
         self.control.absolute_z( -1 )
         self.control.publish_data( "Go to depth" )
         while( not self.control.check_z( 0.15 ) ):
+            self.rate.sleep()
+
+        self.control.publish_data( "Move forward 2.5 meter" )
+        self.control.relative_xy( 1.5 , 0 )
+        while( not self.control.check_xy( 0.15 , 0.15 ) ):
             self.rate.sleep()
 
         self.control.publish_data( "Finish task buoy?")
