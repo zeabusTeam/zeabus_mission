@@ -48,19 +48,7 @@ class Path:
     def find_path( self ): # status_mission is 1
 
         # In function find_path we move to triangle pattern to find path 
-        # You can think I will survey around area of triangle
-        #               p4
-        #              /  \
-        #             /    \
-        #            /  p1  \
-        #           /        \
-        #          /          \
-        #         p2----------p3
-        # p1 -> p2 move ( -1 , +1 ) # round_move = 1 
-        # p2 -> p4 move ( +2 , -1 ) # round_move = 2
-        # p4 -> p3 move ( -2 , -1 ) # round_move = 3
-        # p3 -> p1 move ( +1 , +1 ) # round_move = 4
-        # round_move 5 is check and end
+        # You can think I will survey around area of rectsngle
 
         self.control.absolute_z( -1 )
         self.control.publish_data( "We have go to depth 1.5 meters")
@@ -69,6 +57,7 @@ class Path:
 
         result = False
         round_move = 0
+        absolute_z = -1.6
 
         while( not rospy.is_shutdown() ):
             round_move += 1
@@ -122,11 +111,14 @@ class Path:
                 while( not self.control.check_xy( 0.15 , 0.15 ) ):
                     self.rate.sleep()
                 self.control.publish_data( "I found path and will go depth" )
-                self.control.absolute_z( -2.5 )
+                self.control.absolute_z( absolute_z )
                 while( not self.control.check_z( 0.15 ) ):
                     self.rate.sleep()
-                self.status_mission = 2
-                break
+                if( absolute_z < -2.5 ):
+                    self.status_mission = 2
+                    break
+                self.control.publish_data( "Tre to find again")
+                absolute_z -= 1.1
             else:
                 relative_x = 0
                 relative_y = 0
