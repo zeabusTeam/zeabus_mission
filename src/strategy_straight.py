@@ -16,9 +16,11 @@ import rospy
 import math
 
 # For doing gate mission
-from gate_lib import Gate
-from zeabus_utility.srv import VisionGate, SendBool
-from zeabus_utility.srv import SendBoolResponse
+#from gate_lib import Gate
+#from zeabus_utility.srv import VisionGate, SendBool
+
+# For doing gate mission by GAP
+from gate import Gate
 
 # For doing path mission
 from path import Path
@@ -34,6 +36,8 @@ from zeabus.control.command_interfaces import CommandInterfaces
 # Import math bound radian
 from zeabus.math import general as zeabus_math
 
+from zeabus_utility.srv import SendBoolResponse
+
 _CONSTANT_PATH_1_MOVEMENT_X_ = 0.5
 _CONSTANT_PATH_1_MOVEMENT_Y_ = 0.2
 
@@ -48,11 +52,12 @@ class StrategyStraight:
         self.rate = rospy.Rate( 10 )
 
         # Step setup mission gate
-        try:
-            gate_srv = rospy.ServiceProxy('/vision/gate', VisionGate)
-        except rospy.ServiceException, e:
-            print("Service call failed: %s" % e)
-        self.mission_gate = Gate(gate_srv)
+#        try:
+#            gate_srv = rospy.ServiceProxy('/vision/gate', VisionGate)
+#        except rospy.ServiceException, e:
+#            print("Service call failed: %s" % e)
+#        self.mission_gate = Gate(gate_srv)
+        self.mission_gate = Gate()
 
         # Step setup mission Path 
         self.mission_path = Path( _CONSTANT_PATH_1_MOVEMENT_X_ , _CONSTANT_PATH_1_MOVEMENT_Y_)
@@ -83,13 +88,15 @@ class StrategyStraight:
         self.control.reset_state()
         self.control.publish_data( "Now I will run code doing mission gate")
 
-        self.mission_gate.step00_checkDeep()
-        if( not rospy.is_shutdown() ):
-            self.mission_gate.step01_rotateAndFindGate()
-        if( not rospy.is_shutdown() ):
-            self.mission_gate.step01_5_lockYawToGate()
-        if( not rospy.is_shutdown() ):
-            self.mission_gate.step02_forwardWithMoveLeftRight()
+#        self.mission_gate.step00_checkDeep()
+#        if( not rospy.is_shutdown() ):
+#            self.mission_gate.step01_rotateAndFindGate()
+#        if( not rospy.is_shutdown() ):
+#            self.mission_gate.step01_5_lockYawToGate()
+#        if( not rospy.is_shutdown() ):
+#            self.mission_gate.step02_forwardWithMoveLeftRight()
+
+        self.mission_gate.start_mission()
 
         self.control.publish_data( "Finish to search gate I will move forward with serach path")
         
