@@ -91,7 +91,7 @@ class StrategyStraight:
         if( not rospy.is_shutdown() ):
             self.mission_gate.step02_forwardWithMoveLeftRight()
 
-        self.control.publish_data( "Finish to search gate I will move forward will serach path")
+        self.control.publish_data( "Finish to search gate I will move forward with serach path")
         
         self.control.publish_data( "waiting depth")
         self.control.absolute_z( -1.0 )
