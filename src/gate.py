@@ -82,20 +82,50 @@ class Gate:
             self.vision.echo_data()
         
             if( self.vision.result['found'] ):
-                cpunt += 1
+                count += 1
             else:
                 count = 0
 
-        if( count == 2 ):
+        if( count == 3 ):
             self.control.relative_xy( 0 , ( self.vision.result[ 'center_x' ] * 1.5 )/ -100 )
             self.control.publish_data( "START_CONSTANT Don't survey I find target" )
             self.lock_target()
         else:
-            self.spin_search()
+            self.direct_search()
 
         
-    def spin_search( self ):
-        
+    def direct_search( self ):
+        self.control.publish_data( "DIRECT_SEARCH start to search" )
+
+        self.control.publish_data( "DIRECT_SEARCH waiting yaw" )
+        while( not self.control.check_yaw( 0.15 ) ):
+            self.rate.sleep()
+
+        self.control.publish_data( "DIRECT_SEARCH waitign xy" )
+        while( not self.control.check_xy( 0.15 , 0.15 ) ):     
+            self.rate.sleep()
+
+        self.control.publish_data( "COMMAND TO MOVE DIRECT TO GATE " 
+            + str( GATE_LIMIT_DISTANCE ) + " meters" )
+
+        count = 0
+        while( ( not self.control.check_xy( 0.15 , 0.15 ) ) and ( count < 3 ) ):
+            self.rate.sleep()
+            self.vision.call_data()
+            self.vision.echo_data()
+
+            if( self.vision.result[ 'found' ] ):
+                count += 1
+            else:
+                count = 0
+
+        if( count == 3 ):
+            self.control.publish_data( "We found the picture so I will reset state")
+            self.control.reset_state( 0 , 0)
+            self.lock_target()
+        else:
+            self.control.publish_data( "We don't found picture abort that" )
+
 
     def lock_target( self ):
         self.control.publish_data( "LOCK_TARGET start mission")
