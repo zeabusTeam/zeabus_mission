@@ -100,10 +100,6 @@ class StrategyStraight:
 
         self.control.publish_data( "Finish to search gate I will move forward with serach path")
         
-        self.control.publish_data( "waiting depth")
-        self.control.absolute_z( -1.0 )
-        while( not self.control.check_z( 0.15 ) ):
-            self.rate.sleep()
 
         self.control.publish_data( "I will move forward by parameter of gate with find path")
         self.control.relative_xy( self.mission_gate.param['finalMoveDist'], 0)
@@ -130,8 +126,8 @@ class StrategyStraight:
                 self.control.publish_data( "Wakeup I will waiting yaw")
                 while( not self.control.check_yaw( 0.15 ) ):
                     self.rate.sleep()
-                relative_x = self.vision_path.y_point[ 0 ] * 0.6 / 100 
-                relative_y = self.vision_path.x_point[ 0 ] * -1 / 100
+                relative_x = self.vision_path.y_point[ 0 ] * 0.8 / 100 
+                relative_y = self.vision_path.x_point[ 0 ] * -1.2 / 100
                 self.control.publish_data( "Move go to path ( x , y ) : " 
                     + repr( (relative_x , relative_y ) ) )
                 self.control.relative_xy( relative_x , relative_y )
