@@ -33,7 +33,7 @@ class Buoy:
         self.control.reset_state()
 
         self.control.publish_data( " Waiting z depth")
-        self.control.absolute_z( -2 )
+        self.control.absolute_z( -1.5 )
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
 
@@ -166,12 +166,12 @@ class Buoy:
             relative_y = 0
             if( self.vision.result['found'] ):
                 unfound = 0
-                if( self.vision.result['center_x'] > 30 ):
-                    relative_y = -0.8
-                elif( self.vision.result['center_x'] < -30 ):
-                    relative_y = 0.8
+                if( self.vision.result['center_x'] > 20 ):
+                    relative_y = -1.2
+                elif( self.vision.result['center_x'] < -20 ):
+                    relative_y = 1.2
                 else:
-                    relative_x = 1.2
+                    relative_x = 1.8
 
                 self.control.publish_data( "Lock Target command force ({:4.2f},{:4.2f})".format(
                     relative_x , relative_y ) )
@@ -230,8 +230,11 @@ class Buoy:
                 break
 
     def finish_task( self ):
-        self.control.relative_xy( -1 , -1.2 )
+        self.rate.sleep()
         self.control.publish_data( "Finish this task, Move back")
+        self.control.relative_xy( -1 , -2.5 )
+        rospy.sleep( 1 )
+        self.control.publish_data( "Wake up to continue")
         while( not self.control.check_xy( 0.15 , 0.15 ) ):
             self.rate.sleep()
 

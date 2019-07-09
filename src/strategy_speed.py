@@ -38,10 +38,9 @@ from zeabus.math import general as zeabus_math
 
 from zeabus_utility.srv import SendBoolResponse, SendBool
 
-_CONSTANT_PATH_1_MOVEMENT_X_ = 0.5
-_CONSTANT_PATH_1_MOVEMENT_Y_ = 0.2
+from mission_constant import *
 
-class StrategyStraight:
+class StrategySpeed:
 
     def __init__( self ):
         self.control = CommandInterfaces( "strategy" )
@@ -60,7 +59,7 @@ class StrategyStraight:
         self.mission_gate = Gate()
 
         # Step setup mission Path 
-        self.mission_path = Path( _CONSTANT_PATH_1_MOVEMENT_X_ , _CONSTANT_PATH_1_MOVEMENT_Y_)
+        self.mission_path = Path( 0 , 0)
         self.vision_path = AnalysisPath()
 
         # Step setup mission buoy
@@ -88,27 +87,19 @@ class StrategyStraight:
         self.control.reset_state()
         self.control.publish_data( "Now I will run code doing mission gate")
 
-#        self.mission_gate.step00_checkDeep()
-#        if( not rospy.is_shutdown() ):
-#            self.mission_gate.step01_rotateAndFindGate()
-#        if( not rospy.is_shutdown() ):
-#            self.mission_gate.step01_5_lockYawToGate()
-#        if( not rospy.is_shutdown() ):
-#            self.mission_gate.step02_forwardWithMoveLeftRight()
-
         self.mission_gate.start_mission()
 
         self.control.publish_data( "Finish to search gate I will move forward with serach path")
-        
 
-        self.control.publish_data( "I will move forward by parameter of gate with find path")
-        self.control.relative_xy( 7 , 0)
-        count = 0
-        # This step will use to movement with rotation yaw
+        # This step will use to movement forward
         self.control.update_target()
-        collect_yaw = self.control.target_pose[5]
-        self.control.publish_data( "SPIN PASS GATE")
-        while( not self.control.check_xy( 0.1 , 0.1 ) ):
+
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec() 
+
+        self.control.deactivate( ['x' , 'y' ] )
+
+        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_SPEED_TIME_GATH_PATH ):
             self.rate.sleep()
             self.vision_path.call_data()
             self.vision_path.echo_data()
@@ -119,44 +110,79 @@ class StrategyStraight:
                 count = 0
 
             if( count == 2 ):
-                self.control.publish_data( "I found path 2 round at here reset now")
-                self.control.reset_state()
-                self.control.publish_data( "Sleep 2 second wait to reset state" )
-                rospy.sleep( 2 )
-                self.control.publish_data( "Wakeup I will waiting yaw")
-                while( not self.control.check_yaw( 0.15 ) ):
+                self.control.publish_data("!!!!!!!!1 STRATEGY FIND PATH !!!!!!!!!!!!!" )
+                target_depth = -1.0
+                while( not rospy.is_shutdown() ):
                     self.rate.sleep()
-                relative_x = self.vision_path.y_point[ 0 ] * 0.8 / 100 
-                relative_y = self.vision_path.x_point[ 0 ] * -1.2 / 100
-                self.control.publish_data( "Move go to path ( x , y ) : " 
-                    + repr( (relative_x , relative_y ) ) )
-                self.control.relative_xy( relative_x , relative_y )
-                while( not self.control.check_xy( 0.15 , 0.15 ) ):
-                    self.rate.sleep()
+                    self.vision_path.call_data()
+                    self.vision_path.echo_data()
+
+                    relative_x = 0
+                    relative_y = 0
+                    ok_x = False
+                    ok_y = False
+                    
+                    if( self.vision_path.num_point == 0 ):
+                        relative_y = 0
+                    elif( self.vision_path.x_point[0] > 30 ):
+                        relative_y = -PATH_FORCE_Y
+                    elif( self.vision_path.x_point[0] < -30 ):
+                        relative_y = PATH_FORCE_Y
+                    else:
+                        ok_y = True
+
+                    if( self.vision_path.num_point == 0):
+                        relative_x = 0
+                    elif( self.vision_path.y_point[0] > 20 ):
+                        relative_x = PATH_FORCE_X
+                    elif( self.vision_path.y_point[0] < -20 ):
+                        relative_x = -PATH_FORCE_X
+                    else:
+                        ok_x = True
+
+                    if( ok_x and ok_y ):
+                        self.control.force_xy( 0 , 0 )
+                        if( self.control.check_z( 0.15 ) ):
+                            if( target_depth < -2.4 ):
+                                self.control.publish_data( "Breaking and go to setup point")
+                                break
+                            else:
+                                target_depth -= 0.5
+                                self.control.publish_data( "I command depth to " 
+                                    + str( target_depth ) )
+                                self.control.absolute_z( target_depth )
+                    else:
+                        self.control.publish_data( "STRATEGY command " 
+                            + repr(( relative_x , relative_y ) ) )
+                        self.control.force_xy( relative_x , relative_y )
+
+                self.control.force_xy( 0 , 0 )
                 break
 
-            if( self.control.check_yaw( 0.6 ) ):
-                self.control.publish_data( "Adding spin yaw" )
-                self.control.relative_yaw( math.pi / 1.5 )
-        # End part of movement with rotation yaw
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec() 
+            self.control.publish_data( "STRATEGY forward time is " + str( diff_time ) )
+            self.control.force_xy( STRATEGY_SPEED_FORCE_GATH_PATH , 0 )
 
-        self.control.publish_data( "Return absolute yaw " + str( collect_yaw ) )
-        self.control.absolute_yaw( collect_yaw )
-        while( not self.control.check_yaw( 0.15 ) ):
-            self.rate.sleep()
+        self.control.activate( ['x' , 'y'] )
+
+        # Part to move forward for path
+
+        result = False
 
         if( count == 2 ):
             self.control.publish_data( "I start path by ever found path" )
+            self.mission_path.setup_point()
+            result = True
         else:
             self.control.publish_data( "I start path by never found path" )
-
-        result = self.mission_path.find_path()
 
         if( result ):
             self.control.publish_data( "Congratulation we know you pass path")
         else:
             self.control.publish_data( "It bad you failure mission path" )
-            self.control.absolute_yaw( zeabus_math.bound_radian( collect_yaw + (math.pi / 2) ) )
+            self.control.relative_yaw( zeabus_math.bound_radian( (math.pi / 2) ) )
+
+        self.control.relative_xy( 0 , 0 )
 
         self.control.publish_data( "Waiting yaw before send process to buoy_straight")
         while( not self.control.check_yaw( 0.15 ) ):
@@ -210,7 +236,7 @@ class StrategyStraight:
             self.control.publish_data( "Congratulation we know you pass path")
         else:
             self.control.publish_data( "It bad you failure mission path" )
-            self.control.absolute_yaw( zeabus_math.bound_radian( collect_yaw - (math.pi / 2) ) )
+            self.control.relative_yaw( zeabus_math.bound_radian( -math.pi / 2) )
 
     # End part of play all mission
 
@@ -233,5 +259,5 @@ class StrategyStraight:
 if __name__=="__main__":
     rospy.init_node('strategy_mission')
 
-    mission = StrategyStraight()
+    mission = StrategySpeed()
 
