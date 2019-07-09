@@ -57,7 +57,6 @@ class Path:
             self.rate.sleep()
 
         result = False
-#        round_move = 0
         round_move = 6
         absolute_z = -1.6
 
@@ -304,6 +303,7 @@ class Path:
                 self.control.publish_data( "MOVING_ON_PATH SECTION 2 now center Waiting yaw")
             else:
                 self.control.publish_data( "MOVING_ON_PATH SECTION 2 now center move direct")
+                self.control.absolute_z( -2 )
                 start_time = rospy.get_rostime()
                 diff = (rospy.get_rostime() - start_time).to_sec()
                 while( (not rospy.is_shutdown() ) and diff < ( PATH_PASS_TIME + 3 ) ):

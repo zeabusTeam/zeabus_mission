@@ -232,19 +232,19 @@ class Buoy:
     def finish_task( self ):
         self.rate.sleep()
         self.control.publish_data( "Finish this task, Move back")
-        self.control.relative_xy( -1 , -2.5 )
+        self.control.relative_xy( -1 , -1.5 )
+        self.control.absolute_z( -1 )
         rospy.sleep( 1 )
         self.control.publish_data( "Wake up to continue")
         while( not self.control.check_xy( 0.15 , 0.15 ) ):
             self.rate.sleep()
 
-        self.control.absolute_z( -1 )
         self.control.publish_data( "Go to depth" )
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
 
-        self.control.publish_data( "Move forward 2.5 meter" )
-        self.control.relative_xy( 1.5 , 0 )
+        self.control.publish_data( "Move forward 2 meter" )
+        self.control.relative_xy( 2.5 , 0 )
         while( not self.control.check_xy( 0.15 , 0.15 ) ):
             self.rate.sleep()
 

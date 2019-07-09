@@ -8,9 +8,20 @@
 
 # REFERENCE
 
+import math
+
 # Constant for strategy_speed
-STRATEGY_SPEED_FORCE_GATH_PATH = 1.5
-STRATEGY_SPEED_TIME_GATH_PATH = 30
+    # Part of process pass gate
+STRATEGY_SPEED_FORCE_GATE_PATH = 1.5
+STRATEGY_SPEED_TIME_GATE_PATH = 30
+STRATEGY_SPEED_ROTATE_GATE_BUOY = -1.0*( math.pi / 2) # unit radian
+    # Part of process init for buoy
+STRATEGY_SPEED_FORCE_START_BUOY = 1.5
+STRATEGY_SPEED_TIME_BUOY = 10
+    # Part of process pass buoy
+STRATEGY_SPEED_FORCE_BUOY_PATH = 1.5
+STRATEGY_SPEED_TIME_BUOY_PATH = 15
+STRATEGY_SPEED_ROTATE_BUOY_DROP = 1.0*( math.pi / 2) # unit radian
 
 # Constant for mission gate first gate
 GATE_START_FORWARD = 2
