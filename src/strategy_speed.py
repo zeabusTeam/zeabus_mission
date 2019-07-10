@@ -258,7 +258,10 @@ class StrategySpeed:
                     ok_y = False
                     
                     if( self.vision_path.num_point == 0 ):
+                        rospy.logfatal("STRATGY path disappear noooooooo")
+                        count = 0
                         relative_y = 0
+                        break
                     elif( self.vision_path.x_point[0] > 30 ):
                         relative_y = -PATH_FORCE_Y
                     elif( self.vision_path.x_point[0] < -30 ):

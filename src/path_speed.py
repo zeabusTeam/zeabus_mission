@@ -274,6 +274,10 @@ class Path:
 
         self.control.force_xy( 0 , 0 )
         self.control.publish_data( "I want data to dicision want target I have to use")
+        self.control.force_xy(0,0)
+        while (not self.control.check_yaw(0.15)) :
+            self.control.force_xy(0,0)
+            self.rate.sleep()
         self.vision.call_data()
         self.vision.echo_data()
 
@@ -283,7 +287,10 @@ class Path:
         else:
             self.control.publish_data( "rotation left" )       
             self.control.relative_yaw( math.pi / 4 , True )
-
+        self.control.force_xy(0,0)
+        while (not self.control.check_yaw(0.15)) :
+            self.control.force_xy(0,0)
+            self.rate.sleep()
         while( ( not rospy.is_shutdown() ) ):
             self.rate.sleep()
             self.vision.call_data()

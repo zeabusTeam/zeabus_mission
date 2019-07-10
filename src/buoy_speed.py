@@ -142,7 +142,7 @@ class Buoy:
 
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-
+        '''
         self.control.publish_data( "Lock Target Waiting xy ok")
         while( not self.control.check_xy( 0.15 , 0.15) ):
             self.rate.sleep()
@@ -153,7 +153,7 @@ class Buoy:
 
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
-
+        '''
         self.control.deactivate( ["x" , "y"] )
         
         while( ( not rospy.is_shutdown() ) and ( diff_time < time_out ) ):
@@ -243,7 +243,8 @@ class Buoy:
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
 
-        self.control.publish_data( "Move forward 2 meter" )
+        self.control.publish_data( "Move forward 2.5 meter" )
+        rospy.sleep(0.2)
         self.control.relative_xy( 2.5 , 0 )
         while( not self.control.check_xy( 0.15 , 0.15 ) ):
             self.rate.sleep()
