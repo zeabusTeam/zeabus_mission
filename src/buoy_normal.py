@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# FILE			: buoy_straight.py
+# FILE			: buoy_normal.py
 # AUTHOR		: K.Supasan
 # CREATE ON		: 2019, July 02 (UTC+0)
 # MAINTAINER	: K.Supasan

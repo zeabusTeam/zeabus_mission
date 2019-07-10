@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# FILE			: gate.py
+# FILE			: gate_speed.py
 # AUTHOR		: K.Supasan
 # CREATE ON		: 2019, June 27 (UTC+0)
 # MAINTAINER	: K.Supasan
