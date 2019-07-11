@@ -18,8 +18,6 @@ include_directories(
 )
 
 set( PYTHON_CODE 
-    src/gate_lib.py
-    src/path.py
 )
 
 catkin_install_python(

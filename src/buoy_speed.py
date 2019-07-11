@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# FILE			: buoy_straight.py
+# FILE			: buoy_speed.py
 # AUTHOR		: K.Supasan
 # CREATE ON		: 2019, July 05 (UTC+0)
 # MAINTAINER	: K.Supasan
@@ -13,6 +13,7 @@ import math
 from zeabus.math import general as zeabus_math
 from zeabus.control.command_interfaces import CommandInterfaces
 from zeabus.vision.analysis_buoy import AnalysisBuoy
+from constant_speed import *
 
 class Buoy:
 
@@ -32,16 +33,12 @@ class Buoy:
 
         self.control.reset_state()
 
-        self.control.publish_data( " Waiting z depth")
+        self.control.publish_data( "START Waiting z depth")
         self.control.absolute_z( -1.5 )
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
 
-        self.control.publish_data( " Waiting xy ok")
-        while( not self.control.check_xy( 0.15 , 0.15) ):
-            self.rate.sleep()
-
-        self.control.publish_data( "Waiting yaw ok")
+        self.control.publish_data( "START Waiting yaw ok")
         while( not self.control.check_yaw( 0.15 ) ):
             self.rate.sleep()
 
@@ -71,6 +68,7 @@ class Buoy:
 
         self.control.publish_data( "Find target move relative y " + str( relative_y ) )
         self.control.relative_xy( 0 , relative_y )
+        self.control.sleep()
         relative_y *= -2
         # mode 0 is forward , mode 1 is survey
         mode = 1
@@ -78,44 +76,39 @@ class Buoy:
         while( not rospy.is_shutdown() ):
             self.rate.sleep()
 
-            self.control.publish_data( "Find target waiting xy")
-            while( not self.control.check_xy( 0.15 , 0.15 ) ):
-                self.rate.sleep()
-            
-            self.control.publish_data( "Find target waiting yaw")
-            while( not self.control.check_yaw( 0.15 ) ):
-                self.rate.sleep()
-
             count = 0
-            while( (not rospy.is_shutdown()) and (count < 2) ):
+            while( (not rospy.is_shutdown()) and (count < BUOY_FOUND_PICTURE_ ) ):
                 self.vision.call_data()
+                self.vision.echo_data()
                 if( self.vision.result['found'] ):
+                    self.control.publish_data("FIND_TARGET Found picture")
                     count += 1
                 else:
+                    self.control.publish_data("FIND_TARGET don't found picture")
                     break
 
-            if( count == 2 ):
+            if( count == BUOY_FOUND_PICTURE_ ):
                 self.control.publish_data( "Find target Found 2 round move to mode lock_target")
                 break
+
+            if( not ( self.control.check_xy(0.15 , 0.15 ) and self.control.check_yaw( 0.15 ) )):
+                continue
 
             if( mode == 0 ):
                 self.control.publish_data( "Find target forward " +str( relative_x ) +" meter" )
                 self.control.relative_xy( relative_x , 0 )
+                self.control.sleep()
                 mode = 1
             else:
                 mode = 0
                 self.control.publish_data( "Find target survey " + str( relative_y ) + " meter" )
-                self.rate.sleep()
                 self.control.relative_xy( 0 , relative_y )
-                self.rate.sleep()
+                self.control.sleep()
                 relative_y *= -1
+
+        self.control.publish_data( "FIND_TARGET reset position xy")
+        self.control.relative_xy( 0 , 0 )
                  
-
-        temp_y = ( self.vision.result['center_x'] / 100 ) * 1.5
-        temp_x = 1 
-        self.control.publish_data( "Find target Move (x,y) : " + repr( ( temp_x , temp_y ) ) ) 
-        self.control.relative_xy( temp_x , temp_y )
-
         if( self.vision.result[ 'center_y' ] > 70 ):
             self.control.publish_data( "Move up") 
             self.control.relative_z( 0.05 )
@@ -142,18 +135,7 @@ class Buoy:
 
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-        '''
-        self.control.publish_data( "Lock Target Waiting xy ok")
-        while( not self.control.check_xy( 0.15 , 0.15) ):
-            self.rate.sleep()
 
-        self.control.publish_data( "Lock Target Waiting yaw ok")
-        while( not self.control.check_yaw( 0.15 ) ):
-            self.rate.sleep()
-
-        while( not self.control.check_z( 0.15 ) ):
-            self.rate.sleep()
-        '''
         self.control.deactivate( ["x" , "y"] )
         
         while( ( not rospy.is_shutdown() ) and ( diff_time < time_out ) ):
@@ -179,8 +161,6 @@ class Buoy:
 
                 if( self.vision.result['area'] > 8 ):
                     self.control.publish_data( "Break from area condition") 
-                    distance = 2
-                    limit_time /= 2
                     break 
 
                 if( self.vision.result['center_y'] > 70 ):
@@ -208,11 +188,12 @@ class Buoy:
         self.dash_mode( distance , limit_time )
 
         self.control.force_xy( 0 , 0 )
-        self.control.activate( ["x" , "y"] )
         self.rate.sleep()
 
         self.control.publish_data( "Finish dash mode move back")
         self.finish_task()
+        
+        self.control.activate( ["x" , "y"] )
 
     def dash_mode( self , distance , limit_time ):
 
@@ -231,24 +212,44 @@ class Buoy:
 
     def finish_task( self ):
         self.rate.sleep()
-        self.control.publish_data( "Finish this task, Move back")
-        self.control.relative_xy( -1 , -1.5 )
-        self.control.absolute_z( -1 )
-        rospy.sleep( 1 )
-        self.control.publish_data( "Wake up to continue")
-        while( not self.control.check_xy( 0.15 , 0.15 ) ):
-            self.rate.sleep()
+        self.control.publish_data( "FINISH this task, Move back")
+        self.control.absolute_z( -0.5 )
 
-        self.control.publish_data( "Go to depth" )
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( (not rospy.is_shutdown() ) and diff_time < BUOY_TIME_TO_BACK_ ):
+            self.rate.sleep()
+            self.control.force_xy( -1.0*BUOY_FORCE_FORWARD_ , 0 )
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            self.control.publish_data( "FINISH back current , limit " 
+                + repr( ( diff_time , BUOY_TIME_TO_BACK_ ) ) )
+
+#        self.control.publish_data( "FINISH Survey right")
+#        start_time = rospy.get_rostime()
+#        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+#        while( (not rospy.is_shutdown() ) and diff_time < BUOY_TIME_TO_SURVEY_ ):
+#            self.rate.sleep()
+#            self.control.force_xy( 0 , -1.0*BUOY_FORCE_SURVEY_ )
+#            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+#            self.control.publish_data( "FINISH survey current , limit " 
+#                + repr( ( diff_time , BUOY_TIME_TO_SURVEY_ ) ) )
+#           
+        self.control.force_false() 
+        self.control.publish_data( "FINISH Waiting depth")
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
 
-        self.control.publish_data( "Move forward 2.5 meter" )
-        rospy.sleep(0.2)
-        self.control.relative_xy( 2.5 , 0 )
-        while( not self.control.check_xy( 0.15 , 0.15 ) ):
+        self.control.publish_data( "FINISH Forward")
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( (not rospy.is_shutdown() ) and diff_time < ( BUOY_TIME_TO_BACK_ + 8 ) ):
             self.rate.sleep()
+            self.control.force_xy( BUOY_FORCE_FORWARD_ , 0 )
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            self.control.publish_data( "FINISH forward current , limit " 
+                + repr( ( diff_time , BUOY_TIME_TO_BACK_ + 8 ) ) )
 
+        self.control.force_xy( 0 , 0 )
         self.control.publish_data( "Finish task buoy?")
 
 if __name__=="__main__" :
