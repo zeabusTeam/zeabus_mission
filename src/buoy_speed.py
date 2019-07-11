@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# FILE			: buoy_straight.py
+# FILE			: buoy_speed.py
 # AUTHOR		: K.Supasan
 # CREATE ON		: 2019, July 05 (UTC+0)
 # MAINTAINER	: K.Supasan
@@ -13,6 +13,7 @@ import math
 from zeabus.math import general as zeabus_math
 from zeabus.control.command_interfaces import CommandInterfaces
 from zeabus.vision.analysis_buoy import AnalysisBuoy
+from mission_constant import *
 
 class Buoy:
 
@@ -208,11 +209,12 @@ class Buoy:
         self.dash_mode( distance , limit_time )
 
         self.control.force_xy( 0 , 0 )
-        self.control.activate( ["x" , "y"] )
         self.rate.sleep()
 
         self.control.publish_data( "Finish dash mode move back")
         self.finish_task()
+        
+        self.control.activate( ["x" , "y"] )
 
     def dash_mode( self , distance , limit_time ):
 
@@ -231,24 +233,33 @@ class Buoy:
 
     def finish_task( self ):
         self.rate.sleep()
-        self.control.publish_data( "Finish this task, Move back")
-        self.control.relative_xy( -1 , -1.5 )
+        self.control.publish_data( "FINISH this task, Move back")
         self.control.absolute_z( -1 )
-        rospy.sleep( 1 )
-        self.control.publish_data( "Wake up to continue")
-        while( not self.control.check_xy( 0.15 , 0.15 ) ):
-            self.rate.sleep()
 
-        self.control.publish_data( "Go to depth" )
-        while( not self.control.check_z( 0.15 ) ):
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( (not rospy.is_shutdown() ) and diff_time < _BUOY_TIME_TO_BACK_ ):
             self.rate.sleep()
+            self.control.force_xy( -1.0*_BUOY_FORCE_FORWARD_ , 0 )
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
-        self.control.publish_data( "Move forward 2.5 meter" )
-        rospy.sleep(0.2)
-        self.control.relative_xy( 2.5 , 0 )
-        while( not self.control.check_xy( 0.15 , 0.15 ) ):
+        self.control.publish_data( "FINISH Survey right")
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( (not rospy.is_shutdown() ) and diff_time < _BUOY_TIME_TO_SURVEY_ ):
             self.rate.sleep()
+            self.control.force_xy( 0 , -1.0*_BUOY_FORCE_SURVEY_ )
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            
+        self.control.publish_data( "FINISH Forward")
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( (not rospy.is_shutdown() ) and diff_time < ( _BUOY_TIME_TO_BACK_ + 3 ) ):
+            self.rate.sleep()
+            self.control.force_xy( _BUOY_FORCE_FORWARD_ , 0 )
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
+        self.control.force_xy( 0 , 0 )
         self.control.publish_data( "Finish task buoy?")
 
 if __name__=="__main__" :
