@@ -238,6 +238,8 @@ class Buoy:
         self.control.publish_data( "FINISH Waiting depth")
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
+            self.control.force_xy( -1.0*_BUOY_FORCE_FORWARD_ , 0 )
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
         self.control.publish_data( "FINISH Forward")
         start_time = rospy.get_rostime()
