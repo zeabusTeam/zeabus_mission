@@ -36,6 +36,12 @@ BUOY_FORCE_SURVEY_ = 2
 BUOY_FORCE_FORWARD_ = 1.8
 BUOY_FOUND_PICTURE_ = 1
 
+# Constant for operator drop
+DROP_HAVE_TO_ROTATION = False
+DROP_RADIAN_TO_ROTATION = math.pi 
+DROP_START_DEPTH = -1.5
+DROP_DEPTH_ACTION = -3 # depth when you want to drop or open
+
 # Constant for connect mission
 STRATEGY_TIME_GATE_PATH_ = 25
 STRATEGY_FORCE_GATE_PATH_ = 2
