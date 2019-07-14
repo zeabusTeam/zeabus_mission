@@ -39,11 +39,11 @@ BUOY_FOUND_PICTURE_ = 1
 # Constant for operator drop
 DROP_HAVE_TO_ROTATION = False
 DROP_RADIAN_TO_ROTATION = math.pi 
-DROP_START_DEPTH = -2.0
-DROP_DEPTH_ACTION = -3 # depth when you want to drop or open
+DROP_START_DEPTH = -1.0 # operator to run this file
+DROP_TARGET_DEPTH = -2.0 # For doing individual mission drop or open
+DROP_DEPTH_ACTION = -3.0 # depth when you want to drop or open
 DROP_WANT_OPEN = False
-DROP_TARGET_DEPTH = -3.0
-DROP_FORCE_BACKWARD = -1.2
+DROP_FORCE_BACKWARD = -1.5
 
 # Constant for connect mission
 STRATEGY_TIME_GATE_PATH_ = 25
