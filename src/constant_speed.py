@@ -47,6 +47,8 @@ DROP_WANT_OPEN_ = False
 DROP_FORCE_OPEN_ = -1.5
 DROP_TIME_OPEN_ = 5
 DROP_FORCE_BACKWARD_ = -1.5
+DROP_OFFSET_DROP_ = -40
+DROP_ONLY_ = 70 # target of center y when you want to drop
 
 # Constant for connect mission
 STRATEGY_TIME_GATE_PATH_ = 25
