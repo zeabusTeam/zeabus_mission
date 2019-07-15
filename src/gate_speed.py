@@ -106,13 +106,13 @@ class Gate:
             else:
                 count = 0
 
-            if( self.control.force_xy( 0 , 1.7 * GATE_START_SURVEY_DIRECTION_ ) 
+            if( self.control.force_xy( 0 , 2 * GATE_START_SURVEY_DIRECTION_ ) 
                     > GATE_START_SURVEY_DISTANCE_ ):
                 self.control.publish_data( "START Abort forward by distance")
                 break
 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()  
-            self.control.publish_data( "START forward time : limit " 
+            self.control.publish_data( "START survey time : limit " 
                 + repr( ( diff_time , GATE_START_SURVEY_TIME_ )  ) )
 
         if( count == 3 ):
@@ -218,11 +218,25 @@ class Gate:
             limit_time = ( self.last_distance_to_found - 2.5 ) * 5
             start_time = rospy.get_rostime()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            run_lock_target_again = False
+            count_found = 0
             while( ( not rospy.is_shutdown() ) and diff_time < limit_time ):
                 self.rate.sleep()
                 self.control.force_xy( 2 , 0 )
                 self.control.publish_data( "LOCK_TARGET last forward time : "+repr(diff_time) )
                 diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+                self.vision.call_data()
+                self.vision.echo_data()
+                if( self.vision.result['found'] ):
+                    count_found += 1
+                    self.control.publish_data("LOCK_TARGET run again? " + str( count_found ) )
+                    if( count_found == 3 ):
+                        run_lock_target_again = True
+                else:
+                    count_found = 0
+            if( run_lock_target_again and GATE_APPROVE_AGAIN_ ):
+                self.control.publish_data( "LOCK_TARGET run again" )
+                self.lock_target()
 
         self.control.activate( ['x' , 'y'])
 

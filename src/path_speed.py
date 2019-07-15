@@ -65,6 +65,7 @@ class Path:
             if( count == 2 ):
                 self.control.publish_data("!!!!!!!!! STRATEGY FIND PATH !!!!!!!!!!!!!" )
                 target_depth = -1.0
+                real_found = True
                 while( not rospy.is_shutdown() ):
                     self.rate.sleep()
                     self.vision.call_data()
@@ -104,29 +105,33 @@ class Path:
                                 self.control.publish_data( "I command depth to " 
                                     + str( target_depth ) )
                                 self.control.absolute_z( target_depth )
+                    elif( self.vision.num_point == 0 ):
+                        real_found = False
+                        break
                     else:
                         self.control.publish_data( "FIND command " 
                             + repr(( relative_x , relative_y ) ) )
                         self.control.force_xy( relative_x , relative_y )
 
                 self.control.force_xy( 0 , 0 )
-                break
+                if( real_found ):
+                    break
 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             if( mode == 1 ):
-                self.control.force_xy( 0.1 , 1.2 )
+                self.control.force_xy( 0.1 , -1.2 )
                 if( diff_time > PATH_FIND_TIME_ ):
                     self.control.publish_data( "FIND mode 1 time out")
                     mode = 2
                     start_time = rospy.get_rostime()
             elif( mode == 2 ):
-                self.control.force_xy( 0.1 , -1.2 )
-                if( diff_time > (PATH_FIND_TIME_ * 2.0) + 2 ):
+                self.control.force_xy( 0.1 , 1.3 )
+                if( diff_time > (PATH_FIND_TIME_ * 2.0) + 3 ):
                     self.control.publish_data( "FIND mode 2 time out")
                     mode = 3
                     start_time = rospy.get_rostime() 
             elif( mode == 3 ):
-                self.control.force_xy( 0.1 , 1.2 )
+                self.control.force_xy( 0.1 , -1.2 )
                 if( diff_time > ( PATH_FIND_TIME_ + 2 ) ):
                     self.control.publish_data( "FIND mode 3 time out")
                     mode = 4 
@@ -227,13 +232,13 @@ class Path:
             force_x = 0
             force_y = 0
             target_point = 0
-            if( self.vision.x_point[ 0 ] < -20  ):
+            if( self.vision.x_point[ 0 ] < -15  ):
                 force_y = PATH_FORCE_Y_
-            elif( self.vision.x_point[ 0 ] > 20 ):
+            elif( self.vision.x_point[ 0 ] > 15 ):
                 force_y = -1.0*PATH_FORCE_Y_
-            elif( self.vision.y_point[ 0 ] < -20 ):
+            elif( self.vision.y_point[ 0 ] < -15 ):
                 force_x = -1.0*PATH_FORCE_X_
-            elif( self.vision.y_point[ 0 ] > 20 ):
+            elif( self.vision.y_point[ 0 ] > 15 ):
                 force_x = PATH_FORCE_X_
             elif( not self.control.check_yaw( 0.12 ) ):
                 self.control.publish_data( "MOVING_ON_PATH SECTION 1 now center Waiting yaw")
@@ -261,13 +266,13 @@ class Path:
             force_x = 0
             force_y = 0
             target_point = 0
-            if( self.vision.x_point[ 1 ] < -40  ):
+            if( self.vision.x_point[ 1 ] < -10  ):
                 force_y = PATH_FORCE_Y_
-            elif( self.vision.x_point[ 1 ] > -20 ):
+            elif( self.vision.x_point[ 1 ] > 10 ):
                 force_y = -1.0*PATH_FORCE_Y_
-            elif( self.vision.y_point[ 1 ] < -15 ):
+            elif( self.vision.y_point[ 1 ] < -10 ):
                 force_x = -1.0*PATH_FORCE_X_
-            elif( self.vision.y_point[ 1 ] > 15 ):
+            elif( self.vision.y_point[ 1 ] > 10 ):
                 force_x = PATH_FORCE_X_
             else:
                 self.control.publish_data( "MOVING_ON_PATH SECTION 2 now center of point 2")
@@ -312,6 +317,7 @@ class Path:
             diff_time = ( rospy.get_rostime() - start_time).to_sec()
 
         self.control.activate( ['x' , 'y' ] )
+        self.control.relative_xy( 0 , 0 )
         self.control.publish_data( "MOVING_ON_PATH finish yaw")
 
 if __name__=="__main__" :

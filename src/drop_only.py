@@ -33,6 +33,7 @@ class Drop:
         self.control.activate( ['x' , 'y' , 'z' , 'roll' , 'pitch' , 'yaw'] )
 
         self.control.reset_state( 0 , 0 )
+        self.control.sleep()
 
         target_depth = STRATEGY_DEPTH_FIND_DROP_
 
@@ -89,7 +90,7 @@ class Drop:
                     + repr( (force_x , force_y ) ) )
             else:
                 found_picture = False
-                self.control.force_xy( 1.5 , 0 )
+                self.control.force_xy( 0 , 0 )
 
         self.control.force_false()
 
@@ -154,10 +155,10 @@ class Drop:
                                 self.rate.sleep()
                                 self.vision.call_data( DROP_FIND_TARGET )
                                 self.vision.echo_data()
-                                if( self.vision.result['rotation'] > 0.1 ):
+                                if( self.vision.result['rotation'] > 0.12 ):
                                     self.control.publish_data( "OPERATOR rotation left")
                                     self.control.force_xy_yaw( 0 , 0 , 0.2 )
-                                elif( self.vision.result['rotation'] < -0.1 ):
+                                elif( self.vision.result['rotation'] < -0.12 ):
                                     self.control.publish_data( "OPERATOR rotation right")
                                     self.control.force_xy_yaw( 0 , 0 , -0.2 )
                                 else:
@@ -172,7 +173,11 @@ class Drop:
                             break
                         else:
                             self.control.publish_data( "OPERATOR we don't see 4 point")
-                            self.control.relative_z( 0.2 )
+                            if( self.control.check_z( 0.12 ) ):
+                                self.control.publish_data( "Adding depth")
+                                self.control.relative_z( 0.2 )
+                            else:
+                                self.control.publish_data( "Waiting depth" )
                     else:
                         self.control.publish_data( "OPERATOR Waiting z are ok")
                 else:
@@ -181,6 +186,7 @@ class Drop:
                         + repr( ( force_x , force_y ) ) )
             else:
                 count_unfound += 1
+                self.control.force_xy( 0 , 0 )
                 self.control.publish_data( "OPERATOR Don't found picture")
 
         self.control.publish_data( "OPERATOR Choose Process")
@@ -193,23 +199,21 @@ class Drop:
 
         self.control.absolute_z( DROP_START_DEPTH_ )
 
-    def drop( self ):
+    def drop( self , offset_center , start_depth ):
         self.control.publish_data("DROP start mission start at depth " + str( start_depth ) )
         count_unfound = 0
 
         target_depth = start_depth
-
+        self.control.deactivate( [ 'x' , 'y'] )
         while( ( not rospy.is_shutdown() ) and  count_unfound < 5 ):
             self.rate.sleep()
             self.vision.call_data( DROP_FIND_TARGET )
+            max_x = offset_center + 5
+            min_x = offset_center - 5
             if( target_depth > DROP_TARGET_DEPTH_ ):
-                max_x = offset_center + 10
-                min_x = offset_center - 10
                 min_y = -10
                 max_y = 10
             else:
-                max_x = 10
-                min_x = 10
                 min_y = DROP_ONLY_ - 10
                 max_y = DROP_ONLY_ + 10
             self.vision.echo_data()
@@ -236,8 +240,9 @@ class Drop:
                 if( ok_x and ok_y ):
                     self.control.force_xy( 0 , 0 )
                     if( self.control.check_z( 0.12 ) ):
-                        if( target_depth <= DROP_DEPTH_ACTION_ ):
+                        if( target_depth <= DROP_ONLY_DEPTH_ ):
                             self.control.publish_data( "DROP Now depth is target let to drop")
+                            count_unfound = 5
                             break
                         else:
                             self.control.publish_data( 
@@ -258,4 +263,12 @@ class Drop:
                 self.control.publish_data( "DROP center mission unfound " + str( count_unfound ))
                 self.control.force_xy( 0 , 0 )
                 count_unfound += 1
-        
+        if( count_unfound == 5 ):
+            self.control.publish_data( "DROPING !!!!!!!!!!!!!!!!!!!!!!!!!!! Finish")
+            self.control.sleep()
+
+
+if __name__=="__main__":
+    rospy.init_node( "mission_drop" )
+    mission = Drop( )
+    mission.start_mission()

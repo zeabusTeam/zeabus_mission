@@ -224,16 +224,16 @@ class Buoy:
             self.control.publish_data( "FINISH back current , limit " 
                 + repr( ( diff_time , BUOY_TIME_TO_BACK_ ) ) )
 
-#        self.control.publish_data( "FINISH Survey right")
-#        start_time = rospy.get_rostime()
-#        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-#        while( (not rospy.is_shutdown() ) and diff_time < BUOY_TIME_TO_SURVEY_ ):
-#            self.rate.sleep()
-#            self.control.force_xy( 0 , -1.0*BUOY_FORCE_SURVEY_ )
-#            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-#            self.control.publish_data( "FINISH survey current , limit " 
-#                + repr( ( diff_time , BUOY_TIME_TO_SURVEY_ ) ) )
-#           
+        self.control.publish_data( "FINISH Survey right")
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( (not rospy.is_shutdown() ) and diff_time < BUOY_TIME_TO_SURVEY_ ):
+            self.rate.sleep()
+            self.control.force_xy( 0 , -1.0*BUOY_FORCE_SURVEY_ )
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            self.control.publish_data( "FINISH survey current , limit " 
+                + repr( ( diff_time , BUOY_TIME_TO_SURVEY_ ) ) )
+           
         self.control.force_false() 
         self.control.publish_data( "FINISH Waiting depth")
         while( not self.control.check_z( 0.15 ) ):
@@ -249,7 +249,7 @@ class Buoy:
             self.control.force_xy( BUOY_FORCE_FORWARD_ , 0 )
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             self.control.publish_data( "FINISH forward current , limit " 
-                + repr( ( diff_time , BUOY_TIME_TO_BACK_ + 8 ) ) )
+                + repr( ( diff_time , BUOY_TIME_TO_BACK_ + 5 ) ) )
 
         self.control.force_xy( 0 , 0 )
         self.control.publish_data( "Finish task buoy?")
