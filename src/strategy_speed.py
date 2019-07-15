@@ -30,6 +30,10 @@ from zeabus.vision.analysis_path import AnalysisPath
 from buoy_speed import Buoy
 from zeabus.vision.analysis_buoy import AnalysisBuoy
 
+# For doung drop mission
+from drop_speed import Drop
+from zeabus.vision.analysis_drop import AnalysisDrop
+
 # Standard for connect with control
 from zeabus.control.command_interfaces import CommandInterfaces
 
@@ -60,6 +64,10 @@ class StrategySpeed:
         # Step setup mission Buoy
         self.mission_buoy = Buoy()
         self.vision_buoy = AnalysisBuoy()
+
+        # Step setup mission Drop
+        self.mission_drop = Drop()
+        self.vision_drop = AnalysisDrop()
 
         self.current_play = False
 
@@ -296,7 +304,7 @@ class StrategySpeed:
             self.control.publish_data( "STRATEGY forward time is " + str( diff_time ) )
             self.control.force_xy( STRATEGY_FORCE_BUOY_PATH_ , 0 )
 
-        # End part to search
+        # End part to search part
 
         self.control.activate( ['x' , 'y'] )
         
@@ -311,9 +319,99 @@ class StrategySpeed:
                 self.control.publish_data( "It bad you failure mission path rotation to drop" )
                 self.control.relative_yaw( STRATEGY_ROTATION_BUOY_DROP_ )
 
-        self.control.publish_data( "I will waiting yaw before do next process")
-        while( not self.control.check_yaw( 0.15 ) ):
+        # Start part for search drop garliac mission
+        self.controol.publish_data( "Waiting yaw")
+        while( not self.control.check_yaw( 0.12 ) ):
             self.rate.sleep()
+
+        self.control.absolute_z( STRATEGY_DEPTH_FIND_DROP_ )
+        self.control.sleep()
+        self.control.publish_data( "Waiting depth at error ok 0.5 meters" )
+        while( not self.control.check_z( 0.5 ) ):
+            self.rate.sleep()
+
+        self.control.deactivate( ['x' , 'y'] )
+        self.control.force_xy( STRATEGY_FORCE_DROP_ , 0 )
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        self.control.publish_data( "START FORWARD TO FIND DROP MISSION" )
+        count_found = 0
+        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_DROP_ ):
+            self.rate.sleep()
+            self.vision_drop.call_data( DROP_FIND_TARGET )
+            self.vision.echo_data()
+            if( self.vision.result['found'] ):
+                count_found += 1
+                if( count_found == 3 ):
+                    self.control.publish_data( "STRATEGY Focuse on target")
+                    target_depth = STRATEGY_DEPTH_FIND_DROP_
+                    self.control.force_xy( 0 , 0 )                
+                    while( ( not rospy.is_shutdown() ) and count_found > 0 ):
+                        self.rate.sleep()
+                        self.vision_drop.call_data( DROP_FIND_TARGET )
+                        self.vision_drop.echo_data()
+                        if( self.vision.result['found'] ):
+                            count_found = 3
+                        else:
+                            count_found -= 1
+                            self.control.publish_data( "Don't found picture " 
+                                + str( count_found ) )
+                            continue
+                        force_x = 0 
+                        force_y = 9
+                        if( ( abs( self.vision_drop.result['center_x'] ) < 15 ) or
+                                ( abs( self.vision_drop.result['center_y'] ) ) ):
+
+                            if( self.vision_drop.result['center_y'] <  -15 ):
+                                force_x = -1
+                            elif( self.vision_drop.result['center_y'] > 15 ):
+                                force_x = 1
+                            else:
+                                pass
+
+                            if( self.vision_drop.result['center_x'] > 15 ):
+                                force_y = -1.3
+                            elif( self.vision_drop.result['center_x'] < -15 ):
+                                force_y = 1.3
+                            else:
+                                pass
+
+                            self.control.publish_data( "Command force {:6.3f} , {:6.3f}" .format(
+                                force_x , force_y ) ) 
+                            self.control.force_xy( force_x , force_y )
+                        else:
+                            if( self.control.check_z( 0.12 ) ):
+                                if( target_depth > DROP_START_DEPTH_ ):
+                                    self.control.publish_data( "Command to depth at " 
+                                        + str( DROP_START_DEPTH_ ) )
+                                    self.control.absolute_z( DROP_START_DEPTH_ )
+                                else:
+                                    sel.control.publish_data( "Depth is ok")
+                                    break
+                            else:
+                                self.control.force_xy( 0 , 0 )
+                                self.control.publish_data( "Now center waiting detph")
+                             
+                    break
+            else:
+                count_found = 0
+            distance = self.control.force_xy( STRATEGY_FORCE_DROP_ , 0 ) 
+            self.control.publish_data( 
+                "time ( {:6.3f} , {:6.3f} ) and distance ( {:6.3f} , {:6.3f} ) found ".format(
+                    diff_time , STRATEGY_TIME_DROP_ , distance , STRATEGY_DISTANCE_DROP_ ) 
+                + str( count_found ) )
+            if( distance > STRATEGY_DISTANCE_DROP_ ):
+                self.control.publish_data( "Abort to find drop by distance")
+                break
+
+        self.control.activate( ['x' , 'y' ] )
+        self.control.relative_xy( 0 , 0 )
+
+        if( count_found == 3 ):
+            self.control.publish_data( "Found picture next play drop by operator function")
+            self.mission_drop.operator()
+        else:
+            self.control.publish_data( "Don't found drop")
 
     # End part of play all mission
 
