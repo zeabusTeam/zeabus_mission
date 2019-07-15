@@ -396,6 +396,7 @@ class StrategySpeed:
             else:
                 count_found = 0
             distance = self.control.force_xy( STRATEGY_FORCE_DROP_ , 0 ) 
+            diff_time = (rospy.get_rostime() - start_time).to_sec()
             self.control.publish_data( 
                 "time ( {:6.3f} , {:6.3f} ) and distance ( {:6.3f} , {:6.3f} ) found ".format(
                     diff_time , STRATEGY_TIME_DROP_ , distance , STRATEGY_DISTANCE_DROP_ ) 
