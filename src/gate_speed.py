@@ -275,3 +275,4 @@ if __name__=="__main__" :
 
     mission = Gate()
     mission.start_mission()
+    mission.pass_target()

@@ -34,7 +34,7 @@ class Buoy:
         self.control.reset_state()
 
         self.control.publish_data( "START Waiting z depth")
-        self.control.absolute_z( -1.5 )
+        self.control.absolute_z( -2.1 )
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
 
