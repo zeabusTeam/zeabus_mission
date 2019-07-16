@@ -65,7 +65,7 @@ else:
     STAKE_OVAL_CENTER_X = -50
 STAKE_OVAL_AREA = 6
 STAKE_HEART_AREA = 25
-STAKE_TARGET_POINT = ( -30 , 20 ) 
+STAKE_TARGET_POINT = ( -50.1 , 11.2 ) 
 
 # Constant for connect mission
 # ====> Mission Gate
