@@ -117,7 +117,11 @@ class Drop:
     
         # This function don't already to use
         if( DROP_HAVE_TO_ROTATION_ ):
-            pass
+            self.control.relative_yaw( math.pi )
+            self.control.sleep()
+            self.control.publish_data( "OPERATOR relative yaw " + str( math.pi ) + " radian")
+            while( not self.control.check_yaw( 0.12 ) ):
+                self.rate.sleep()
         finish = False
 
         count_unfound = 0
@@ -196,6 +200,7 @@ class Drop:
         else:
             self.control.publish_data( "OPERATOR chosee drop" )
             self.drop( DROP_OFFSET_DROP_ , DROP_START_DEPTH_ )
+            self.open( DROP_OFFSET_DROP_ * -1.0 )
 
         self.control.absolute_z( DROP_START_DEPTH_ )
 
@@ -267,6 +272,88 @@ class Drop:
             self.control.publish_data( "DROPING !!!!!!!!!!!!!!!!!!!!!!!!!!! Finish")
             self.control.sleep()
 
+        self.control.absolute_z( DROP_START_DEPTH_ )
+
+    def open( self , offset_center ):
+        self.control.publish_data("OPEN start mission start at depth " + str( DROP_TARGET_DEPTH_ ) )
+        count_unfound = 0
+
+        target_depth = start_depth
+        self.control.deactivate( [ 'x' , 'y'] )
+        while( ( not rospy.is_shutdown() ) and  count_unfound < 5 ):
+            self.rate.sleep()
+            self.vision.call_data( DROP_FIND_TARGET )
+            max_x = offset_center + 5
+            min_x = offset_center - 5
+            if( target_depth > DROP_TARGET_DEPTH_ ):
+                min_y = -10
+                max_y = 10
+            else:
+                min_y = DROP_ONLY_ - 10
+                max_y = DROP_ONLY_ + 10
+            self.vision.echo_data()
+            if( self.vision.result['found'] ):
+                count_unfound = 0 
+                force_x = 0
+                force_y = 0
+                ok_x = False
+                ok_y = False
+
+                if( self.vision.result['center_y'] > max_y ):
+                    force_x = 0.8
+                elif( self.vision.result['center_y'] < min_y ):
+                    force_x = -0.8
+                else:
+                    ok_x = True
+                if( self.vision.result[ 'center_x' ] > ( max_x ) ):
+                    force_y = -1.2
+                elif( self.vision.result[ 'center_x'] < ( min_x ) ):
+                    force_y = 1.2
+                else:
+                    ok_y = True
+
+                if( ok_x and ok_y ):
+                    self.control.force_xy( 0 , 0 )
+                    if( self.control.check_z( 0.15 ) ):
+                        if( target_depth <= DROP_ACTION_DEPTH_ ):
+                            self.control.publish_data( "OPEN Now depth is target let to open")
+                            count_unfound = 5
+                            break
+                        else:
+                            self.control.publish_data( 
+                                "OPEN new depth ( command, first_target , second_target ) : " 
+                                + repr( ( target_depth 
+                                    , DROP_TARGET_DEPTH_ , DROP_ACTION_DEPTH_ ) ) )
+                            target_depth -= 0.4  
+                            self.control.absolute_z( target_depth )
+                            self.control.sleep()
+                    else:
+                        self.control.publish_data( "OPEN now center x y waiting depth" )
+                else:
+                    self.control.publish_data( "OEPN command force " 
+                        + repr( ( force_x , force_y ) ) + " and target y in range " 
+                        + repr( ( min_y , max_y ) ) )
+                    self.control.force_xy( force_x , force_y ) 
+            else:
+                self.control.publish_data( "OPEN center mission unfound " + str( count_unfound ))
+                self.control.force_xy( 0 , 0 )
+                count_unfound += 1
+
+        if( count_unfound == 5 ):
+            self.control.publish_data( "OPEN now picture is unfound ? try to open" )
+            self.control.absolute_z( DROP_ACTION_DEPTH_ )
+            self.control.force_xy( 0 , 0 )
+            self.control.sleep()
+            self.control.publish_data( "OPEN Waiting z")
+            while( not self.control.check_z( 0.15 ) ):
+                self.rate.sleep()
+            start_time = rospy.get_rostime()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            while( ( not rospy.is_shutdown() ) and diff_time < DROP_TIME_OPEN_ ):
+                self.rate.sleep()
+                self.control.force_xy( 0 , -1 )
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+                self.control.publish_data( "OPEN move right time is " + str( diff_time ))
 
 if __name__=="__main__":
     rospy.init_node( "mission_drop" )
