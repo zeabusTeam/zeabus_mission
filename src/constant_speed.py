@@ -53,8 +53,9 @@ DROP_OFFSET_DROP_ = -20
 DROP_ONLY_ = 55 # target of center y when you want to drop
 
 # Constant for operator stake
-STAKE_Z_FORCE_0 = -2
+#
 STAKE_Z_DOWN = -2.3
+STAKE_Z_FORCE_0 = -2
 STAKE_Z_UP = -1.8
 STAKE_AREA_ROTATION = 20
 STAKE_AREA_ROTATION_OVER = 40
@@ -64,8 +65,10 @@ if( STAKE_OVAL_DIRECTION == 'right' ):
 else:
     STAKE_OVAL_CENTER_X = -50
 STAKE_OVAL_AREA = 6
-STAKE_HEART_AREA = 25
+STAKE_HEART_AREA = 3
 STAKE_TARGET_POINT = ( -50.1 , 11.2 ) 
+STAKE_BACKWARD_TIME = 4
+STAKE_HEART_CENTER_Y = -10
 
 # Constant for connect mission
 # ====> Mission Gate
