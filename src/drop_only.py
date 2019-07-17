@@ -125,7 +125,7 @@ class Drop:
         finish = False
 
         count_unfound = 0
-        while( ( not rospy.is_shutdown() ) and count_unfound < 3 ): 
+        while( ( not rospy.is_shutdown() ) and count_unfound < 5 ): 
             self.rate.sleep()
             self.vision.call_data( DROP_FIND_TARGET )
             self.vision.echo_data()
@@ -136,16 +136,16 @@ class Drop:
                 ok_x = False
                 ok_y = False
                 if( self.vision.result['center_x'] > 10 ):
-                    force_y =  -1.3
+                    force_y =  -0.8
                 elif( self.vision.result['center_x'] < -10 ):
-                    force_y = 1.3
+                    force_y = 0.8
                 else:
                     ok_y = True
     
                 if( self.vision.result['center_y'] > 10 ):
-                    force_x = 1.0
+                    force_x = 0.5
                 elif( self.vision.result['center_y'] < -10 ):
-                    force_x = -1.0
+                    force_x = -0.5
                 else:
                     ok_x = True
     
@@ -195,7 +195,7 @@ class Drop:
 
         self.control.publish_data( "OPERATOR Choose Process")
         self.control.deactivate( ['x' , 'y' ] )
-        if( count_unfound == 3 ):
+        if( count_unfound == 5 ):
             self.control.publish_data( "OPERATOR stop process because don't found picture" )
         else:
             self.control.publish_data( "OPERATOR chosee drop" )
@@ -213,8 +213,8 @@ class Drop:
         while( ( not rospy.is_shutdown() ) and  count_unfound < 5 ):
             self.rate.sleep()
             self.vision.call_data( DROP_FIND_TARGET )
-            max_x = offset_center + 5
-            min_x = offset_center - 5
+            max_x = offset_center + 10
+            min_x = offset_center - 10
             if( target_depth > DROP_TARGET_DEPTH_ ):
                 min_y = -10
                 max_y = 10
@@ -230,15 +230,15 @@ class Drop:
                 ok_y = False
 
                 if( self.vision.result['center_y'] > max_y ):
-                    force_x = 0.8
+                    force_x = 0.4
                 elif( self.vision.result['center_y'] < min_y ):
-                    force_x = -0.8
+                    force_x = -0.4
                 else:
                     ok_x = True
                 if( self.vision.result[ 'center_x' ] > ( max_x ) ):
-                    force_y = -1.2
+                    force_y = -0.8
                 elif( self.vision.result[ 'center_x'] < ( min_x ) ):
-                    force_y = 1.2
+                    force_y = 0.8
                 else:
                     ok_y = True
 
@@ -275,16 +275,22 @@ class Drop:
         self.control.absolute_z( DROP_START_DEPTH_ )
 
     def open( self , offset_center ):
-        self.control.publish_data("OPEN start mission start at depth " + str( DROP_TARGET_DEPTH_ ) )
+        self.control.publish_data("OPEN start mission start at depth "
+            + str( DROP_TARGET_DEPTH_ ) )
         count_unfound = 0
 
-        target_depth = start_depth
+        target_depth = DROP_START_DEPTH_
+        self.control.absolute_z( target_depth )
+        self.control.publish_data( "OPEN waiting depth for doing again")
+        self.control.sleep()
+        while( not self.control.check_z( 0.12 ) ):
+            self.rate.sleep()
         self.control.deactivate( [ 'x' , 'y'] )
         while( ( not rospy.is_shutdown() ) and  count_unfound < 5 ):
             self.rate.sleep()
             self.vision.call_data( DROP_FIND_TARGET )
-            max_x = offset_center + 5
-            min_x = offset_center - 5
+            max_x = offset_center + 10
+            min_x = offset_center - 10
             if( target_depth > DROP_TARGET_DEPTH_ ):
                 min_y = -10
                 max_y = 10
@@ -300,15 +306,15 @@ class Drop:
                 ok_y = False
 
                 if( self.vision.result['center_y'] > max_y ):
-                    force_x = 0.8
+                    force_x = 0.4
                 elif( self.vision.result['center_y'] < min_y ):
-                    force_x = -0.8
+                    force_x = -0.4
                 else:
                     ok_x = True
                 if( self.vision.result[ 'center_x' ] > ( max_x ) ):
-                    force_y = -1.2
+                    force_y = -0.8
                 elif( self.vision.result[ 'center_x'] < ( min_x ) ):
-                    force_y = 1.2
+                    force_y = 0.8
                 else:
                     ok_y = True
 

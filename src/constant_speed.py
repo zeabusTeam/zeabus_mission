@@ -40,9 +40,9 @@ BUOY_FOUND_PICTURE_ = 1
 # Constant for operator drop
 DROP_HAVE_TO_ROTATION_ = False
 DROP_RADIAN_TO_ROTATION_ = math.pi 
-DROP_START_DEPTH_ = -1.5 # operator to run this file
-DROP_TARGET_DEPTH_ = -2.0 # For doing individual mission drop or open
-DROP_ACTION_DEPTH_ = -3.2 # depth when you want to drop or open
+DROP_START_DEPTH_ = -1.0 # operator to run this file
+DROP_TARGET_DEPTH_ = -1.5 # For doing individual mission drop or open
+DROP_ACTION_DEPTH_ = -2.8 # depth when you want to drop or open
 DROP_ONLY_DEPTH_ = -2.5 # Depth use to guess drop
 DROP_STEP_DEPTH_ = -0.3
 DROP_WANT_OPEN_ = False
@@ -50,15 +50,15 @@ DROP_FORCE_OPEN_ = -1.5
 DROP_TIME_OPEN_ = 8
 DROP_FORCE_BACKWARD_ = -1.5
 DROP_OFFSET_DROP_ = -20
-DROP_ONLY_ = 55 # target of center y when you want to drop
+DROP_ONLY_ = 55 # target of center y when you want to drop and can use for estimate open
 
 # Constant for operator stake
 #
 STAKE_Z_DOWN = -2.3
 STAKE_Z_FORCE_0 = -2
-STAKE_Z_UP = -1.8
-STAKE_AREA_ROTATION = 20
-STAKE_AREA_ROTATION_OVER = 40
+STAKE_Z_UP = -1.7
+STAKE_AREA_ROTATION = 15
+STAKE_AREA_ROTATION_OVER = 30
 STAKE_OVAL_DIRECTION = 'right'
 if( STAKE_OVAL_DIRECTION == 'right' ):
     STAKE_OVAL_CENTER_X = 50
@@ -72,19 +72,21 @@ STAKE_HEART_CENTER_Y = -10
 
 # Constant for connect mission
 # ====> Mission Gate
-STRATEGY_TIME_GATE_PATH_ = 25
+STRATEGY_TIME_GATE_PATH_ = 20
 STRATEGY_FORCE_GATE_PATH_ = 2
+STRATEGY_TIME_SURVEY_PATH_ = 2
+STRATEGY_FORCE_SURVEY_PATH_ = 1.2
 STRATEGY_ROTATION_GATE_BUOY_ = math.pi / 4
 # ====> Mission Buoy
-STRATEGY_DEPTH_BOUY_ = -2
-STRATEGY_TIME_BUOY_ = 5
-STRATEGY_FORCE_BUOY_ = 1.5  
-STRATEGY_FORCE_BUOY_PATH_ = 1.2
-STRATEGY_TIME_BUOY_PATH_ = 3
+STRATEGY_DEPTH_BOUY_ = -1.7 # This depth will use in buoy mission
+STRATEGY_TIME_BUOY_ = 10 # This is time to forward search direct after path
+STRATEGY_FORCE_BUOY_ = 1.5  # This is force use to forward search direct after path
+STRATEGY_TIME_BUOY_PATH_ = 5
+STRATEGY_FORCE_BUOY_PATH_ = 1.2 # This is force use to go direct after buoy to path
 # ====> Mission DROP
 STRATEGY_ROTATION_BUOY_DROP_ = -1.0*math.pi / 4
 STRATEGY_DEPTH_FIND_DROP_ = -1
-STRATEGY_FREE_TIME_DROP_ = 5
+STRATEGY_FREE_TIME_DROP_ = 6
 STRATEGY_FORCE_DROP_ = 1.5
 STRATEGY_TIME_DROP_ = 20
 STRATEGY_DISTANCE_DROP_ = 6

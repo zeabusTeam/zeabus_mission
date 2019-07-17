@@ -103,7 +103,18 @@ class StrategySpeed:
         diff_time = ( rospy.get_rostime() - start_time ).to_sec() 
 
         self.control.deactivate( ['x' , 'y' ] )
+
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_SURVEY_PATH_ ):
+            self.rate.sleep()
+            self.control.force_xy( 0 , STRATEGY_FORCE_SURVEY_PATH_)
+            self.control.publish_data( "STRATEGY survey before path " + str(diff_time)  ) 
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        
         count = 0
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
         while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_GATE_PATH_ ):
             self.rate.sleep()
             self.vision_path.call_data()
@@ -362,20 +373,22 @@ class StrategySpeed:
         while( (not rospy.is_shutdown() ) and diff_time < STRATEGY_FREE_TIME_DROP_ ):
             self.rate.sleep()
             self.control.force_xy( STRATEGY_FORCE_DROP_ , 0 )
+            self.control.publish_data( "STRATEGY Move free time is " 
+                + repr( ( diff_time , STRATEGY_FREE_TIME_DROP_ ) ) )
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
         self.control.publish_data( "START FORWARD TO FIND DROP MISSION" )
         count_found = 0
-        self.control.force_xy( STRATEGY_FORCE_DROP_ , 0 , True ) 
+        self.control.force_xy( STRATEGY_FORCE_DROP_ , 0 , True )
         while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_DROP_ ):
             self.rate.sleep()
             self.vision_drop.call_data( DROP_FIND_TARGET )
             self.vision_drop.echo_data()
             if( self.vision_drop.result['found'] ):
                 count_found += 1
-                if( count_found == 3 ):
+                if( count_found == 5 ):
                     self.control.publish_data( "STRATEGY Focuse on target")
                     target_depth = STRATEGY_DEPTH_FIND_DROP_
                     self.control.force_xy( 0 , 0 )                
@@ -384,7 +397,7 @@ class StrategySpeed:
                         self.vision_drop.call_data( DROP_FIND_TARGET )
                         self.vision_drop.echo_data()
                         if( self.vision_drop.result['found'] ):
-                            count_found = 3
+                            count_found = 5
                         else:
                             count_found -= 1
                             self.control.publish_data( "Don't found picture " 
@@ -442,7 +455,7 @@ class StrategySpeed:
         self.control.activate( ['x' , 'y' ] )
         self.control.relative_xy( 0 , 0 )
 
-        if( count_found == 3 ):
+        if( count_found > 0 ):
             self.control.publish_data( "Found picture next play drop by operator function")
             self.mission_drop.operator()
         else:

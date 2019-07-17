@@ -56,24 +56,19 @@ class Stake:
                 force_y = 0
                 relative_z = 0
                 ok_x = False
-                ok_y = False
+                ok_y = True
                 ok_z = False
                 found_pitcure = True
                 if( self.vision.result['center'][0] > 10 ):
-                    force_y = -1.5
+                    force_y = -1.0
                 elif( self.vision.result['center'][0] < -10 ):
-                    force_y = 1.5
+                    force_y = 1.0
                 else:
                     ok_x = True
 
-                if( self.vision.result['center'][1] > 15 ):
-                    relative_z = 0.2
-                elif( self.vision.result['center'][1] < -15 ):
-                    relative_z = -0.2
-                else:
-                    ok_y = True
-
-                if( self.vision.result['area'] < STRATEGY_STAKE_AREA_FOCUS ):
+                if( not ok_x ):
+                    pass
+                elif( self.vision.result['area'] < STRATEGY_STAKE_AREA_FOCUS ):
                     force_x = 1
                     self.control.publish_data( "STRATEGY area now {:6.3f} < {:6.3f}".format(
                         self.vision.result['area'] , STRATEGY_STAKE_AREA_FOCUS ) )
@@ -121,24 +116,26 @@ class Stake:
                 ok_z = False
                 ok_x = False
                 if( self.vision.result['center'][0] > 20 ):
-                    force_y = -1
+                    force_y = -0.8
                 elif( self.vision.result['center'][0] < -20 ):
-                    force_y = 1
+                    force_y = 0.8
                 else:
                     ok_x = True
-                
-                if( self.vision.result['area'] < STAKE_AREA_ROTATION ):
-                    force_x = 0.8
+
+                if( not ok_x ):
+                    pass
+                elif( self.vision.result['area'] < STAKE_AREA_ROTATION ):
+                    force_x = 0.4
                 elif( self.vision.result['area'] > STAKE_AREA_ROTATION_OVER ):
-                    force_x = -0.8
+                    force_x = -0.4
                 else:
                     ok_z = True
 
-                if( self.vision.result['center'][1] > 20 ):
+                if( self.vision.result['center'][1] > 50 ):
                     force_z = STAKE_Z_UP
-                elif( self.vision.result['center'][1] < -60 ):
+                elif( self.vision.result['center'][1] < -80 ):
                     force_z = STAKE_Z_DOWN - 0.5
-                elif( self.vision.result['center'][1] < -20 ):
+                elif( self.vision.result['center'][1] < -50 ):
                     force_z = STAKE_Z_DOWN
                 else:
                     ok_y = True
@@ -154,11 +151,11 @@ class Stake:
                         self.vision.echo_data()
                         if( self.vision.result['found'] ):
                             count_unfound = 0
-                            if( abs( self.vision.result['center'][0] ) > 50 ):
+                            if( abs( self.vision.result['center'][0] ) > 40 ):
                                 ok_x = False
                             else:
                                 ok_x = True
-                            if( abs( self.vision.result['center'][0] ) > 50 ):
+                            if( abs( self.vision.result['center'][0] ) > 80 ):
                                 ok_y = False
                             else:
                                 ok_y = True
@@ -166,11 +163,11 @@ class Stake:
                                 + repr( (ok_x , ok_y ) ) )
                             if( ok_x and ok_y ):
                                 force_yaw = 0
-                                if( self.vision.result['rotation'] > 0.25 ):
-                                    self.control.force_xyz_yaw( 0 , -1 , STAKE_Z_FORCE_0 , 0.25 )
+                                if( self.vision.result['rotation'] > 0.12 ):
+                                    self.control.force_xyz_yaw( 0 , 0 , STAKE_Z_FORCE_0 , 0.15 )
                                     self.control.publish_data("OPERATOR rotation left")
-                                elif( self.vision.result['rotation'] < -0.25 ):
-                                    self.control.force_xyz_yaw( 0 , 1 , STAKE_Z_FORCE_0 , -0.25 )
+                                elif( self.vision.result['rotation'] < -0.12 ):
+                                    self.control.force_xyz_yaw( 0 , 0 , STAKE_Z_FORCE_0 , -0.15 )
                                     self.control.publish_data("OPERATOR rotation right")
                                 else:
                                     self.control.publish_data("OPERATOR success rotation")
@@ -204,98 +201,7 @@ class Stake:
             self.oval()
 
     def heart( self ):
-        self.control.deactivate( ['x' , 'y' , 'z'] ) 
-
-        self.control.force_xyz(  0 , 0 , STAKE_Z_FORCE_0 )
-        self.control.publish_data( "Heart Mission start is center_y is " 
-            + str( STAKE_HEART_CENTER_Y ) )
-
-        while( not rospy.is_shutdown() ):
-            self.rate.sleep()
-            self.vision.call_data( STAKE_FIND_TARGET )
-            self.vision.echo_data()
-            force_x = 0 
-            force_y = 0
-            force_z = STAKE_Z_FORCE_0
-            ok_x = False
-            ok_y = False
-            ok_z = False
-            if( self.vision.result[ 'center' ][1] > STAKE_HEART_CENTER_Y + 40 ):
-                force_z = STAKE_Z_UP + 0.3
-            elif( self.vision.result[ 'center' ][1] > STAKE_HEART_CENTER_Y + 15 ):
-                force_z = STAKE_Z_UP
-            elif( self.vision.result[ 'center' ][1] < STAKE_HEART_CENTER_Y - 15 ):
-                force_z = STAKE_Z_DOWN
-            elif( self.vision.result[ 'center' ][1] < STAKE_HEART_CENTER_Y - 40 ):
-                force_z = STAKE_Z_DOWN - 0.3
-            else:
-                ok_y = True
-
-            if( self.vision.result[ 'center' ][0] > 20 ):
-                force_y = -1.0
-            elif( self.vision.result[ 'center' ][0] < 0 ):
-                force_y = 1.0
-            else:
-                ok_x = True
-
-            if( self.vision.result['area'] < STAKE_AREA_ROTATION ):
-                force_x = 0.6
-            else:
-                ok_z = True
-
-            if( ok_x and ok_y and ok_z ):
-                self.control.publish_data( "Heart Now x and y is center")
-                self.vision.call_data( STAKE_FIND_HEART )
-                if( self.vision.result[ 'found' ] ):
-                    while( not rospy.is_shutdown() ):
-                        self.rate.sleep()
-                        self.vision.call_data( STAKE_OVAL_DIRECTION )
-                        if( self.vision.result[ 'found' ] ):
-                            ok_x = False
-                            ok_y = False
-                            ok_z = False
-                            force_x = 0
-                            force_y = 0
-                            force_z = STAKE_Z_FORCE_0
-                            if( self.vision.result['center'][0] < (STAKE_TARGET_POINT[0]-10)):
-                                force_y = 0.8
-                            elif( self.vision.result['center'][0] > (STAKE_TARGET_POINT[1]+10)):
-                                force_y = -0.8
-                            else:
-                                ok_y = True
-                
-                            if( self.vision.result['center'][1] > (STAKE_TARGET_POINT[1]-10)):
-                                force_z = STAKE_Z_UP
-                            elif( self.vision.result['center'][1] < (STAKE_TARGET_POINT[1]+10)):
-                                force_z = STAKE_Z_DOWN
-                            else:
-                                ok_z = True
-
-                            if( self.vision.result['area'] < ( STAKE_HEART_AREA ) ):
-                                force_x = 0.5
-                            else:
-                                ok_x = True
-
-                        if( ok_x and ok_y and ok_z ):
-                            self.control.force_xyz( force_x , force_y ,force_z )
-                            self.control.publish_data( "HEART !!!!!!!!!!!!!! Command fireeeeee")
-                            rospy.sleep( 2 )
-                            break
-                        else:
-                            self.control.publish_data( 
-                                "SPECIAL HEART force {:6.3f} {:6.3f} {:6.3f}".format(
-                                    force_x , force_y , force_z ) )
-                    self.control.publish_data( "SPECIAL HEART finish do target")
-                    break
-                else:
-                    self.control.publish_data( "OVAL don't found target found")
-                    self.control.force_xyz( 1.0 , force_y , force_z )
-            else:
-                self.control.publish_data( "Heart force xyz "
-                    +repr( ( force_x + 0.2 , force_y , force_z ) ) )
-                self.control.force_xyz( force_x + 0.2, force_y , force_z )
-
-        self.control.publish_data( "OVAL finish fire next I will backward")
+        pass
 
     def oval( self ):
         self.control.deactivate( ['x' , 'y' , 'z'] ) 
@@ -316,9 +222,9 @@ class Stake:
             ok_z = False
             if( self.vision.result[ 'top' ] > 90 ):
                 force_z = STAKE_Z_UP + 0.3
-            elif( self.vision.result[ 'top' ] > 65 ):
+            elif( self.vision.result[ 'top' ] > 70 ):
                 force_z = STAKE_Z_UP
-            elif( self.vision.result[ 'top'] < 35 ):
+            elif( self.vision.result[ 'top'] < 30 ):
                 force_z = STAKE_Z_DOWN
             elif( self.vision.result['top'] < 0 ):
                 force_z = STAKE_Z_DOWN - 0.3
@@ -326,13 +232,20 @@ class Stake:
                 ok_y = True
 
             if( self.vision.result[ STAKE_OVAL_DIRECTION ] > max_x ):
-                force_y = -1.3
+                force_y = -0.8
             elif( self.vision.result[ STAKE_OVAL_DIRECTION ] < min_x ):
-                force_y = 1.3
+                force_y = 0.8
             else:
                 ok_x = True
 
-            if( ok_x and ok_y ):
+            if( self.vision.result['area'] > 30 ):
+                force_x = -0.5
+            elif( self.vision.result['area'] < 10 ):
+                force_x = 0.5
+            else:
+                ok_z = True
+
+            if( ok_x and ok_y and ok_z):
                 self.control.publish_data( "OVAL Now x and y is center")
                 self.vision.call_data( STAKE_OVAL_DIRECTION )
                 if( self.vision.result[ 'found' ] ):
@@ -361,7 +274,7 @@ class Stake:
                                 ok_z = True
 
                             if( self.vision.result['area'] < ( STAKE_OVAL_AREA ) ):
-                                force_x = 0.5
+                                force_x = 0.4
                             else:
                                 ok_x = True
 
@@ -377,11 +290,11 @@ class Stake:
                     self.control.publish_data( "SPECIAL OVAL finish do target")
                     break
                 else:
-                    self.control.publish_data( "OVAL don't found target found")
-                    self.control.force_xyz( 1.0 , force_y , force_z )
+                    self.control.publish_data( "SPECIAL OVAL don't found target")
+                    self.control.force_xyz( force_x , force_y , force_z )
             else:
                 self.control.publish_data( "OVAL force xyz " + repr((force_x, force_y, force_z)))
-                self.control.force_xyz( 0.2 , force_y , force_z )
+                self.control.force_xyz( force_x , force_y , force_z )
 
         self.control.publish_data( "OVAL finish fire next I will backward")
 
@@ -393,10 +306,8 @@ class Stake:
             self.control.force_xyz( -0.8 , 0 , STAKE_Z_DOWN )
             self.control.publish_data( "OVAL Backward time is " + str( diff_time ) )
 
-       self.heart()  
-            
-                
-                
+        self.heart()  
+
 if __name__=="__main__":
     rospy.init_node( "mission_drop" )
     mission = Stake( )

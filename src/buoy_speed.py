@@ -109,15 +109,6 @@ class Buoy:
         self.control.publish_data( "FIND_TARGET reset position xy")
         self.control.relative_xy( 0 , 0 )
                  
-        if( self.vision.result[ 'center_y' ] > 70 ):
-            self.control.publish_data( "Move up") 
-            self.control.relative_z( 0.05 )
-        elif( self.vision.result[ 'center_y'] < -70 ):
-            self.control.publish_data( "Find target Move dowm") 
-            self.control.relative_z( -0.05)
-        else:
-            self.control.publish_data( "Find target Don't move in axis z") 
-
         self.lock_target()
 
     def lock_target( self ): # status_mission = 2
@@ -149,11 +140,11 @@ class Buoy:
             if( self.vision.result['found'] ):
                 unfound = 0
                 if( self.vision.result['center_x'] > 20 ):
-                    relative_y = -1.2
+                    relative_y = -1.3
                 elif( self.vision.result['center_x'] < -20 ):
-                    relative_y = 1.2
+                    relative_y = 1.3
                 else:
-                    relative_x = 1.8
+                    relative_x = 0.8
 
                 self.control.publish_data( "Lock Target command force ({:4.2f},{:4.2f})".format(
                     relative_x , relative_y ) )
@@ -163,15 +154,6 @@ class Buoy:
                     self.control.publish_data( "Break from area condition") 
                     break 
 
-                if( self.vision.result['center_y'] > 70 ):
-                    self.control.publish_data( "Move up")
-                    self.control.relative_z( 0.1 )
-                elif( self.vision.result['center_y'] < -70 ):
-                    self.control.publish_data( "Move down" )
-                    self.control.relative_z( -0.1 )
-                else:
-                    self.control.publish_data( "Don't move depth center_y : " 
-                        + str( self.vision.result['center_y']) )
             else:
                 unfound += 1
                 self.control.publish_data( "Don't found target" )
@@ -244,7 +226,7 @@ class Buoy:
         self.control.publish_data( "FINISH Forward")
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-        while( (not rospy.is_shutdown() ) and diff_time < ( BUOY_TIME_TO_BACK_ + 8 ) ):
+        while( (not rospy.is_shutdown() ) and diff_time < ( BUOY_TIME_TO_BACK_ + 5 ) ):
             self.rate.sleep()
             self.control.force_xy( BUOY_FORCE_FORWARD_ , 0 )
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
