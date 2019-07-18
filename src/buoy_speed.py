@@ -34,7 +34,7 @@ class Buoy:
         self.control.reset_state()
 
         self.control.publish_data( "START Waiting z depth")
-        self.control.absolute_z( -2.1 )
+        self.control.absolute_z( BUOY_START_DEPTH )
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
 
@@ -77,7 +77,7 @@ class Buoy:
             self.rate.sleep()
 
             count = 0
-            while( (not rospy.is_shutdown()) and (count < BUOY_FOUND_PICTURE_ ) ):
+            while( (not rospy.is_shutdown()) and (count < BUOY_FOUND_PICTURE ) ):
                 self.vision.call_data()
                 self.vision.echo_data()
                 if( self.vision.result['found'] ):
@@ -87,7 +87,7 @@ class Buoy:
                     self.control.publish_data("FIND_TARGET don't found picture")
                     break
 
-            if( count == BUOY_FOUND_PICTURE_ ):
+            if( count == BUOY_FOUND_PICTURE ):
                 self.control.publish_data( "Find target Found 2 round move to mode lock_target")
                 break
 
@@ -108,7 +108,7 @@ class Buoy:
 
         self.control.publish_data( "FIND_TARGET reset position xy")
         self.control.relative_xy( 0 , 0 )
-                 
+ 
         self.lock_target()
 
     def lock_target( self ): # status_mission = 2
@@ -118,10 +118,9 @@ class Buoy:
         unfound = 0 
 
         distance = 3
-        limit_time = 15
         warning_time = 5
 
-        time_out = 45 # time_out seconds when you have lock target
+        time_out = BUOY_TIME_LOCK_TARGET # time_out seconds when you have lock target
         self.control.publish_data( "You have limit time in mode lock_target " + str( time_out ))
 
         start_time = rospy.get_rostime()
@@ -140,17 +139,17 @@ class Buoy:
             if( self.vision.result['found'] ):
                 unfound = 0
                 if( self.vision.result['center_x'] > 20 ):
-                    relative_y = -1.3
+                    relative_y = TARGET_RIGHT
                 elif( self.vision.result['center_x'] < -20 ):
-                    relative_y = 1.3
+                    relative_y = TARGET_LEFT
                 else:
-                    relative_x = 0.8
+                    relative_x = TARGET_FORWARD
 
                 self.control.publish_data( "Lock Target command force ({:4.2f},{:4.2f})".format(
                     relative_x , relative_y ) )
                 self.control.force_xy( relative_x , relative_y )
 
-                if( self.vision.result['area'] > 8 ):
+                if( self.vision.result['area'] > BUOY_AREA_ABORT ):
                     self.control.publish_data( "Break from area condition") 
                     break 
 
@@ -167,7 +166,7 @@ class Buoy:
                     warning_time , time_out ) )
                 warning_time += 5 
 
-        self.dash_mode( distance , limit_time )
+        self.dash_mode( distance )
 
         self.control.force_xy( 0 , 0 )
         self.rate.sleep()
@@ -177,61 +176,57 @@ class Buoy:
         
         self.control.activate( ["x" , "y"] )
 
-    def dash_mode( self , distance , limit_time ):
+    def dash_mode( self , distance ):
 
         self.control.force_xy( 1 , 0 , True)
         start_time = rospy.get_rostime()
-        self.control.publish_data( "Move forward limit time at " + str( limit_time ) )
+        self.control.publish_data( "DASH Move forward limit time at " + str( BUOY_LIMIT_TIME ) )
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-        while(  not rospy.is_shutdown()  ):
+        while( ( not rospy.is_shutdown() ) and ( diff_time < BUOY_LIMIT_TIME ) ):
             self.rate.sleep()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             temp = self.control.force_xy( 1 , 0 )
-            self.control.publish_data( "Now distance is " + str( temp ) 
+            self.control.publish_data( "DASH Now distance is " + str( temp ) 
                 + " and time is " + str( diff_time ) )
-            if( diff_time > limit_time ):
-                break
 
     def finish_task( self ):
         self.rate.sleep()
         self.control.publish_data( "FINISH this task, Move back")
-        self.control.absolute_z( -0.5 )
+        self.control.absolute_z( BUOY_TARGET_DEPTH_FINISH )
 
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-        while( (not rospy.is_shutdown() ) and diff_time < BUOY_TIME_TO_BACK_ ):
+        while( (not rospy.is_shutdown() ) and diff_time < BUOY_TIME_TO_BACK ):
             self.rate.sleep()
-            self.control.force_xy( -1.0*BUOY_FORCE_FORWARD_ , 0 )
+            self.control.force_xy( -1.0*BUOY_FORCE_FORWARD , 0 )
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             self.control.publish_data( "FINISH back current , limit " 
-                + repr( ( diff_time , BUOY_TIME_TO_BACK_ ) ) )
+                + repr( ( diff_time , BUOY_TIME_TO_BACK ) ) )
 
         self.control.publish_data( "FINISH Survey right")
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-        while( (not rospy.is_shutdown() ) and diff_time < BUOY_TIME_TO_SURVEY_ ):
+        while( (not rospy.is_shutdown() ) and diff_time < BUOY_TIME_TO_SURVEY ):
             self.rate.sleep()
-            self.control.force_xy( 0 , -1.0*BUOY_FORCE_SURVEY_ )
+            self.control.force_xy( 0 , -1.0*BUOY_FORCE_SURVEY )
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             self.control.publish_data( "FINISH survey current , limit " 
-                + repr( ( diff_time , BUOY_TIME_TO_SURVEY_ ) ) )
+                + repr( ( diff_time , BUOY_TIME_TO_SURVEY ) ) )
            
         self.control.force_false() 
         self.control.publish_data( "FINISH Waiting depth")
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
-            #self.control.force_xy( -1.0*BUOY_FORCE_FORWARD_ , 0 )
-            #diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
         self.control.publish_data( "FINISH Forward")
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-        while( (not rospy.is_shutdown() ) and diff_time < ( BUOY_TIME_TO_BACK_ + 5 ) ):
+        while( (not rospy.is_shutdown() ) and diff_time < ( BUOY_TIME_TO_BACK + 5 ) ):
             self.rate.sleep()
-            self.control.force_xy( BUOY_FORCE_FORWARD_ , 0 )
+            self.control.force_xy( BUOY_FORCE_FORWARD , 0 )
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             self.control.publish_data( "FINISH forward current , limit " 
-                + repr( ( diff_time , BUOY_TIME_TO_BACK_ + 5 ) ) )
+                + repr( ( diff_time , BUOY_TIME_TO_BACK + 5 ) ) )
 
         self.control.force_xy( 0 , 0 )
         self.control.publish_data( "Finish task buoy?")

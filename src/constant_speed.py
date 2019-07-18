@@ -51,11 +51,16 @@ PATH_LAST_TIME = 8
 PATH_END_DEPTH = -1.5               # This is absolute depth after do task path finish
 
 # Constant for mission buoy
-BUOY_TIME_TO_BACK_ = 3 # forward will plus 5 second
-BUOY_TIME_TO_SURVEY_ = 5
-BUOY_FORCE_SURVEY_ = 2
-BUOY_FORCE_FORWARD_ = 1.3
-BUOY_FOUND_PICTURE_ = 1
+BUOY_START_DEPTH = -2.1             # This will tell desire depth when want to start this mission
+BUOY_FOUND_PICTURE = 1              # This use will deicision to change mode after found round
+BUOY_TIME_LOCK_TARGET = 60          # This is limit you still in mode lock target
+BUOY_AREA_ABORT = 8                 # In mode lock target you can out of loop by area
+BUOY_LIMIT_TIME = 15                # This is limit time of dash mode
+BUOY_TARGET_DEPTH_FINISH = -0.5     # This is absolute depth when you finish dash mode
+BUOY_FORCE_SURVEY = 2
+BUOY_FORCE_FORWARD = 1.3
+BUOY_TIME_TO_BACK = 3              # forward will plus 5 second
+BUOY_TIME_TO_SURVEY = 5
 
 # Constant for operator drop
 DROP_HAVE_TO_ROTATION_ = False
