@@ -36,7 +36,7 @@ class Gate:
 
         self.control.reset_state( 0 , 0 )
 
-        self.control.absolute_z( GATE_START_DEPTH_ )
+        self.control.absolute_z( GATE_START_DEPTH )
 
         self.control.publish_data( "START survey to find mission by survey" )
 
@@ -49,29 +49,29 @@ class Gate:
         self.control.deactivate( ['x' , 'y'] )
 
         # Start to forward by parameter and fix to move forward only
-        self.control.force_xy( 1.2 , 0 , True )
+        self.control.force_xy( SURVEY_FORWARD , 0 , True )
         count = 0
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()  
-        while( diff_time < GATE_START_FORWARD_TIME_ and count < 3):
+        while( diff_time < GATE_START_FORWARD_TIME and count < 3 and not rospy.is_shutdown() ):
             self.rate.sleep()
 
             self.vision.call_data()
             self.vision.echo_data()
             if( self.vision.result['found'] ):
-                count += 1
+                count += 1T_SEARCH
                 self.control.publish_data( "START Found picture count is " + str( count ) )
                 self.last_distance_to_found = self.vision.result['distance']
             else:
                 count = 0
 
-            if( self.control.force_xy( 1.2 , 0 ) > GATE_START_FORWARD_DISTANCE_ ):
+            if( self.control.force_xy( SURVEY_FORWARD , 0 ) > GATE_START_FORWARD_DISTANCE ):
                 self.control.publish_data( "START Abort forward by distance")
                 break
 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()  
             self.control.publish_data( "START forward time : limit " 
-                + repr( (diff_time , GATE_START_FORWARD_TIME_ )  ) )
+                + repr( (diff_time , GATE_START_FORWARD_TIME )  ) )
 
         if( count == 3 ):
             self.control.publish_data( "START Move to target picture")
@@ -79,22 +79,22 @@ class Gate:
                 self.rate.sleep()
                 self.vision.call_data()
                 self.vision.echo_data()
-                if( self.vision.result['center_x'] < -50 ):
-                    self.control.force_xy( 0.5 , 1.5 )
-                elif( self.vision.result[ 'center_x' ] > 50 ):
-                    self.control.force_xy( 0.5 , -1.5 )
+                if( self.vision.result['center_x'] < -30 ):
+                    self.control.force_xy( 0.2 , SURVEY_LEFT )
+                elif( self.vision.result[ 'center_x' ] > 30 ):
+                    self.control.force_xy( 0.2 ,  )
                 else:
                     self.control.publish_data( "START Now center change to lock target")
                     break
         else:
             self.control.publish_data( "START survey to gate mission" )
-            self.control.force_xy( 0 , 1.5 * GATE_START_SURVEY_DIRECTION_ , True )
+            self.control.force_xy( 0 , SURVEY_LEFT * GATE_START_SURVEY_DIRECTION , True )
             count = 0 
 
         # Next If you don't found picture and count == 3 I will survey
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()  
-        while( ( diff_time < GATE_START_SURVEY_TIME_ ) and ( count < 3 )):
+        while( diff_time < GATE_START_SURVEY_TIME and count < 3 and not rospy.is_shutdown() ):
             self.rate.sleep()
     
             self.vision.call_data()
@@ -106,14 +106,14 @@ class Gate:
             else:
                 count = 0
 
-            if( self.control.force_xy( 0 , 2 * GATE_START_SURVEY_DIRECTION_ ) 
-                    > GATE_START_SURVEY_DISTANCE_ ):
+            if( self.control.force_xy( 0 , SURVEY_LEFT * GATE_START_SURVEY_DIRECTION ) 
+                    > GATE_START_SURVEY_DISTANCE ):
                 self.control.publish_data( "START Abort forward by distance")
                 break
 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()  
             self.control.publish_data( "START survey time : limit " 
-                + repr( ( diff_time , GATE_START_SURVEY_TIME_ )  ) )
+                + repr( ( diff_time , GATE_START_SURVEY_TIME )  ) )
 
         if( count == 3 ):
             self.control.publish_data( "START next function is lock_target" )
@@ -122,7 +122,7 @@ class Gate:
             self.control.publish_data( "START next function is direct_search" )
             self.direct_search()
 
-        
+    # This function use to forward go to gate by don't found gate        
     def direct_search( self ):
         self.control.publish_data( "DIRECT_SEARCH start to search" )
 
@@ -136,8 +136,8 @@ class Gate:
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec() 
         self.control.publish_data( "DIRECT_SEARCH start to forward")
-        self.control.force_xy( 1.2 , 0 , True )
-        while( ( diff_time < GATE_FORWARD_ONLY_TIME_ ) and ( count < 3 ) ):
+        self.control.force_xy( SURVEY_FORWARD , 0 , True )
+        while( ( diff_time < GATE_FORWARD_ONLY_TIME ) and ( count < 3 ) ):
             self.rate.sleep()
             self.vision.call_data()
             self.vision.echo_data()
@@ -149,7 +149,7 @@ class Gate:
             else:
                 count = 0
 
-            if( self.control.force_xy( 1.2 , 0 ) < GATE_FORWARD_ONLY_DISTANCE_ ):
+            if( self.control.force_xy( SURVEY_FORWARD , 0 ) < GATE_FORWARD_ONLY_DISTANCE ):
                 self.control.publish_data( "DIRECT_SEARCH abort by distance")
                 break
 
@@ -179,7 +179,7 @@ class Gate:
                 if( self.vision.result['center_x'] < -20 ):
                     relative_y = GATE_FORCE_Y
                 elif( self.vision.result[ 'center_x'] > 20 ):
-                    relative_y = -1.0*GATE_FORCE_Y
+                    relative_y = -1.0 * GATE_FORCE_Y
                 else:
                     relative_x = GATE_FORCE_X
 
@@ -222,19 +222,21 @@ class Gate:
             count_found = 0
             while( ( not rospy.is_shutdown() ) and diff_time < limit_time ):
                 self.rate.sleep()
-                self.control.force_xy( 2 , 0 )
-                self.control.publish_data( "LOCK_TARGET last forward time : "+repr(diff_time) )
+                self.control.force_xy( SUPER_FORWARD , 0 )
+                self.control.publish_data( "LOCK_TARGET last forward time ( diff : limit ) "
+                    +repr( ( diff_time , limit_time ) ) )
                 diff_time = ( rospy.get_rostime() - start_time ).to_sec()
                 self.vision.call_data()
                 self.vision.echo_data()
                 if( self.vision.result['found'] ):
                     count_found += 1
                     self.control.publish_data("LOCK_TARGET run again? " + str( count_found ) )
-                    if( count_found == 3 ):
+                    if( count_found == 3 and GATE_APPROVE_AGAIN ):
                         run_lock_target_again = True
+                        break
                 else:
                     count_found = 0
-            if( run_lock_target_again and GATE_APPROVE_AGAIN_ ):
+            if( run_lock_target_again ):
                 self.control.publish_data( "LOCK_TARGET run again" )
                 self.lock_target()
 

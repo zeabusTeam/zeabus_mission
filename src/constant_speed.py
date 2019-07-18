@@ -10,18 +10,37 @@
 
 import math
 
+# Constant for manage about force
+# TARGET when you want to manage center point
+TARGET_FORWARD = 0.5
+TARGET_BACKWARD = -0.5
+TARGET_LEFT = 0.8
+TARGET_RIGHT = -0.8
+# SURVEY when you want to find object or target
+SURVEY_FORWARD = 1.2
+SURVEY_BACKWARD = -1.2
+SURVEY_LEFT = 1.5
+SURVEY_RIGHT = -1.5
+# SUPER when you want to move don't care everything
+SUPER_FORWARD = 2.0
+SUPER_BACKWORD = -2.0
+SUPER_LEFT = 2.3
+SUPER_RIGHT = -2.3
+
 # Constant for first mission
-GATE_START_FORWARD_TIME_ = 9 
-GATE_START_FORWARD_DISTANCE_ = 3
-GATE_START_SURVEY_TIME_ = 20
-GATE_START_SURVEY_DISTANCE_ = 4
-GATE_START_SURVEY_DIRECTION_ = 1.0 # positive is left and negative is right
-GATE_FORWARD_ONLY_TIME_ = 15
-GATE_FORWARD_ONLY_DISTANCE_ = 8
-GATE_START_DEPTH_ = -0.75
-GATE_FORCE_Y = 180.0 # unit is / 100 kgf
-GATE_FORCE_X = 120.0 # unit is / 100 kgf
-GATE_APPROVE_AGAIN_ = True
+GATE_START_DEPTH = -0.75            # This use to target depth of this mission
+GATE_START_FORWARD_TIME = 9         # This is limit of time to go forward
+GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
+GATE_START_SURVEY_TIME = 20         # This is limit time for go servey 
+GATE_START_SURVEY_DISTANCE = 6      # This is limit time for go survey 
+GATE_START_SURVEY_DIRECTION = 1.0   # positive is left and negative is right
+# ----> two below variable we use to sure we can 
+GATE_FORWARD_ONLY_TIME = 30         # This is limit time for go direct. 
+GATE_FORWARD_ONLY_DISTANCE = 8      # This is limit distane for go direct
+GATE_FORCE_Y = TARGET_LEFT * 100    # unit is / 100 kgf
+GATE_FORCE_X = SURVEY_FORWARD * 100 # unit is / 100 kgf
+GATE_APPROVE_AGAIN = True           # This function help you. 
+                                    # If you are mode last move will be call data again
 
 # Constant for mission path
 PATH_FIND_TIME_ = 5 # Left is constant but right + 2 second
