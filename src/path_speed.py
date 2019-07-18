@@ -9,8 +9,10 @@
 
 # REFERENCE
 
-import rospy
+from __future__ import print_function
+
 import math
+import rospy
 from zeabus.math import general as zeabus_math
 from zeabus.control.command_interfaces import CommandInterfaces
 from zeabus.vision.analysis_path import AnalysisPath
@@ -36,14 +38,17 @@ class Path:
         # Reset state
         self.control.reset_state( 0 , 0 )
 
-        self.control.absolute_z( -1 )
+        self.control.absolute_z( PATH_START_DEPTH )
         self.control.sleep()
-        self.control.publish_data( "Wait depth" )
+        self.control.publish_data( "START Path waiting depth" )
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()  
+
         self.find_path()
 
-    def find_path( self ):
+    # Path find will move only left and right please carefull to use this function
+
+    def find_path( self ): 
         self.control.publish_data( "FIND doing mission to find" )
 
         start_time = rospy.get_rostime()
@@ -63,9 +68,10 @@ class Path:
                 count = 0
 
             if( count == 2 ):
-                self.control.publish_data("!!!!!!!!! STRATEGY FIND PATH !!!!!!!!!!!!!" )
+                self.control.publish_data("STRATEGY FIND PATH !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" )
                 target_depth = -1.0
                 real_found = True
+                count_unfound = 0
                 while( not rospy.is_shutdown() ):
                     self.rate.sleep()
                     self.vision.call_data()
@@ -79,25 +85,25 @@ class Path:
                     if( self.vision.num_point == 0 ):
                         relative_y = 0
                     elif( self.vision.x_point[0] > 30 ):
-                        relative_y = -1*PATH_FORCE_Y_
+                        relative_y = TARGET_RIGHT
                     elif( self.vision.x_point[0] < -30 ):
-                        relative_y = PATH_FORCE_Y_
+                        relative_y = TARGET_LEFT
                     else:
                         ok_y = True
 
                     if( self.vision.num_point == 0):
                         relative_x = 0
                     elif( self.vision.y_point[0] > 20 ):
-                        relative_x = PATH_FORCE_X_
+                        relative_x = TARGET_FORWARD
                     elif( self.vision.y_point[0] < -20 ):
-                        relative_x = -1*PATH_FORCE_X_
+                        relative_x = TARGET_BACKWARD
                     else:
                         ok_x = True
 
                     if( ok_x and ok_y ):
                         self.control.force_xy( 0 , 0 )
                         if( self.control.check_z( 0.15 ) ):
-                            if( target_depth < -2.4 ):
+                            if( target_depth < PATH_TARGET_DEPTH ):
                                 self.control.publish_data( "Breaking and go to setup point")
                                 break
                             else:
@@ -106,8 +112,12 @@ class Path:
                                     + str( target_depth ) )
                                 self.control.absolute_z( target_depth )
                     elif( self.vision.num_point == 0 ):
-                        real_found = False
-                        break
+                        count_unfound += 1
+                        self.control.publish_data( "FIND unfound count is " 
+                            + str( count_unfound ) )
+                        if( count_unfound == 3 )
+                            real_found = False
+                            break
                     else:
                         self.control.publish_data( "FIND command " 
                             + repr(( relative_x , relative_y ) ) )
@@ -119,22 +129,31 @@ class Path:
 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             if( mode == 1 ):
-                self.control.force_xy( 0.1 , -1.2 )
-                if( diff_time > PATH_FIND_TIME_ ):
+                self.control.force_xy( 0.1 , SURVEY_RIGHT )
+                if( diff_time > PATH_FIND_TIME ):
                     self.control.publish_data( "FIND mode 1 time out")
                     mode = 2
                     start_time = rospy.get_rostime()
+                else:
+                    self.control.publish_data( "FIND mode 1 (diff , limit ) : " 
+                        + repr( ( diff_time , PATH_FIND_TIME ) ) )
             elif( mode == 2 ):
-                self.control.force_xy( 0.1 , 1.3 )
-                if( diff_time > (PATH_FIND_TIME_ * 2.0) + 3 ):
+                self.control.force_xy( 0.1 , SURVEY_LEFT )
+                if( diff_time > (PATH_FIND_TIME * 2.0) + 3 ):
                     self.control.publish_data( "FIND mode 2 time out")
                     mode = 3
                     start_time = rospy.get_rostime() 
+                else:
+                    self.control.publish_data( "FIND mode 2 (diff , limit ) : " 
+                        + repr( ( diff_time , PATH_FIND_TIME * 2.0 + 3 ) ) )
             elif( mode == 3 ):
-                self.control.force_xy( 0.1 , -1.2 )
-                if( diff_time > ( PATH_FIND_TIME_ + 2 ) ):
+                self.control.force_xy( 0.1 , SUPER_RIGHT )
+                if( diff_time > ( PATH_FIND_TIME + 3 ) ):
                     self.control.publish_data( "FIND mode 3 time out")
                     mode = 4 
+                else:
+                    self.control.publish_data( "FIND mode 3 (diff , limit ) : " 
+                        + repr( ( diff_time , PATH_FIND_TIME + 3 ) ) )
             else:
                 self.control.force_false() 
                 break
@@ -170,18 +189,18 @@ class Path:
             if( self.vision.num_point == 0 ):
                 relative_y = 0
             elif( self.vision.x_point[0] > 20 ):
-                relative_y = -PATH_FORCE_Y_
+                relative_y = TARGET_RIGHT
             elif( self.vision.x_point[0] < -20 ):
-                relative_y = PATH_FORCE_Y_
+                relative_y = TARGET_LEFT
             else:
                 ok_y = True
 
             if( self.vision.num_point == 0):
                 relative_x = 0
             elif( self.vision.y_point[0] > 20 ):
-                relative_x = PATH_FORCE_X_
+                relative_x = TARGET_FORWARD
             elif( self.vision.y_point[0] < -20 ):
-                relative_x = -1.0*PATH_FORCE_X_
+                relative_x = TARGET_BACKWARD
             else:
                 ok_x = True
         
@@ -211,10 +230,10 @@ class Path:
                 break
             elif( diff > 0 ):
                 self.control.publish_data( "SETUP rotation left")
-                self.control.force_xy_yaw( 0 , 0 , 0.3 )
+                self.control.force_xy_yaw( 0 , 0 , PATH_FORCE_YAW )
             else:
                 self.control.publish_data( "SETUP rotation right" )
-                self.control.force_xy_yaw( 0 , 0 , -0.3 )
+                self.control.force_xy_yaw( 0 , 0 , -1.0 * PATH_FORCE_YAW )
 
         self.control.publish_data( "SETUP Now rotation finish next is moving on path")
         self.control.deactivate( [ 'x' , 'y' ])
@@ -224,7 +243,7 @@ class Path:
     def moving_on_path( self ): # status_mission = 3
 
         # Move to center of path
-        self.control.publish_data( "MOVING_ON_PATH move to center of point one" )
+        self.control.publish_data( "MOVING_ON_PATH move to center of first point" )
         while( ( not rospy.is_shutdown() ) ):
             self.rate.sleep()
             self.vision.call_data()
@@ -233,13 +252,13 @@ class Path:
             force_y = 0
             target_point = 0
             if( self.vision.x_point[ 0 ] < -15  ):
-                force_y = PATH_FORCE_Y_
+                force_y = TARGET_RIGHT
             elif( self.vision.x_point[ 0 ] > 15 ):
-                force_y = -1.0*PATH_FORCE_Y_
+                force_y = TARGET_LEFT
             elif( self.vision.y_point[ 0 ] < -15 ):
-                force_x = -1.0*PATH_FORCE_X_
+                force_x = TARGET_BACKWARD
             elif( self.vision.y_point[ 0 ] > 15 ):
-                force_x = PATH_FORCE_X_
+                force_x = TARGET_FORWARD
             elif( not self.control.check_yaw( 0.12 ) ):
                 self.control.publish_data( "MOVING_ON_PATH SECTION 1 now center Waiting yaw")
             else:
@@ -267,13 +286,13 @@ class Path:
             force_y = 0
             target_point = 0
             if( self.vision.x_point[ 1 ] < -10  ):
-                force_y = PATH_FORCE_Y_
+                force_y = TARGET_LEFT
             elif( self.vision.x_point[ 1 ] > 10 ):
-                force_y = -1.0*PATH_FORCE_Y_
+                force_y = TARGET_RIGHT
             elif( self.vision.y_point[ 1 ] < -10 ):
-                force_x = -1.0*PATH_FORCE_X_
+                force_x = TARGET_BACKWARD
             elif( self.vision.y_point[ 1 ] > 10 ):
-                force_x = PATH_FORCE_X_
+                force_x = TARGET_FORWARD
             else:
                 self.control.publish_data( "MOVING_ON_PATH SECTION 2 now center of point 2")
                 break
@@ -300,25 +319,25 @@ class Path:
                 break
             elif( diff > 0 ):
                 self.control.publish_data( "MOVING_ON_PATH rotation left")
-                self.control.force_xy_yaw( 0 , 0 , 0.3 )
+                self.control.force_xy_yaw( 0 , 0 , PATH_FORCE_YAW )
             else:
                 self.control.publish_data( "MOVING_ON_PATH rotation right" )
-                self.control.force_xy_yaw( 0 , 0 , -0.3 )
+                self.control.force_xy_yaw( 0 , 0 , -1.0*PATH_FORCE_YAW )
 
         self.control.publish_data( "MOVING_ON_PATH Now rotation finish next is moving on path")
-        self.control.deactivate( [ 'x' , 'y' ])
+        self.control.deactivate( [ 'x' , 'y' ] )
 
-        self.control.absolute_z( -1.5 )
+        self.control.absolute_z( PATH_END_DEPTH )
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time).to_sec()
-        while( not rospy.is_shutdown() and diff_time < PATH_LAST_TIME_ ):
+        while( not rospy.is_shutdown() and diff_time < PATH_LAST_TIME ):
             self.rate.sleep()
-            self.control.force_xy( 1.2 , 0 )
+            self.control.force_xy( SURVEY_FORWARD , 0 )
             diff_time = ( rospy.get_rostime() - start_time).to_sec()
+            self.control.publish_data( "MOVING_ON_PATH diff , limit " + repr( diff_time,limit) )
 
         self.control.activate( ['x' , 'y' ] )
         self.control.relative_xy( 0 , 0 )
-        self.control.publish_data( "MOVING_ON_PATH finish yaw")
 
 if __name__=="__main__" :
     rospy.init_node( "mission_path" )

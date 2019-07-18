@@ -27,7 +27,7 @@ SUPER_BACKWORD = -2.0
 SUPER_LEFT = 2.3
 SUPER_RIGHT = -2.3
 
-# Constant for first mission
+# Constant for first mission is mission gate
 GATE_START_DEPTH = -0.75            # This use to target depth of this mission
 GATE_START_FORWARD_TIME = 9         # This is limit of time to go forward
 GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
@@ -43,11 +43,12 @@ GATE_APPROVE_AGAIN = True           # This function help you.
                                     # If you are mode last move will be call data again
 
 # Constant for mission path
-PATH_FIND_TIME_ = 5 # Left is constant but right + 2 second
-PATH_FORCE_X_ = 1
-PATH_FORCE_Y_ = 1.5
-PATH_FORCE_YAW_ = 0.3
-PATH_LAST_TIME_ = 4
+PATH_START_DEPTH = -1               # This will tell desire depth when want to start this mission
+PATH_TARGET_DEPTH = -2.4            # This target of path will want to go before do mission
+PATH_FIND_TIME = 5                  # Left is constant but right + 2 second
+PATH_FORCE_YAW = 0.3                # This variable is force to use rotation
+PATH_LAST_TIME = 8
+PATH_END_DEPTH = -1.5               # This is absolute depth after do task path finish
 
 # Constant for mission buoy
 BUOY_TIME_TO_BACK_ = 3 # forward will plus 5 second
