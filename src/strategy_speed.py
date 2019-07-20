@@ -108,7 +108,7 @@ class StrategySpeed:
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
         while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_SURVEY_PATH ):
             self.rate.sleep()
-            self.control.force_xy( 0 , STRATEGY_FORCE_SURVEY_PATHi )
+            self.control.force_xy( 0 , STRATEGY_FORCE_SURVEY_PATH )
             self.control.publish_data( "STRATEGY survey before path " + str(diff_time)  ) 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
         
@@ -140,9 +140,9 @@ class StrategySpeed:
                     if( self.vision_path.num_point == 0 ):
                         relative_y = 0
                     elif( self.vision_path.x_point[0] > 30 ):
-                        relative_y = SURVEY_LEFT
-                    elif( self.vision_path.x_point[0] < -30 ):
                         relative_y = SURVEY_RIGHT
+                    elif( self.vision_path.x_point[0] < -30 ):
+                        relative_y = SURVEY_LEFT
                     else:
                         ok_y = True
 
@@ -197,19 +197,21 @@ class StrategySpeed:
         # Part of mission buoy
         self.control.publish_data( "STRATEGY Command depth " + str( STRATEGY_DEPTH_BOUY ) )
         self.control.absolute_z( STRATEGY_DEPTH_BOUY )
-
-        count_ok_depth = 0
-        while( ( not rospy.is_shutdown() ) and count_ok_depth < 3 ):
+        self.control.sleep()
+        while( ( not self.control.check_z( 0.12 ) ) ):
             self.rate.sleep()
-            if( self.control.check_z( 0.12 ) ):
-                count_ok_depth += 1
-            else:
-                count_ok_depth = 0
-            self.control.publish_data( "STRATEGY Waiting z count_ok {:3d} : {:3d}".format(
-                count_ok_depth , 3 ) )
 
-        self.control.publish_data( "STRATEGY start forward for init do mission buoy" )
+        self.control.publish_data( "STRATEGY start survey for init do mission buoy" )
         self.control.deactivate( ['x' , 'y'] )
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_BUOY_SURVEY ):
+            self.control.force_xy( 0 , STRATEGY_FORCE_BUOY_SURVEY )
+            self.rate.sleep()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            self.control.publish_data( "STRATEGY Survey is diff time " + str( diff_time ) )
+
+        self.control.force_xy( 0 , 0 )
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
         count_found = 0
@@ -221,7 +223,7 @@ class StrategySpeed:
         
             if( self.vision_buoy.result[ 'found' ] ):
                 count_found += 1
-                if( count_found == BUOY_FORCE_FORWARD_ ):
+                if( count_found == 2 ):
                     self.control.publish_data( "STRATEGY I will call mission_buoy lock_target")
                     self.mission_buoy.lock_target()
                     pass_buoy = True
@@ -353,7 +355,7 @@ class StrategySpeed:
         self.control.relative_xy( 0 , 0 )
         self.control.sleep()
 
-        self.control.absolute_z( STRATEGY_DEPTH_FIND_DROP_ )
+        self.control.absolute_z( STRATEGY_DEPTH_FIND_DROP )
         self.control.sleep()
         self.control.publish_data( "Waiting depth at error ok 0.5 meters" )
         while( not self.control.check_z( 0.15 ) ):
@@ -372,9 +374,9 @@ class StrategySpeed:
         self.control.publish_data( "STRATEGY Move free time for drop")
         while( (not rospy.is_shutdown() ) and diff_time < STRATEGY_FREE_TIME_DROP ):
             self.rate.sleep()
-            self.control.force_xy( STRATEGY_FORCE_DROP , 0 )
+            self.control.force_xy( STRATEGY_FREE_FORCE_DROP , 0 )
             self.control.publish_data( "STRATEGY Move free time is " 
-                + repr( ( diff_time , STRATEGY_FREE_TIME_DROP_ ) ) )
+                + repr( ( diff_time , STRATEGY_FREE_TIME_DROP ) ) )
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
         start_time = rospy.get_rostime()
@@ -382,7 +384,7 @@ class StrategySpeed:
         self.control.publish_data( "START FORWARD TO FIND DROP MISSION" )
         count_found = 0
         self.control.force_xy( STRATEGY_FORCE_DROP , 0 , True )
-        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_DROP_ ):
+        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_DROP ):
             self.rate.sleep()
             self.vision_drop.call_data( DROP_FIND_TARGET )
             self.vision_drop.echo_data()

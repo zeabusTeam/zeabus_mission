@@ -171,9 +171,8 @@ class Drop:
                                 else:
                                     self.control.force_false()
                                     self.control.publish_data( "OPERATOR rotation is OK!!!")
-                                    self.controlp()
                                     self.control.activate( ['x' , 'y' , 'yaw' ] )
-                                    self.sleep()
+                                    self.control.sleep()
                                     break
                             self.control.publish_data( "OPERATOR will continue open ? drop?")
                             break
@@ -201,10 +200,11 @@ class Drop:
             self.control.publish_data( "OPERATOR stop process because don't found picture" )
         else:
             self.control.publish_data( "OPERATOR chosee drop" )
-            self.drop( DROP_CENTER_X_DROP , DROP_TARGET_DEPTH )
+            self.control.update_target()
+            self.drop( DROP_CENTER_X_DROP , self.control.target_pose[2] )
             self.open( DROP_CENTER_X_OPEN )
 
-        self.control.absolute_z( DROP_START_DEPTH_ )
+        self.control.absolute_z( DROP_START_DEPTH )
 
     def drop( self , offset_center , start_depth ):
         self.control.publish_data("DROP start mission start at depth " + str( start_depth ) )
@@ -215,14 +215,8 @@ class Drop:
         while( ( not rospy.is_shutdown() ) and  count_unfound < 5 ):
             self.rate.sleep()
             self.vision.call_data( DROP_FIND_TARGET )
-            max_x = offset_center + 10
-            min_x = offset_center - 10
-            if( target_depth > DROP_TARGET_DEPTH_ ):
-                min_y = -10
-                max_y = 10
-            else:
-                min_y = DROP_CENTER_Y - 10
-                max_y = DROP_CENTER_Y + 10
+            max_x = offset_center + 5
+            min_x = offset_center - 5
             self.vision.echo_data()
             if( self.vision.result['found'] ):
                 count_unfound = 0 
@@ -231,9 +225,9 @@ class Drop:
                 ok_x = False
                 ok_y = False
 
-                if self.vision.result['center_y'] > max_y :
+                if self.vision.result['center_y'] > 10 :
                     force_x = TARGET_FORWARD
-                elif self.vision.result['center_y'] < min_y :
+                elif self.vision.result['center_y'] < -10 :
                     force_x = TARGET_BACKWARD
                 else:
                     ok_x = True
@@ -269,7 +263,24 @@ class Drop:
                 self.control.publish_data( "DROP center mission unfound " + str( count_unfound ))
                 self.control.force_xy( 0 , 0 )
                 count_unfound += 1
+
         if( count_unfound == 5 ):
+            self.control.absolute_z( DROP_ONLY_DEPTH )
+            self.control.publish_data( "DROP waiting for z before backward")
+
+            while( not self.control.check_z( 0.12 ) ):
+                self.rate.sleep()
+
+            self.control.publish_data( "DROP Process to backward before drop")
+            start_time = rospy.get_rostime()
+            diff_time = (rospy.get_rostime() - start_time).to_sec()
+            while( not rospy.is_shutdown() ) and ( diff_time < DROP_BACKWARD_TIME ):
+                self.rate.sleep()
+                self.control.force_xy( DROP_BACKWARD_FORCE , 0 )
+                diff_time = (rospy.get_rostime() - start_time).to_sec()
+                self.control.publish_data( "DROP Process backward time is " + str( diff_time ) )
+
+            self.control.force_xy( 0 , 0 ) 
             self.control.publish_data( "DROPING !!!!!!!!!!!!!!!!!!!!!!!!!!! Finish")
             self.control.sleep()
 
@@ -277,7 +288,7 @@ class Drop:
 
     def open( self , offset_center ):
         self.control.publish_data("OPEN start mission start at depth "
-            + str( DROP_TARGET_DEPTH_ ) )
+            + str( DROP_TARGET_DEPTH ) )
         count_unfound = 0
 
         target_depth = DROP_START_DEPTH
@@ -291,7 +302,7 @@ class Drop:
         # This process is process little find target
         count_unfound = 0
         self.control.publish_data( "OPEN little find target")
-        while not rospy.is_shutdown() :
+        while not rospy.is_shutdown() and count_unfound < 50 :
             self.rate.sleep()
             self.vision.call_data( DROP_FIND_TARGET )
             self.vision.echo_data()
@@ -322,8 +333,8 @@ class Drop:
                     self.control.publish_data( "OPEN command force " + repr((force_x , force_y)))
                     self.control.force_xy( force_x , force_y )
             else:
-                self.control.publish_data( "OPEN Don't found target")
                 count_unfound+=1
+                self.control.publish_data( "OPEN Don't found target " + str( count_unfound ) )
                 self.control.force_xy( TARGET_FORWARD , 0 )
 
         while( ( not rospy.is_shutdown() ) and  count_unfound < 5 ):
@@ -332,12 +343,6 @@ class Drop:
             self.vision.echo_data()
             max_x = offset_center + 10
             min_x = offset_center - 10
-            if( target_depth > DROP_TARGET_DEPTH ):
-                min_y = -10
-                max_y = 10
-            else:
-                min_y = DROP_ONLY_ - 10
-                max_y = DROP_ONLY_ + 10
             self.vision.echo_data()
             if( self.vision.result['found'] ):
                 count_unfound = 0 
@@ -346,9 +351,9 @@ class Drop:
                 ok_x = False
                 ok_y = False
 
-                if( self.vision.result['center_y'] > max_y ):
+                if( self.vision.result['center_y'] > 10 ):
                     force_x = 0.4
-                elif( self.vision.result['center_y'] < min_y ):
+                elif( self.vision.result['center_y'] < -10 ):
                     force_x = -0.4
                 else:
                     ok_x = True
@@ -370,7 +375,7 @@ class Drop:
                             self.control.publish_data( 
                                 "OPEN new depth ( command, first_target , second_target ) : " 
                                 + repr( ( target_depth 
-                                    , DROP_TARGET_DEPTH_ , DROP_ACTION_DEPTH ) ) )
+                                    , DROP_TARGET_DEPTH , DROP_ACTION_DEPTH ) ) )
                             target_depth -= 0.4  
                             self.control.absolute_z( target_depth )
                             self.control.sleep()
@@ -378,8 +383,7 @@ class Drop:
                         self.control.publish_data( "OPEN now center x y waiting depth" )
                 else:
                     self.control.publish_data( "OEPN command force " 
-                        + repr( ( force_x , force_y ) ) + " and target y in range " 
-                        + repr( ( min_y , max_y ) ) )
+                        + repr( ( force_x , force_y ) ) ) 
                     self.control.force_xy( force_x , force_y ) 
             else:
                 self.control.publish_data( "OPEN center mission unfound " +str(count_unfound) )
@@ -388,15 +392,27 @@ class Drop:
 
         if( count_unfound == 5 ):
             self.control.publish_data( "OPEN now picture is unfound ? try to open" )
-            self.control.absolute_z( DROP_ACTION_DEPTH - 0.15 )
+            self.control.absolute_z( DROP_ACTION_DEPTH )
             self.control.force_xy( 0 , 0 )
             self.control.sleep()
+
+            start_time = rospy.get_rostime()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+
+            while( ( not rospy.is_shutdown() ) and diff_time < DROP_TIME_OPEN ):
+                self.rate.sleep()
+                self.control.force_xy( -0.2 , -1.0*DROP_FORCE_OPEN )
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+                self.control.publish_data( "OPEN move left time is " + str( diff_time ))
+            self.control.force_xy( 0 , 0 )
+
             self.control.publish_data( "OPEN Waiting z")
             while( not self.control.check_z( 0.12 ) ):
                 self.rate.sleep()
+
             start_time = rospy.get_rostime()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-            while( ( not rospy.is_shutdown() ) and diff_time < DROP_TIME_OPEN ):
+            while( ( not rospy.is_shutdown() ) and diff_time < DROP_TIME_OPEN * 3 ):
                 self.rate.sleep()
                 self.control.force_xy( 0 , DROP_FORCE_OPEN )
                 diff_time = ( rospy.get_rostime() - start_time ).to_sec()

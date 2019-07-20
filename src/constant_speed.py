@@ -28,7 +28,7 @@ SUPER_LEFT = 2.3
 SUPER_RIGHT = -2.3
 
 # Constant for first mission is mission gate
-GATE_START_DEPTH = -0.75            # This use to target depth of this mission
+GATE_START_DEPTH = -0.5            # This use to target depth of this mission
 GATE_START_FORWARD_TIME = 9         # This is limit of time to go forward
 GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
 GATE_START_SURVEY_TIME = 20         # This is limit time for go servey 
@@ -46,12 +46,12 @@ GATE_APPROVE_AGAIN = True           # This function help you.
 PATH_START_DEPTH = -1               # This will tell desire depth when want to start this mission
 PATH_TARGET_DEPTH = -2.4            # This target of path will want to go before do mission
 PATH_FIND_TIME = 5                  # Left is constant but right + 2 second
-PATH_FORCE_YAW = 0.3                # This variable is force to use rotation
-PATH_LAST_TIME = 8
+PATH_FORCE_YAW = 0.2                # This variable is force to use rotation
+PATH_LAST_TIME = 5
 PATH_END_DEPTH = -1.5               # This is absolute depth after do task path finish
 
 # Constant for mission buoy
-BUOY_START_DEPTH = -2.1             # This will tell desire depth when want to start this mission
+BUOY_START_DEPTH = -1.8             # This will tell desire depth when want to start this mission
 BUOY_FOUND_PICTURE = 1              # This use will deicision to change mode after found round
 BUOY_TIME_LOCK_TARGET = 60          # This is limit you still in mode lock target
 BUOY_AREA_ABORT = 8                 # In mode lock target you can out of loop by area
@@ -68,26 +68,39 @@ BUOY_TIME_TO_SURVEY = 5             # time to survey make increase opportunity t
 DROP_HAVE_TO_ROTATION = False
 DROP_RADIAN_TO_ROTATION = math.pi
 # ----> Below 4 constant variable will connect about depth to manage or doing process
-DROP_FIND_DEPTH = -0.5 
+DROP_FIND_DEPTH = -0.5
 DROP_START_DEPTH = -1.0             # Operator to do about search and start to find mission
 DROP_TARGET_DEPTH = -1.5            # Operator to using doing sub mission ( drop or open)
-DROP_ONLY_DEPTH = -2.5             # Depth for using guess drop garlic
-DROP_ACTION_DEPTH = -2.8            # Depth for using open action by survey
-DROP_STEP_DEPTH = -0.3             # Depth is use for relative depth to command
+DROP_ONLY_DEPTH = -2.5              # Depth for using guess drop garlic
+DROP_ACTION_DEPTH = -3.4            # Depth for using open action by survey
+DROP_STEP_DEPTH = -0.3              # Depth is use for relative depth to command
+DROP_BACKWARD_TIME = 5              # This time to backward before drop
+DROP_BACKWARD_FORCE=SURVEY_BACKWARD # This is force to backward before drop
 # ----> Below constant in mission will may use for case you see all
-DROP_WANT_OPEN = False             # This variable use to consider you want to try open or not
-DROP_FORCE_OPEN = -1.5             # This force will use survey open
-DROP_TIME_OPEN = 8                 # This is time to command same force
-DROP_FORCE_BACKWARD_ = -1.5
+DROP_WANT_OPEN = False              # This variable use to consider you want to try open or not
+DROP_FORCE_OPEN = -1.5              # This force will use survey open
+DROP_TIME_OPEN = 4                  # This is time to command same force
 # ----> Drop force yaw
 DROP_FORCE_YAW = 0.2         
 # ----> Below 3 constant is use about estimate center to do mission
-DROP_CENTER_X_DROP = 20
-DROP_CENTER_X_OPEN = -20
+DROP_CENTER_X_DROP = -40
+DROP_CENTER_X_OPEN = 20
 DROP_CENTER_Y = 55 # target of center y when you want to drop and can use for estimate open
 
+# Constant for operator exposed
+EXPOSED_START_DEPTH = -0.75
+EXPOSED_TARGET_DEPTH = -1.5
+EXPOSED_LIMIT_ROUND = 6             # This is limit round to find object
+EXPOSED_LIMIT_TIME = 10             # This is limit time to survey
+EXPOSED_FORCE_YAW = 0.2             # This is force to use rotation
+# ====> specific about check coffin
+EXPOSED_FORCE_TO_FIND = SURVEY_LEFT
+EXPOSED_FORCE_TO_BACK = SURVEY_RIGHT
+EXPOSED_CENTER_X_DIRECTION = 1.0
+EXPOSED_CENTER_X_NEW_GATE = 70
+EXPOSED_LIMIT_TIME_TO_FIND = 15 
+
 # Constant for operator stake
-#
 STAKE_Z_DOWN = -2.3
 STAKE_Z_FORCE_0 = -2
 STAKE_Z_UP = -1.7
@@ -108,22 +121,31 @@ STAKE_HEART_CENTER_Y = -10
 # ====> Mission Gate
 STRATEGY_TIME_SURVEY_PATH = 2               # Time to survey before pass gate
 STRATEGY_FORCE_SURVEY_PATH = SUPER_RIGHT    # Force to survey before pass gate
-STRATEGY_TIME_GATE_PATH = 20                # Time to forward and doing pass gate
+STRATEGY_TIME_GATE_PATH = 30                # Time to forward and doing pass gate
 STRATEGY_FORCE_GATE_PATH = SUPER_FORWARD    # Force to forward and doing pass gate
-STRATEGY_ROTATION_GATE_BUOY = math.pi / 4   # Use rotation when don't found path
+STRATEGY_ROTATION_GATE_BUOY = math.pi / 2   # Use rotation when don't found path
 # ====> Mission Buoy
 STRATEGY_DEPTH_BOUY = BUOY_START_DEPTH      # This depth will use in buoy mission
-STRATEGY_TIME_BUOY = 10                     # This is time to forward search direct after path
-STRATEGY_FORCE_BUOY = SURVEY_FORWARD        # This is force use to forward search direct after path
+STRATEGY_TIME_BUOY = 2                      # This is time to forward search direct after path
+STRATEGY_FORCE_BUOY = SURVEY_FORWARD        # This is force forward search direct after path
+STRATEGY_TIME_BUOY_SURVEY = 7               # This is time to survey after path to buoy
+STRATEGY_FORCE_BUOY_SURVEY = SURVEY_LEFT    # This is force survey after path to buoy
 STRATEGY_TIME_BUOY_PATH = 10                # This is time to use forward find buoy only direct 
 STRATEGY_FORCE_BUOY_PATH = SURVEY_FORWARD   # This is force use to direct after buoy to search path
 # ====> Mission DROP
-STRATEGY_ROTATION_BUOY_DROP = math.pi / -4 # This use rotation buoy to drop in case don't find path
-STRATEGY_DEPTH_FIND_DROP = DROP_FIND_DEPTH # This use to depth for find depth
+STRATEGY_ROTATION_BUOY_DROP = math.pi/-4.0  # This use rotation buoy to drop in case don't find path
+STRATEGY_DEPTH_FIND_DROP = DROP_FIND_DEPTH  # This use to depth for find depth
 STRATEGY_FREE_TIME_DROP = 6
+STRATEGY_FREE_FORCE_DROP = SUPER_FORWARD
 STRATEGY_FORCE_DROP = SURVEY_FORWARD
 STRATEGY_TIME_DROP = 20
 STRATEGY_DISTANCE_DROP = 6
+# ====> Mission Exposed
+STRATEGY_EXPOSED_FIND = EXPOSED_START_DEPTH
+STRATEGY_TIME_FORWARD = 10
+STRATEGY_FORCE_FORWARD = SURVEY_FORWARD
+STRATEGY_TIME_SURVEY = 5
+STRATEGY_FORCE_SURVEY = SURVEY_LEFT
 # ====> Mission Stake
 STRATEGY_STAKE_DEPTH_FIND = -3
 STRATEGY_FORCE_STAKE = 1.0

@@ -143,7 +143,7 @@ class Buoy:
                 elif( self.vision.result['center_x'] < -20 ):
                     relative_y = TARGET_LEFT
                 else:
-                    relative_x = TARGET_FORWARD
+                    relative_x = SUPER_FORWARD
 
                 self.control.publish_data( "Lock Target command force ({:4.2f},{:4.2f})".format(
                     relative_x , relative_y ) )
@@ -185,7 +185,7 @@ class Buoy:
         while( ( not rospy.is_shutdown() ) and ( diff_time < BUOY_LIMIT_TIME ) ):
             self.rate.sleep()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-            temp = self.control.force_xy( 1 , 0 )
+            temp = self.control.force_xy( SUPER_FORWARD , 0 )
             self.control.publish_data( "DASH Now distance is " + str( temp ) 
                 + " and time is " + str( diff_time ) )
 

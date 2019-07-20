@@ -111,11 +111,11 @@ class Path:
                                 self.control.publish_data( "I command depth to " 
                                     + str( target_depth ) )
                                 self.control.absolute_z( target_depth )
-                    elif( self.vision.num_point == 0 ):
+                    elif self.vision.num_point == 0 :
                         count_unfound += 1
                         self.control.publish_data( "FIND unfound count is " 
                             + str( count_unfound ) )
-                        if( count_unfound == 3 )
+                        if count_unfound == 3 :
                             real_found = False
                             break
                     else:
@@ -252,9 +252,9 @@ class Path:
             force_y = 0
             target_point = 0
             if( self.vision.x_point[ 0 ] < -15  ):
-                force_y = TARGET_RIGHT
-            elif( self.vision.x_point[ 0 ] > 15 ):
                 force_y = TARGET_LEFT
+            elif( self.vision.x_point[ 0 ] > 15 ):
+                force_y = TARGET_RIGHT 
             elif( self.vision.y_point[ 0 ] < -15 ):
                 force_x = TARGET_BACKWARD
             elif( self.vision.y_point[ 0 ] > 15 ):
@@ -334,7 +334,8 @@ class Path:
             self.rate.sleep()
             self.control.force_xy( SURVEY_FORWARD , 0 )
             diff_time = ( rospy.get_rostime() - start_time).to_sec()
-            self.control.publish_data( "MOVING_ON_PATH diff , limit " + repr( diff_time,limit) )
+            self.control.publish_data( "MOVING_ON_PATH diff , limit " 
+                + repr( (diff_time , PATH_LAST_TIME ) ) )
 
         self.control.activate( ['x' , 'y' ] )
         self.control.relative_xy( 0 , 0 )

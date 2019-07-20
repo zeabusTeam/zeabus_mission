@@ -59,7 +59,7 @@ class Gate:
             self.vision.call_data()
             self.vision.echo_data()
             if( self.vision.result['found'] ):
-                count += 1T_SEARCH
+                count += 1
                 self.control.publish_data( "START Found picture count is " + str( count ) )
                 self.last_distance_to_found = self.vision.result['distance']
             else:
@@ -82,7 +82,7 @@ class Gate:
                 if( self.vision.result['center_x'] < -30 ):
                     self.control.force_xy( 0.2 , SURVEY_LEFT )
                 elif( self.vision.result[ 'center_x' ] > 30 ):
-                    self.control.force_xy( 0.2 ,  )
+                    self.control.force_xy( 0.2 ,  SURVEY_RIGHT)
                 else:
                     self.control.publish_data( "START Now center change to lock target")
                     break
