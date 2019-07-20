@@ -55,27 +55,36 @@ BUOY_START_DEPTH = -2.1             # This will tell desire depth when want to s
 BUOY_FOUND_PICTURE = 1              # This use will deicision to change mode after found round
 BUOY_TIME_LOCK_TARGET = 60          # This is limit you still in mode lock target
 BUOY_AREA_ABORT = 8                 # In mode lock target you can out of loop by area
-BUOY_LIMIT_TIME = 15                # This is limit time of dash mode
+BUOY_LIMIT_TIME = 15                # This is limit time of dash mode only
+# ----> Below constant variable is use after finish dash mode
 BUOY_TARGET_DEPTH_FINISH = -0.5     # This is absolute depth when you finish dash mode
-BUOY_FORCE_SURVEY = 2
-BUOY_FORCE_FORWARD = 1.3
-BUOY_TIME_TO_BACK = 3              # forward will plus 5 second
-BUOY_TIME_TO_SURVEY = 5
+BUOY_FORCE_SURVEY = 2               # force to survey after dash mode
+BUOY_FORCE_FORWARD = 1.3            # force to forward and backward after dahs mode
+BUOY_TIME_TO_BACK = 3               # forward will plus 5 second
+BUOY_TIME_TO_SURVEY = 5             # time to survey make increase opportunity to find path
 
 # Constant for operator drop
-DROP_HAVE_TO_ROTATION_ = False
-DROP_RADIAN_TO_ROTATION_ = math.pi 
-DROP_START_DEPTH_ = -1.0 # operator to run this file
-DROP_TARGET_DEPTH_ = -1.5 # For doing individual mission drop or open
-DROP_ACTION_DEPTH_ = -2.8 # depth when you want to drop or open
-DROP_ONLY_DEPTH_ = -2.5 # Depth use to guess drop
-DROP_STEP_DEPTH_ = -0.3
-DROP_WANT_OPEN_ = False
-DROP_FORCE_OPEN_ = -1.5
-DROP_TIME_OPEN_ = 8
+# ----> Below 2 constan variable will help you to manage about flip mission or task 
+DROP_HAVE_TO_ROTATION = False
+DROP_RADIAN_TO_ROTATION = math.pi
+# ----> Below 4 constant variable will connect about depth to manage or doing process
+DROP_FIND_DEPTH = -0.5 
+DROP_START_DEPTH = -1.0             # Operator to do about search and start to find mission
+DROP_TARGET_DEPTH = -1.5            # Operator to using doing sub mission ( drop or open)
+DROP_ONLY_DEPTH = -2.5             # Depth for using guess drop garlic
+DROP_ACTION_DEPTH = -2.8            # Depth for using open action by survey
+DROP_STEP_DEPTH = -0.3             # Depth is use for relative depth to command
+# ----> Below constant in mission will may use for case you see all
+DROP_WANT_OPEN = False             # This variable use to consider you want to try open or not
+DROP_FORCE_OPEN = -1.5             # This force will use survey open
+DROP_TIME_OPEN = 8                 # This is time to command same force
 DROP_FORCE_BACKWARD_ = -1.5
-DROP_OFFSET_DROP_ = -20
-DROP_ONLY_ = 55 # target of center y when you want to drop and can use for estimate open
+# ----> Drop force yaw
+DROP_FORCE_YAW = 0.2         
+# ----> Below 3 constant is use about estimate center to do mission
+DROP_CENTER_X_DROP = 20
+DROP_CENTER_X_OPEN = -20
+DROP_CENTER_Y = 55 # target of center y when you want to drop and can use for estimate open
 
 # Constant for operator stake
 #
