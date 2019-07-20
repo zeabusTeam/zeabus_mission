@@ -209,10 +209,10 @@ class Exposed:
                                 self.rate.sleep()
                                 self.vision.call_data()
                                 self.vision.echo_data()
-                                if( self.vision.result['object_1']['rotation'] > 0.1 ):
+                                if( self.vision.result['object_1']['rotation'] > 0.12 ):
                                     self.control.publish_data("OPERATOR rotation left")
                                     self.control.force_xy_yaw( 0 , 0 , EXPOSED_FORCE_YAW )
-                                elif( self.vision.result['object_1']['rotation'] < -0.1 ):
+                                elif( self.vision.result['object_1']['rotation'] < -0.12 ):
                                     self.control.publish_data( "OPERATOR rotation right" )
                                     self.control.force_xy_yaw( 0 , 0 ,-EXPOSED_FORCE_YAW )
                                 else:
@@ -260,9 +260,17 @@ class Exposed:
                 break
             elif( self.vision.result['num_object'] == 1 ):
                if( self.vision.result['object_1']['center_x'] * EXPOSED_CENTER_X_DIRECTION ) >
-                    EXPOSED_CENTER_X_NEW_GATE :
+                    EXPOSED_CENTER_X_NEW_VALUE :
                     can_go_up = True 
                     self.control.force_xy( 0 , 0 )
+
+                    start_time = rospy.get_rostime()
+                    diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+                    while( not rospy.is_shutdown() ) and diff_time < 5 :
+                        self.rate.sleep()
+                        self.control.force_xy( 0 , EXPOSED_FORCE_TO_BACK )
+                        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+
                     self.control.publish_data( "TUNE_CENTER found new object")
                     break
                 else:
@@ -274,37 +282,44 @@ class Exposed:
 
         if( not can_go_up ):
             self.control.publish_data( "TUNE_CENTER We want to find again")
-            while( not rospy.is_shutdown() ):
+            start_time = rospy.get_rostime()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            while( not rospy.is_shutdown() ) and ( diff_time < EXPOSED_LIMIT_TIME_TO_FIND * 2.5 ):
                 self.vision.call_data()
                 self.vision.echo_data()
                 if( self.vision.result['num_object'] == 1 ):
-                    self.control.publish_data( "TUNE_CENTER have to tune center again")
-                    force_x = 0 
-                    force_y = 0
-                    ok_x = False
-                    ok_y = False
-                    if( self.vision.result['center_x'] > 10 ):
-                        force_y = TARGET_RIGHT 
-                    elif( self.vision.result['center_x'] < -10 ):
-                        force_y = TARGET_LEFT
-                    else:
-                        ok_y = True
-                    if( self.vision.result['center_y'] > 10 ):
-                        force_x = TARGET_FORWARD 
-                    elif( self.vision.result['center_y'] < -10 ):
-                        force_x = TARGET_BACKWARD
-                    else:
-                        ok_x = True
+                    while not rospy.is_shutdown() :
+                        self.vision.call_data()
+                        self.vision.echo_data()
+                        self.control.publish_data( "TUNE_CENTER have to tune center again")
+                        force_x = 0 
+                        force_y = 0
+                        ok_x = False
+                        ok_y = False
+                        if( self.vision.result['center_x'] > 10 ):
+                            force_y = TARGET_RIGHT 
+                        elif( self.vision.result['center_x'] < -10 ):
+                            force_y = TARGET_LEFT
+                        else:
+                            ok_y = True
+                        if( self.vision.result['center_y'] > 10 ):
+                            force_x = TARGET_FORWARD 
+                        elif( self.vision.result['center_y'] < -10 ):
+                            force_x = TARGET_BACKWARD
+                        else:
+                            ok_x = True
 
-                    if( ok_x and ok_y ):
-                        self.control.publish_data("TUNE_CENTER now opk")
-                        break
-                    else:
-                        self.control.publish_data( "TUNE_CENTER force " 
-                            + repr( (force_x, force_y ) ) )
-                        self.control.force_xy( force_x , force_y )
+                        if( ok_x and ok_y ):
+                            self.control.publish_data("TUNE_CENTER now opk")
+                            break
+                        else:
+                            self.control.publish_data( "TUNE_CENTER force " 
+                                + repr( (force_x, force_y ) ) )
+                            self.control.force_xy( force_x , force_y )
                 else:
                     self.control.force_xy( 0 , EXPOSED_FORCE_TO_BACK )
+
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
             self.control.publish_data( "TUNE_CENTER have to move out and go up")
             while( not rospy.is_shutdown() ):

@@ -96,8 +96,9 @@ EXPOSED_FORCE_YAW = 0.2             # This is force to use rotation
 # ====> specific about check coffin
 EXPOSED_FORCE_TO_FIND = SURVEY_LEFT
 EXPOSED_FORCE_TO_BACK = SURVEY_RIGHT
-EXPOSED_CENTER_X_DIRECTION = 1.0
-EXPOSED_CENTER_X_NEW_GATE = 70
+# ====> Two below constant have relative 
+EXPOSED_CENTER_X_DIRECTION = 1.0    # positive 1 in case you survey left and -1 in case right
+EXPOSED_CENTER_X_NEW_VALUE = 70
 EXPOSED_LIMIT_TIME_TO_FIND = 15 
 
 # Constant for operator stake
