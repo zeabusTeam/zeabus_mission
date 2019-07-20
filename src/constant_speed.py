@@ -106,24 +106,24 @@ STAKE_HEART_CENTER_Y = -10
 
 # Constant for connect mission
 # ====> Mission Gate
-STRATEGY_TIME_GATE_PATH_ = 20
-STRATEGY_FORCE_GATE_PATH_ = 2
-STRATEGY_TIME_SURVEY_PATH_ = 2
-STRATEGY_FORCE_SURVEY_PATH_ = 1.2
-STRATEGY_ROTATION_GATE_BUOY_ = math.pi / 4
+STRATEGY_TIME_SURVEY_PATH = 2               # Time to survey before pass gate
+STRATEGY_FORCE_SURVEY_PATH = SUPER_RIGHT    # Force to survey before pass gate
+STRATEGY_TIME_GATE_PATH = 20                # Time to forward and doing pass gate
+STRATEGY_FORCE_GATE_PATH = SUPER_FORWARD    # Force to forward and doing pass gate
+STRATEGY_ROTATION_GATE_BUOY = math.pi / 4   # Use rotation when don't found path
 # ====> Mission Buoy
-STRATEGY_DEPTH_BOUY_ = -1.7 # This depth will use in buoy mission
-STRATEGY_TIME_BUOY_ = 10 # This is time to forward search direct after path
-STRATEGY_FORCE_BUOY_ = 1.5  # This is force use to forward search direct after path
-STRATEGY_TIME_BUOY_PATH_ = 5
-STRATEGY_FORCE_BUOY_PATH_ = 1.2 # This is force use to go direct after buoy to path
+STRATEGY_DEPTH_BOUY = BUOY_START_DEPTH      # This depth will use in buoy mission
+STRATEGY_TIME_BUOY = 10                     # This is time to forward search direct after path
+STRATEGY_FORCE_BUOY = SURVEY_FORWARD        # This is force use to forward search direct after path
+STRATEGY_TIME_BUOY_PATH = 10                # This is time to use forward find buoy only direct 
+STRATEGY_FORCE_BUOY_PATH = SURVEY_FORWARD   # This is force use to direct after buoy to search path
 # ====> Mission DROP
-STRATEGY_ROTATION_BUOY_DROP_ = -1.0*math.pi / 4
-STRATEGY_DEPTH_FIND_DROP_ = -1
-STRATEGY_FREE_TIME_DROP_ = 6
-STRATEGY_FORCE_DROP_ = 1.5
-STRATEGY_TIME_DROP_ = 20
-STRATEGY_DISTANCE_DROP_ = 6
+STRATEGY_ROTATION_BUOY_DROP = math.pi / -4 # This use rotation buoy to drop in case don't find path
+STRATEGY_DEPTH_FIND_DROP = DROP_FIND_DEPTH # This use to depth for find depth
+STRATEGY_FREE_TIME_DROP = 6
+STRATEGY_FORCE_DROP = SURVEY_FORWARD
+STRATEGY_TIME_DROP = 20
+STRATEGY_DISTANCE_DROP = 6
 # ====> Mission Stake
 STRATEGY_STAKE_DEPTH_FIND = -3
 STRATEGY_FORCE_STAKE = 1.0

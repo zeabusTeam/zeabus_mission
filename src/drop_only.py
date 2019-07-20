@@ -382,7 +382,7 @@ class Drop:
                         + repr( ( min_y , max_y ) ) )
                     self.control.force_xy( force_x , force_y ) 
             else:
-                self.control.publish_data( "OPEN center mission unfound " + str( count_unfound ))
+                self.control.publish_data( "OPEN center mission unfound " +str(count_unfound) )
                 self.control.force_xy( 0 , 0 )
                 count_unfound += 1
 
