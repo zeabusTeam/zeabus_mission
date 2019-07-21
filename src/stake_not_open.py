@@ -44,7 +44,7 @@ class Stake:
 
         self.control.deactivate( [ 'x' , 'y' ] )
 
-        found_pitcure = False
+        found_picture = False
 
         while( not rospy.is_shutdown() ):
             self.rate.sleep()
@@ -116,18 +116,18 @@ class Stake:
                 ok_z = False
                 ok_x = False
                 if( self.vision.result['center'][0] > 20 ):
-                    force_y = -0.8
+                    force_y = TARGET_RIGHT
                 elif( self.vision.result['center'][0] < -20 ):
-                    force_y = 0.8
+                    force_y = TARGET_LEFT
                 else:
                     ok_x = True
 
                 if( not ok_x ):
                     pass
                 elif( self.vision.result['area'] < STAKE_AREA_ROTATION ):
-                    force_x = 0.4
+                    force_x = TARGET_FORWARD
                 elif( self.vision.result['area'] > STAKE_AREA_ROTATION_OVER ):
-                    force_x = -0.4
+                    force_x = TARGET_BACKWARD
                 else:
                     ok_z = True
 
@@ -200,9 +200,116 @@ class Stake:
         else:
             self.oval()
 
-    def heart( self ):
-        pass
+    # Lock target is function to fire will received target and try to call if ever found 
+    #   This function will return true
+    def lock_target( self , target , area ):
 
+        count_unfound = 0
+        count_found = 0
+        can_fire = False
+        while ( not rospy.is_shutdown() ) and count_unfound < 2:
+            self.rate.sleep()
+            self.vision.call_data( target )
+            self.vision.echo_data()
+
+            if( self.vision.result['found'] ):
+                count_found += 1
+                count_unfound = 0
+
+                if( count_found == 2 ):
+                    can_fire = True
+
+                force_x = 0 
+                force_y = 0
+                force_z = STAKE_Z_FORCE_0
+                ok_x = False
+                ok_y = False
+
+                if self.vision.result['center'][0] < STAKE_TARGET_X[0] :
+                    force_y = TARGET_LEFT
+                elif self.vision.result['center'][0] > STAKE_TARGET_X[1]:
+                    force_y = TARGET_RIGHT
+                else:
+                    ok_x = True
+
+                if self.vision.result['center'][1] < STAKE_TARGET_Y[0]:
+                    force_z = STAKE_Z_DOWN
+                elif self.vision.result['center'][1] > STAKE_TARGET_Y[1]:
+                    force_z = STAKE_Z_UP
+                else:
+                    ok_y = False
+
+                if( ok_x and ok_y ):
+                    if( self.vision.result['area'] >  area ):
+                        can_fire = True
+                        break
+                    else:
+                        force_x = TARGET_FORWARD 
+                self.control.force_xyz( force_x , force_y , force_z )
+                self.control.publish_data( "LOCK " + target 
+                    + " on area " + str( self.vision.result['area'] ) 
+                    + " command force " + repr( ( force_x , force_y , force_z ) ) )
+            else:
+                count_found = 0
+                count_unfound += 1
+                self.control.publish_data( "LOCK " + target + " unfound object!")
+                self.control.force_xyz( 0 , 0 , STAKE_Z_FORCE_0 )
+
+        if( can_fire ):
+            self.control.publish_data( "LOCK " + target + " Fire torpido!!!!!!!!!!")
+            start_time = rospy.get_rostime()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            while( not rospy.is_shutdown() ) and diff_time < 2 :
+                self.rate.sleep()
+                self.control.force_xyz( 0 , 0 , STAKE_Z_FORCE_0 )
+
+        return can_fire
+
+    def heart( self ):
+
+        self.control.activate( ['x' , 'y' , 'z'] )
+        self.control.sleep()
+        self.control.publish_data( "HEART start mission go to depth " + str( STAKE_START_DEPTH ) )
+        
+        while not self.control.check_z( 0.12 ):
+            self.rate.sleep()
+
+        self.control.publish_data( "HEART Try find target again" )
+        self.control.deactivate( ['x' , 'y' ] ) 
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        found_picture = False
+        while ( not rospy.is_shutdown() ) and diff_time < STAKE_LIMIT_TIME :
+            self.rate.sleep()
+            self.vision.call_data( STAKE_FIND_HEART )
+            self.vision.echo_data()
+            
+            if( self.vision.result['found'] ):
+                found_pitcure = True
+                if self.vision.result['center'][ 1 ] < -40 :
+                    self.control.relative_z( -0.3 )
+                elif( self.vision.result['center'][ 1 ] > 40 ):
+                    self.control.relative_z( 0.3 )
+                else:
+                    pass
+
+                force_x = 0
+                force_y = 0
+                if self.vision.result['center'][0] > 20 :
+                    force_y = TARGET_RIGHT
+                elif self.vision.result['center'][0] < -20 :
+                    force_y = TARGET_LEFT
+                else:
+                    pass
+
+                if self.vision.result['area'] > STAKE_AREA_ROTATION_OVER :
+                    force_x = TARGET_BACKWARD
+
+                self.control.force_xy( force_x , force_y )
+                break
+
+        
+        
     def oval( self ):
         self.control.deactivate( ['x' , 'y' , 'z'] ) 
 
@@ -210,7 +317,8 @@ class Stake:
         min_x = STAKE_OVAL_CENTER_X - 10
         max_x = STAKE_OVAL_CENTER_X + 10
         self.control.publish_data( "OVAL Mission start center x is " + str(STAKE_OVAL_CENTER_X))
-        while( not rospy.is_shutdown() ):
+        count_unfound = 0 
+        while( not rospy.is_shutdown() ) and count_unfound < 3 :
             self.rate.sleep()
             self.vision.call_data( STAKE_FIND_TARGET )
             self.vision.echo_data()
@@ -220,6 +328,17 @@ class Stake:
             ok_x = False
             ok_y = False
             ok_z = False
+            if self.lock_target( STAKE_OVAL_DIRECTION , STAKE_OVAL_AREA ) :
+                self.control.publish_data( "SPECIAL OVAL Have do mission end this process")
+                break
+
+            if not self.vision.result['found'] :
+                count_unfound += 1
+                self.control.publish_data( "Don't found picture count " + str( count_unfound ) )
+                self.control.force_xyz( 0 , 0 , STAKE_Z_FORCE_0 )
+                continue
+
+            count_unfound = 0
             if( self.vision.result[ 'top' ] > 90 ):
                 force_z = STAKE_Z_UP + 0.3
             elif( self.vision.result[ 'top' ] > 70 ):
@@ -238,63 +357,18 @@ class Stake:
             else:
                 ok_x = True
 
-            if( self.vision.result['area'] > 30 ):
-                force_x = -0.5
-            elif( self.vision.result['area'] < 10 ):
-                force_x = 0.5
-            else:
-                ok_z = True
-
-            if( ok_x and ok_y and ok_z):
-                self.control.publish_data( "OVAL Now x and y is center")
-                self.vision.call_data( STAKE_OVAL_DIRECTION )
-                if( self.vision.result[ 'found' ] ):
-                    while( not rospy.is_shutdown() ):
-                        self.rate.sleep()
-                        self.vision.call_data( STAKE_OVAL_DIRECTION )
-                        if( self.vision.result[ 'found' ] ):
-                            ok_x = False
-                            ok_y = False
-                            ok_z = False
-                            force_x = 0
-                            force_y = 0
-                            force_z = STAKE_Z_FORCE_0
-                            if( self.vision.result['center'][0] < (STAKE_TARGET_POINT[0]-10)):
-                                force_y = 0.8
-                            elif( self.vision.result['center'][0] > (STAKE_TARGET_POINT[1]+10)):
-                                force_y = -0.8
-                            else:
-                                ok_y = True
-                
-                            if( self.vision.result['center'][1] > (STAKE_TARGET_POINT[1]-10)):
-                                force_z = STAKE_Z_UP
-                            elif( self.vision.result['center'][1] < (STAKE_TARGET_POINT[1]+10)):
-                                force_z = STAKE_Z_DOWN
-                            else:
-                                ok_z = True
-
-                            if( self.vision.result['area'] < ( STAKE_OVAL_AREA ) ):
-                                force_x = 0.4
-                            else:
-                                ok_x = True
-
-                        if( ok_x and ok_y and ok_z ):
-                            self.control.force_xyz( force_x , force_y ,force_z )
-                            self.control.publish_data( "OVAL !!!!!!!!!!!!!! Command fireeeeee")
-                            rospy.sleep( 2 )
-                            break
-                        else:
-                            self.control.publish_data( 
-                                "SPECIAL OVAL force {:6.3f} {:6.3f} {:6.3f}".format(
-                                    force_x , force_y , force_z ) )
-                    self.control.publish_data( "SPECIAL OVAL finish do target")
-                    break
+            if( ok_x and ok_y ):
+                if( self.vision.result['area'] > 30 ):
+                    force_x = -0.5
+                elif( self.vision.result['area'] < 10 ):
+                    force_x = 0.5
                 else:
-                    self.control.publish_data( "SPECIAL OVAL don't found target")
-                    self.control.force_xyz( force_x , force_y , force_z )
+                    ok_z = True
             else:
-                self.control.publish_data( "OVAL force xyz " + repr((force_x, force_y, force_z)))
-                self.control.force_xyz( force_x , force_y , force_z )
+                pass
+
+            self.control.publish_data( "OVAL force xyz " + repr((force_x, force_y, force_z)))
+            self.control.force_xyz( force_x , force_y , force_z )
 
         self.control.publish_data( "OVAL finish fire next I will backward")
 
