@@ -58,7 +58,7 @@ class Stake:
                 ok_x = False
                 ok_y = True
                 ok_z = False
-                found_pitcure = True
+                found_picture = True
                 if( self.vision.result['center'][0] > 10 ):
                     force_y = -1.0
                 elif( self.vision.result['center'][0] < -10 ):
@@ -91,7 +91,7 @@ class Stake:
                     + str( STRATEGY_FORCE_STAKE ) )
 
         self.control.activate( [ 'x' , 'y' ] )
-        if( found_pitcure ):
+        if( found_picture ):
             self.operator()
 
     def operator( self ):
@@ -115,9 +115,9 @@ class Stake:
                 ok_y = False
                 ok_z = False
                 ok_x = False
-                if( self.vision.result['center'][0] > 20 ):
+                if( self.vision.result['center'][0] > 10 ):
                     force_y = TARGET_RIGHT
-                elif( self.vision.result['center'][0] < -20 ):
+                elif( self.vision.result['center'][0] < -10 ):
                     force_y = TARGET_LEFT
                 else:
                     ok_x = True
@@ -131,11 +131,11 @@ class Stake:
                 else:
                     ok_z = True
 
-                if( self.vision.result['center'][1] > 50 ):
+                if( self.vision.result['center'][1] > 40 ):
                     force_z = STAKE_Z_UP
                 elif( self.vision.result['center'][1] < -80 ):
                     force_z = STAKE_Z_DOWN - 0.5
-                elif( self.vision.result['center'][1] < -50 ):
+                elif( self.vision.result['center'][1] < -40 ):
                     force_z = STAKE_Z_DOWN
                 else:
                     ok_y = True
@@ -145,13 +145,14 @@ class Stake:
                     success_rotation = False
                     self.control.deactivate( ['x' , 'y' , 'z' , 'yaw' ] )
                     self.control.force_xyz( 0 , 0 , STAKE_Z_FORCE_0 )
+                    should_move = 0
                     while( not rospy.is_shutdown() and count_unfound < 3 ):
                         self.rate.sleep()
                         self.vision.call_data( STAKE_FIND_TARGET )
                         self.vision.echo_data()
                         if( self.vision.result['found'] ):
                             count_unfound = 0
-                            if( abs( self.vision.result['center'][0] ) > 40 ):
+                            if( abs( self.vision.result['center'][0] ) > 20 ):
                                 ok_x = False
                             else:
                                 ok_x = True
@@ -163,12 +164,14 @@ class Stake:
                                 + repr( (ok_x , ok_y ) ) )
                             if( ok_x and ok_y ):
                                 force_yaw = 0
-                                if( self.vision.result['rotation'] > 0.12 ):
+                                if( self.vision.result['rotation'] > STAKE_ROTATION ):
                                     self.control.force_xyz_yaw( 0 , 0 , STAKE_Z_FORCE_0 , 0.15 )
                                     self.control.publish_data("OPERATOR rotation left")
-                                elif( self.vision.result['rotation'] < -0.12 ):
+                                    should_move = TARGET_RIGHT
+                                elif( self.vision.result['rotation'] < -STAKE_ROTATION ):
                                     self.control.force_xyz_yaw( 0 , 0 , STAKE_Z_FORCE_0 , -0.15 )
                                     self.control.publish_data("OPERATOR rotation right")
+                                    should_move = TARGET_LEFT
                                 else:
                                     self.control.publish_data("OPERATOR success rotation")
                                     success_rotation = True   
@@ -182,6 +185,23 @@ class Stake:
                     self.control.activate( ['x' , 'y' , 'z' , 'yaw' ] )
                     self.control.sleep()
                     self.control.deactivate( ['x' , 'y' , 'z' ] )
+
+                    if( count_unfound == 3 ):
+                        start_time = rospy.get_rostime()
+                        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+
+                        while not rospy.is_shutdown() and diff_time < 6 :
+                            self.vision.call_data()
+                            self.vision.echo_data()
+                            if( self.vision.result['found'] ):
+                                self.control.publish_data( "OPERATOR Emergency found target")
+                                break
+                            else:
+                                self.control.force_xyz( 0 , should_move , STAKE_Z_FORCE_0 )
+                                self.control.publish_data( "OPERATOR Emergency move " 
+                                    + str( should_move ) )
+                            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+
                     if( success_rotation ):
                         self.control.publish_data("OPERATOR !!!!!!!!!!!!!!!!!!! Breaking")
                         break
@@ -262,6 +282,7 @@ class Stake:
             while( not rospy.is_shutdown() ) and diff_time < 2 :
                 self.rate.sleep()
                 self.control.force_xyz( 0 , 0 , STAKE_Z_FORCE_0 )
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
         return can_fire
 
@@ -269,7 +290,7 @@ class Stake:
 
         self.control.activate( ['x' , 'y' , 'z'] )
         self.control.sleep()
-        self.control.publish_data( "HEART start mission go to depth " + str( STAKE_START_DEPTH ) )
+        self.control.publish_data( "HEART start mission go to depth "+str( STAKE_START_DEPTH ) )
         
         while not self.control.check_z( 0.12 ):
             self.rate.sleep()
@@ -285,7 +306,7 @@ class Stake:
             self.vision.echo_data()
             
             if( self.vision.result['found'] ):
-                found_pitcure = True
+                found_picture = True
                 if self.vision.result['center'][ 1 ] < -40 :
                     self.control.relative_z( -0.3 )
                 elif( self.vision.result['center'][ 1 ] > 40 ):
@@ -307,8 +328,16 @@ class Stake:
 
                 self.control.force_xy( force_x , force_y )
                 break
+            else:
+                self.control.force_xy( TARGET_BACKWARD , 0 )
 
-        
+        if( found_picture ):
+            count_unfound = 0
+            while not rospy.is_shutdown() and count_unfound < 3 :
+                self.rate.sleep()
+                pass
+        else:
+            self.control.publish_data( "HEART can't do because don't found")
         
     def oval( self ):
         self.control.deactivate( ['x' , 'y' , 'z'] ) 
@@ -377,7 +406,7 @@ class Stake:
         while( ( not rospy.is_shutdown() ) and diff_time < STAKE_BACKWARD_TIME ):
             self.rate.sleep()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-            self.control.force_xyz( -0.8 , 0 , STAKE_Z_DOWN )
+            self.control.force_xyz( -0.8 , 0 , STAKE_Z_FORCE_0 )
             self.control.publish_data( "OVAL Backward time is " + str( diff_time ) )
 
         self.heart()  

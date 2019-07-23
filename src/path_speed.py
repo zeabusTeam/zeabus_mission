@@ -129,7 +129,7 @@ class Path:
 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             if( mode == 1 ):
-                self.control.force_xy( 0.1 , SURVEY_RIGHT )
+                self.control.force_xy( 0.1 , PATH_FIND_FIRST )
                 if( diff_time > PATH_FIND_TIME ):
                     self.control.publish_data( "FIND mode 1 time out")
                     mode = 2
@@ -138,7 +138,7 @@ class Path:
                     self.control.publish_data( "FIND mode 1 (diff , limit ) : " 
                         + repr( ( diff_time , PATH_FIND_TIME ) ) )
             elif( mode == 2 ):
-                self.control.force_xy( 0.1 , SURVEY_LEFT )
+                self.control.force_xy( 0.1 , PATH_FIND_SECOND )
                 if( diff_time > (PATH_FIND_TIME * 2.0) + 3 ):
                     self.control.publish_data( "FIND mode 2 time out")
                     mode = 3
@@ -147,7 +147,7 @@ class Path:
                     self.control.publish_data( "FIND mode 2 (diff , limit ) : " 
                         + repr( ( diff_time , PATH_FIND_TIME * 2.0 + 3 ) ) )
             elif( mode == 3 ):
-                self.control.force_xy( 0.1 , SUPER_RIGHT )
+                self.control.force_xy( 0.1 , PATH_FIND_FIRST )
                 if( diff_time > ( PATH_FIND_TIME + 3 ) ):
                     self.control.publish_data( "FIND mode 3 time out")
                     mode = 4 
@@ -222,7 +222,7 @@ class Path:
             self.vision.echo_data()
             diff = zeabus_math.bound_radian( self.vision.rotation[0] - ( math.pi / 2 ) )
             self.control.publish_data( "SETUP diff yaw is " + str( diff ) )
-            if( abs( diff ) < 0.1 ):
+            if( abs( diff ) < 0.2 ):
                 self.control.force_false()
                 self.control.publish_data( "Now rotation are ok" )
                 self.control.sleep()
@@ -309,7 +309,7 @@ class Path:
             diff = zeabus_math.bound_radian( self.vision.rotation[ self.vision.num_point -2 ] 
                 -  ( math.pi / 2 ) )
             self.control.publish_data( "MOVING_ON_PATH diff yaw is " + str( diff ) )
-            if( abs( diff ) < 0.1 ):
+            if( abs( diff ) < 0.2 ):
                 self.control.force_false()
                 self.control.publish_data( "Now rotation are ok" )
                 self.control.sleep()
