@@ -22,8 +22,8 @@ class Exposed:
 
     def __init__( self ):
 
-        self.vision = AnalysisCoffin( "base_coffin")
-        self.control = CommandInterfaces( "EXPOSED" )
+        self.vision = AnalysisCoffin( "base_path")
+        self.control = CommandInterfaces( "PATH" )
 
         self.rate = rospy.Rate( 5 )
 
@@ -57,16 +57,16 @@ class Exposed:
                 self.control.publish_data( "START found target command force "  
                     + repr( ( force_x , force_y ) ) )
                 if( self.vision.result['center_x'] < -20 ):
-                    force_y = TARGET_LEFT
+                    force_y = SURVEY_LEFT
                 elif self.vision.result['center_x']  > 20 :
-                    force_y = TARGET_RIGHT
+                    force_y = SURVEY_RIGHT
                 else:
                     ok_y = True
             
                 if( self.vision.result['center_y'] < -20 ):
-                    force_x = TARGET_BACKWARD
+                    force_x = SURVEY_BACKWARD
                 elif self.vision.result['center_y'] > 20:
-                    force_x = TARGET_FORWARD
+                    force_x = SURVEY_FORWARD
                 else:
                     ok_x = True 
 
@@ -115,7 +115,7 @@ class Exposed:
                 if( self.vision.result['center_x'] > 10 ):
                     force_y = SURVEY_RIGHT
                 elif self.vision.result['center_x' ] < -10 :
-                    force_y = SURVEY_LEFT
+                    force_y = SUPER_LEFT
                 else:
                     pass
 
@@ -126,7 +126,6 @@ class Exposed:
                 else:
                     pass
                 self.control.publish_data( "FIND force command " + repr(( force_x , force_y )))
-                self.control.force_xy( force_x , force_y ) 
                 continue
             else:
                 count_found = 0
@@ -145,7 +144,6 @@ class Exposed:
 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             if( diff_time > EXPOSED_LIMIT_TIME ):
-                start_time = rospy.get_rostime()
                 mode = ( mode + 1 ) % 3
                 self.control.publish_data( "FIND Change mode to " + str( mode ) )
             else:
@@ -173,7 +171,6 @@ class Exposed:
         target_depth = self.control.target_pose[ 2 ]
 
         while not rospy.is_shutdown()  and count_unfound < 3 :
-            self.rate.sleep()
             self.vision.call_data()
             self.vision.echo_data()
 
@@ -183,16 +180,16 @@ class Exposed:
                 force_x = 0
                 force_y = 0
 
-                if( self.vision.result['center_x'] > 20 ):
+                if( self.vision.result['center_x'] > 10 ):
                     force_y = TARGET_RIGHT 
-                elif( self.vision.result['center_x'] < -20 ):
+                elif( self.vision.result['center_x'] < -10 ):
                     force_y = TARGET_LEFT
                 else:
                     ok_y = True
 
-                if( self.vision.result['center_y'] > 20 ):
+                if( self.vision.result['center_y'] > 10 ):
                     force_x = TARGET_FORWARD
-                elif( self.vision.result['center_y'] < -20 ):
+                elif( self.vision.result['center_y'] < -10 ):
                     force_x = TARGET_BACKWARD
                 else:
                     ok_x = True
@@ -212,15 +209,14 @@ class Exposed:
                                 self.rate.sleep()
                                 self.vision.call_data()
                                 self.vision.echo_data()
-                                if( self.vision.result['object_1']['rotation'] > 0.15 ):
+                                if( self.vision.result['object_1']['rotation'] > 0.12 ):
                                     self.control.publish_data("OPERATOR rotation left")
                                     self.control.force_xy_yaw( 0 , 0 , EXPOSED_FORCE_YAW )
-                                elif( self.vision.result['object_1']['rotation'] < -0.15 ):
+                                elif( self.vision.result['object_1']['rotation'] < -0.12 ):
                                     self.control.publish_data( "OPERATOR rotation right" )
                                     self.control.force_xy_yaw( 0 , 0 ,-EXPOSED_FORCE_YAW )
                                 else:
                                     success_rotation = True
-                                    self.control.force_xy_yaw( 0, 0, 0 )
                                     break
                             self.control.activate( ['x' , 'y', 'yaw'] )
                             self.control.sleep()
@@ -254,8 +250,7 @@ class Exposed:
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
         can_go_up = False
-        while ( not rospy.is_shutdown() ) and diff_time < EXPOSED_LIMIT_TIME_TO_FIND :
-            self.rate.sleep()
+        while( not rospy.is_shutdown(() ) and diff_time < EXPOSED_LIMIT_TIME_TO_FIND :
             self.vision.call_data()
             self.vision.echo_data()
             if( self.vision.result['num_object'] == 2 ):
@@ -264,8 +259,8 @@ class Exposed:
                 self.control.publish_data( "TUNE_CENTER found two object")
                 break
             elif( self.vision.result['num_object'] == 1 ):
-                if( ( self.vision.result['object_1']['center_x'] * EXPOSED_CENTER_X_DIRECTION ) >
-                    EXPOSED_CENTER_X_NEW_VALUE ):
+               if( self.vision.result['object_1']['center_x'] * EXPOSED_CENTER_X_DIRECTION ) >
+                    EXPOSED_CENTER_X_NEW_VALUE :
                     can_go_up = True 
                     self.control.force_xy( 0 , 0 )
 
@@ -279,17 +274,7 @@ class Exposed:
                     self.control.publish_data( "TUNE_CENTER found new object")
                     break
                 else:
-                    force_x = 0
-                    if( self.vision.result['object_1']['center_y'] > 10 ):
-                        force_x = TARGET_FORWARD
-                    elif( self.vision.result['object_1']['center_y'] < -10 ):
-                        force_x = TARGET_BACKWARD
-                    else:
-                        force_x = 0
-                    self.control.publish_data( "TUNE_CENTER found same coffin and command "+repr(
-                        ( force_x , EXPOSED_FORCE_TO_FIND ) ) )
-                    self.control.force_xy( force_x , EXPOSED_FORCE_TO_FIND )
-                    start_time = rospy.get_rostime()
+                    self.control.publish_data( "TUNE_CENTER found same coffin")
             else:
                 diff_time = ( rospy.get_rostime() - start_time ).to_sec()
                 self.control.publish_data( "TUNE_CENTER Don'found object " + str( diff_time ) )
@@ -299,8 +284,7 @@ class Exposed:
             self.control.publish_data( "TUNE_CENTER We want to find again")
             start_time = rospy.get_rostime()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-            while( not rospy.is_shutdown() ) and (diff_time<EXPOSED_LIMIT_TIME_TO_FIND * 2.5 ):
-                self.rate.sleep()
+            while( not rospy.is_shutdown() ) and ( diff_time < EXPOSED_LIMIT_TIME_TO_FIND * 2.5 ):
                 self.vision.call_data()
                 self.vision.echo_data()
                 if( self.vision.result['num_object'] == 1 ):
@@ -332,9 +316,6 @@ class Exposed:
                             self.control.publish_data( "TUNE_CENTER force " 
                                 + repr( (force_x, force_y ) ) )
                             self.control.force_xy( force_x , force_y )
-                elif( self.vision.result['num_object'] == 2 ):
-                    self.control.force_xy( 0 , 0 )
-                    break
                 else:
                     self.control.force_xy( 0 , EXPOSED_FORCE_TO_BACK )
 
@@ -342,34 +323,23 @@ class Exposed:
 
             self.control.publish_data( "TUNE_CENTER have to move out and go up")
             while( not rospy.is_shutdown() ):
-                self.rate.sleep()
                 self.vision.call_data()
                 self.vision.echo_data()
                 if( self.vision.result['num_object'] == 0 ):
                     self.control.publish_data( "TUNE_CENTER don't found object" )
                     break
-                elif self.vision.result['num_object'] == 2 :
-                    self.control.publish_data( "TUNE_CENTER found 2 object")
-                    self.control.force_xy( 0 , 0 )
-                    break
                 else:
-                    if( self.vision.result['center_x'] * EXPOSED_CENTER_X_DIRECTION > 40 ):
-                        self.control.publish_data( "TUNE_CENTER center is limit" )
-                        break
-                    else:
-                        self.control.publish_data( "TUNE_CENTER still found object" )
-                self.control.force_xy( 0 , EXPOSED_FORCE_TO_BACK )
+                    self.control.publish_data( "TUNE_CENTER still found object" )
 
         self.control.absolute_z( -0.2 )
-        self.control.publish_data( "TUNE_CENTER command to depth and waiting")
-        self.control.sleep()
+        self.control.publish_data( "TUNE_CENTER command to depth")
         while( not self.control.check_z( 0.2 ) ):
             self.rate.sleep()
 
         self.control.publish_data( "TUNE_CENTER have to sleep")
         self.control.deactivate( ['x' , 'y' , 'z' , 'yaw'] )
-        rospy.sleep( 8 )
-        self.control.activate( ['x' , 'y' , 'z' , 'yaw' ] )
+        rospy.sleep( 6 )
+        self.control.activate( ['x' . 'y' . 'z' . 'yaw' ] )
         self.control.publish_data( "TUNE_CENTER have to wakeup")
         
 if __name__=="__main__" :
