@@ -335,7 +335,7 @@ class Drop:
             else:
                 count_unfound+=1
                 self.control.publish_data( "OPEN Don't found target " + str( count_unfound ) )
-                self.control.force_xy( TARGET_FORWARD , DROP_FORCE_FOR_FIND )
+                self.control.force_xy( TARGET_FORWARD , 0 )
 
         while( ( not rospy.is_shutdown() ) and  count_unfound < 5 ):
             self.rate.sleep()
@@ -351,9 +351,9 @@ class Drop:
                 ok_x = False
                 ok_y = False
 
-                if( self.vision.result['center_y'] > DROP_CENTER_Y + 10 ):
+                if( self.vision.result['center_y'] > 10 ):
                     force_x = 0.4
-                elif( self.vision.result['center_y'] < DROP_CENTER_Y - 10 ):
+                elif( self.vision.result['center_y'] < -10 ):
                     force_x = -0.4
                 else:
                     ok_x = True
@@ -399,7 +399,7 @@ class Drop:
             start_time = rospy.get_rostime()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
-            while( ( not rospy.is_shutdown() ) and diff_time < DROP_TIME_OUT ):
+            while( ( not rospy.is_shutdown() ) and diff_time < DROP_TIME_OPEN ):
                 self.rate.sleep()
                 self.control.force_xy( -0.2 , -1.0*DROP_FORCE_OPEN )
                 diff_time = ( rospy.get_rostime() - start_time ).to_sec()
@@ -410,17 +410,11 @@ class Drop:
             while( not self.control.check_z( 0.12 ) ):
                 self.rate.sleep()
 
-            self.control.absolute_z( DROP_ACTION_DEPTH )
-
             start_time = rospy.get_rostime()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-            while( ( not rospy.is_shutdown() ) and diff_time < DROP_TIME_OPEN ):
+            while( ( not rospy.is_shutdown() ) and diff_time < DROP_TIME_OPEN * 3 ):
                 self.rate.sleep()
-                if( diff_time < DROP_TIME_OPEN / 2 ):
-                    self.control.force_xy( -0.05 , DROP_FORCE_OPEN )
-                else:
-                    self.control.absolute_z( DROP_ACTION_DEPTH + 0.25 )
-                    self.control.force_xy( -0.1 , DROP_FORCE_OPEN * 1.5)
+                self.control.force_xy( 0 , DROP_FORCE_OPEN )
                 diff_time = ( rospy.get_rostime() - start_time ).to_sec()
                 self.control.publish_data( "OPEN move right time is " + str( diff_time ))
 
