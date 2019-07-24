@@ -34,10 +34,6 @@ from zeabus.vision.analysis_buoy import AnalysisBuoy
 from drop_only import Drop
 from zeabus.vision.analysis_drop import AnalysisDrop
 
-# For doing exposed mission
-from exposed_speed import Exposed
-from zeabus.vision.analysis_coffin import AnalysisCoffin
-
 # Standard for connect with control
 from zeabus.control.command_interfaces import CommandInterfaces
 
@@ -74,11 +70,6 @@ class StrategySpeed:
         # Step setup mission Drop
         self.mission_drop = Drop()
         self.vision_drop = AnalysisDrop()
-
-        # Step setup mission exposed
-        if( STRATEGY_PLAY_SECOND_LAST ):
-            self.mission_exposed = Exposed()        
-            self.vision_exposed = AnalysisCoffin()
 
         self.current_play = False
 
@@ -135,9 +126,8 @@ class StrategySpeed:
 
             if( count == 2 ):
                 self.control.publish_data("!!!!!!!!! STRATEGY FIND PATH !!!!!!!!!!!!!" )
-                target_depth = -1.4
-                count_unfound = 0 
-                while( not rospy.is_shutdown() and count_unfound < 4 ):
+                target_depth = -1.0
+                while( not rospy.is_shutdown() ):
                     self.rate.sleep()
                     self.vision_path.call_data()
                     self.vision_path.echo_data()
@@ -149,19 +139,19 @@ class StrategySpeed:
                     
                     if( self.vision_path.num_point == 0 ):
                         relative_y = 0
-                    elif( self.vision_path.x_point[0] > 40 ):
-                        relative_y = SUPER_RIGHT
-                    elif( self.vision_path.x_point[0] < -40 ):
-                        relative_y = SUPER_LEFT
+                    elif( self.vision_path.x_point[0] > 30 ):
+                        relative_y = SURVEY_RIGHT
+                    elif( self.vision_path.x_point[0] < -30 ):
+                        relative_y = SURVEY_LEFT
                     else:
                         ok_y = True
 
                     if( self.vision_path.num_point == 0):
                         relative_x = 0
-                    elif( self.vision_path.y_point[0] > 30 ):
-                        relative_x = SUPER_FORWARD
-                    elif( self.vision_path.y_point[0] < -30 ):
-                        relative_x = SUPER_BACKWORD
+                    elif( self.vision_path.y_point[0] > 20 ):
+                        relative_x = SURVEY_FORWARD
+                    elif( self.vision_path.y_point[0] < -20 ):
+                        relative_x = SURVEY_BACKWARD
                     else:
                         ok_x = True
 
@@ -199,7 +189,6 @@ class StrategySpeed:
         else:
             self.control.publish_data( "STRATEGY don't found picture I will rotation" )
             self.control.relative_yaw( STRATEGY_ROTATION_GATE_BUOY )
-            self.control.sleep()
 
         self.control.publish_data( "STRATEGY waiting yaw before start path")
         while( not self.control.check_yaw( 0.15 ) ):
@@ -216,21 +205,11 @@ class StrategySpeed:
         self.control.deactivate( ['x' , 'y'] )
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-        count_found = 0
         while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_BUOY_SURVEY ):
             self.control.force_xy( 0 , STRATEGY_FORCE_BUOY_SURVEY )
-            self.vision_buoy.call_data()
-            self.vision_buoy.echo_data()
-            if( self.vision_buoy.result[ 'found' ] ):
-                count_found += 1
-                if count_found == 5 :
-                    break
-            else:
-                count_found = 0
             self.rate.sleep()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-            self.control.publish_data( "STRATEGY Survey is diff time " + str( diff_time ) 
-                + " and count is " + str( count_found ) )
+            self.control.publish_data( "STRATEGY Survey is diff time " + str( diff_time ) )
 
         self.control.force_xy( 0 , 0 )
         start_time = rospy.get_rostime()
@@ -475,6 +454,7 @@ class StrategySpeed:
                 break
 
         self.control.activate( ['x' , 'y' ] )
+        self.control.relative_xy( 0 , 0 )
 
         if( count_found > 0 ):
             self.control.publish_data( "Found picture next play drop by operator function")
@@ -482,93 +462,10 @@ class StrategySpeed:
         else:
             self.control.publish_data( "Don't found drop" )
 
-    # Part of second last mission
-
-        if( STRATEGY_PLAY_SECOND_LAST ):
-           if( not STRATEGY_HAVE_PINGER ):
-                self.no_pinger_process() 
-
     # End part of play all mission
 
         self.control.publish_data( "Finish all strategy mission" )
-        self.control.deactivate( ["x", "y", "z", "roll", "pitch", "yaw"] )
-
-    def no_pinger_process( self ):
-        self.control.publish_data( "NO_PINGER welcome to process of no pinger case")
-
-        self.control.publish_data( "NO_PINGER EXPOSED command depth "+str(EXPOSED_START_DEPTH) )
-        self.control.absolute_z( EXPOSED_START_DEPTH )
-        self.control.publish_data( "NO_PINGER EXPOSED rotation "+str(STRATEGY_ROTATION_EXPOSED))
-        self.control.relative_yaw( STRATEGY_ROTATION_EXPOSED )
-        self.control.sleep()
-
-        while( not self.control.check_z( 0.12 ) ):
-            self.rate.sleep()
-
-        while( not self.control.check_yaw( 0.12) ):
-            self.rate.sleep()
-
-        self.control.deactivate( [ 'x' , 'y' ] )
-
-        self.control.publish_data( "NO_PINGER EXPOSED forwrd to find exposed")
-        count_found = 0
-        start_time = rospy.get_rostime()
-        diff_time = ( rospy.get_rostime() - start_time ).to_sec() 
-        while( not rospy.is_shutdown() and diff_time < STRATEGY_TIME_FORWARD and count_found<5 ):
-            self.rate.sleep()
-            self.vision_exposed.call_data()
-            self.vision_exposed.echo_data()
-            if( self.vision_exposed.result['num_object'] > 0 ):
-                count_found += 1
-                force_x = 0
-                force_y = 0
-                ok_x = False
-                ok_y = False
-                self.control.publish_data( "NO_PINGER EXPOSED found target command force "  
-                    + repr( ( force_x , force_y ) ) )
-                if( self.vision_exposed.result['center_x'] < -20 ):
-                    force_y = TARGET_LEFT
-                elif self.vision_exposed.result['center_x']  > 20 :
-                    force_y = TARGET_RIGHT
-                else:
-                    ok_y = True
-            
-                if( self.vision_exposed.result['center_y'] < -20 ):
-                    force_x = TARGET_BACKWARD
-                elif self.vision_exposed.result['center_y'] > 20:
-                    force_x = TARGET_FORWARD
-                else:
-                    ok_x = True 
-
-                if( ok_x and ok_y ):
-                    count_found = 5
-                    self.control.publish_data( "NO_PINGER EXPOSED now center point of coffin")
-                else:
-                    self.control.force_xy( force_x , force_y )
-                    self.control.publish_data( "NO_PINGER EXPOSED Have picture command "+repr( (
-                        force_x , force_y ) ) )
-            else:
-                count_found = 0
-                self.control.force_xy( SURVEY_FORWARD , 0 )
-                self.control.publish_data("NO_PINGER EXPOSED don't found picture")
-            diff_time = (rospy.get_rostime() - start_time).to_sec()
-
-        self.control.activate( [ 'x' , 'y' ] )
-
-        success_exposed = False        
-
-        if( count_found == 5 ):
-            self.control.publish_data( "NO_PINGER EXPOSED finish and found object let operator")
-            self.operator()
-            success_exposed = True
-        else:
-            self.control.publish_data( "NO_PINGER EXPOSED finish don't found let find coffin")
-            success_exposed = self.find()
-
-        if( success_exposed ):
-            self.control.publish_data( "NO_PINGER Finish EXPOSED")
-        else:
-            self.control.publish_data( "NO_PINGER don't finish exposed")
+        self.control.deactivate( ["x", "y", "z", "roll", "pitch", "yaw"])
 
     def callback_service( self , request ):
 
@@ -587,3 +484,4 @@ if __name__=="__main__":
     rospy.init_node('strategy_mission')
 
     mission = StrategySpeed()
+
