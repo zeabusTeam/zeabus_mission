@@ -136,8 +136,6 @@ class Buoy:
 
             relative_x = 0
             relative_y = 0
-            ok_x = False
-            ok_y = False
             if( self.vision.result['found'] ):
                 unfound = 0
                 if( self.vision.result['center_x'] > 20 ):
@@ -145,19 +143,13 @@ class Buoy:
                 elif( self.vision.result['center_x'] < -20 ):
                     relative_y = TARGET_LEFT
                 else:
-                    ok_y = True
-
-                if( self.vision.result['area'] < BUOY_AREA_ABORT ):
-                    if( ok_y ):
-                        relative_x = TARGET_FORWARD
-                else:
-                    ok_x = True
+                    relative_x = SUPER_FORWARD
 
                 self.control.publish_data( "Lock Target command force ({:4.2f},{:4.2f})".format(
                     relative_x , relative_y ) )
                 self.control.force_xy( relative_x , relative_y )
 
-                if( ok_x and ok_y ):
+                if( self.vision.result['area'] > BUOY_AREA_ABORT ):
                     self.control.publish_data( "Break from area condition") 
                     break 
 
@@ -167,7 +159,6 @@ class Buoy:
                 if( unfound == 2 ):
                     self.control.publish_data( "Move to dash_mode")
                     break
-                self.control.force_xy( 0 , 0 )
 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             if( ( diff_time / warning_time ) > 1 ):
