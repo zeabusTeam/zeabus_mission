@@ -257,6 +257,7 @@ class Stake:
 
         if( can_fire ):
             self.control.publish_data( "LOCK " + target + " Fire torpido!!!!!!!!!!")
+            self.control.command_torpido( True )
             start_time = rospy.get_rostime()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             while( not rospy.is_shutdown() ) and diff_time < 2 :

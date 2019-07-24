@@ -282,6 +282,7 @@ class Drop:
 
             self.control.force_xy( 0 , 0 ) 
             self.control.publish_data( "DROPING !!!!!!!!!!!!!!!!!!!!!!!!!!! Finish")
+            self.control.command_gripper( True )
             self.control.sleep()
 
         self.control.absolute_z( DROP_TARGET_DEPTH )
