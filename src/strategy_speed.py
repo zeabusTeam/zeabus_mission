@@ -30,6 +30,10 @@ from zeabus.vision.analysis_path import AnalysisPath
 from buoy_speed import Buoy
 from zeabus.vision.analysis_buoy import AnalysisBuoy
 
+# For doung drop mission
+from drop_only import Drop
+from zeabus.vision.analysis_drop import AnalysisDrop
+
 # Standard for connect with control
 from zeabus.control.command_interfaces import CommandInterfaces
 
@@ -38,7 +42,9 @@ from zeabus.math import general as zeabus_math
 
 from zeabus_utility.srv import SendBoolResponse, SendBool
 
+# Import constant
 from constant_speed import *
+from zeabus.vision.analysis_constant import *
 
 class StrategySpeed:
 
@@ -60,6 +66,10 @@ class StrategySpeed:
         # Step setup mission Buoy
         self.mission_buoy = Buoy()
         self.vision_buoy = AnalysisBuoy()
+
+        # Step setup mission Drop
+        self.mission_drop = Drop()
+        self.vision_drop = AnalysisDrop()
 
         self.current_play = False
 
@@ -93,8 +103,19 @@ class StrategySpeed:
         diff_time = ( rospy.get_rostime() - start_time ).to_sec() 
 
         self.control.deactivate( ['x' , 'y' ] )
+
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_SURVEY_PATH ):
+            self.rate.sleep()
+            self.control.force_xy( 0 , STRATEGY_FORCE_SURVEY_PATH )
+            self.control.publish_data( "STRATEGY survey before path " + str(diff_time)  ) 
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        
         count = 0
-        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_GATE_PATH_ ):
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_GATE_PATH ):
             self.rate.sleep()
             self.vision_path.call_data()
             self.vision_path.echo_data()
@@ -119,25 +140,25 @@ class StrategySpeed:
                     if( self.vision_path.num_point == 0 ):
                         relative_y = 0
                     elif( self.vision_path.x_point[0] > 30 ):
-                        relative_y = -PATH_FORCE_Y_
+                        relative_y = SURVEY_RIGHT
                     elif( self.vision_path.x_point[0] < -30 ):
-                        relative_y = PATH_FORCE_Y_
+                        relative_y = SURVEY_LEFT
                     else:
                         ok_y = True
 
                     if( self.vision_path.num_point == 0):
                         relative_x = 0
                     elif( self.vision_path.y_point[0] > 20 ):
-                        relative_x = PATH_FORCE_X_
+                        relative_x = SURVEY_FORWARD
                     elif( self.vision_path.y_point[0] < -20 ):
-                        relative_x = -PATH_FORCE_X_
+                        relative_x = SURVEY_BACKWARD
                     else:
                         ok_x = True
 
                     if( ok_x and ok_y ):
                         self.control.force_xy( 0 , 0 )
                         if( self.control.check_z( 0.15 ) ):
-                            if( target_depth < -2.4 ):
+                            if( target_depth < PATH_TARGET_DEPTH ):
                                 self.control.publish_data( "STRATEGY Breaking and setup point")
                                 break
                             else:
@@ -155,7 +176,7 @@ class StrategySpeed:
 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec() 
             self.control.publish_data( "STRATEGY forward time is " + str( diff_time ) )
-            self.control.force_xy( STRATEGY_FORCE_GATE_PATH_ , 0 )
+            self.control.force_xy( STRATEGY_FORCE_GATE_PATH , 0 )
 
         self.control.relative_xy( 0 , 0 )
         self.control.activate( ['x' , 'y'] )
@@ -167,28 +188,42 @@ class StrategySpeed:
             self.mission_path.setup_point()
         else:
             self.control.publish_data( "STRATEGY don't found picture I will rotation" )
-            self.control.relative_yaw( STRATEGY_ROTATION_GATE_BUOY_ )
+            self.control.relative_yaw( STRATEGY_ROTATION_GATE_BUOY )
 
         self.control.publish_data( "STRATEGY waiting yaw before start path")
         while( not self.control.check_yaw( 0.15 ) ):
             self.rate.sleep()
 
         # Part of mission buoy
+        self.control.publish_data( "STRATEGY Command depth " + str( STRATEGY_DEPTH_BOUY ) )
+        self.control.absolute_z( STRATEGY_DEPTH_BOUY )
+        self.control.sleep()
+        while( ( not self.control.check_z( 0.12 ) ) ):
+            self.rate.sleep()
 
-        self.control.publish_data( "STRATEGY start forward for init do mission buoy" )
+        self.control.publish_data( "STRATEGY start survey for init do mission buoy" )
         self.control.deactivate( ['x' , 'y'] )
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_BUOY_SURVEY ):
+            self.control.force_xy( 0 , STRATEGY_FORCE_BUOY_SURVEY )
+            self.rate.sleep()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            self.control.publish_data( "STRATEGY Survey is diff time " + str( diff_time ) )
+
+        self.control.force_xy( 0 , 0 )
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
         count_found = 0
         pass_buoy = False
-        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_BUOY_ ):
+        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_BUOY ):
             self.rate.sleep()
             self.vision_buoy.call_data()
             self.vision_buoy.echo_data()
         
             if( self.vision_buoy.result[ 'found' ] ):
                 count_found += 1
-                if( count_found == BUOY_FORCE_FORWARD_ ):
+                if( count_found == 2 ):
                     self.control.publish_data( "STRATEGY I will call mission_buoy lock_target")
                     self.mission_buoy.lock_target()
                     pass_buoy = True
@@ -198,18 +233,18 @@ class StrategySpeed:
                 force_x = 0 
                 force_y = 0
                 if( self.vision_buoy.result[ 'center_x'] < -20 ):
-                    force_y = 1.0
+                    force_y = TARGET_LEFT
                 elif( self.vision_buoy.result[ 'center_x'] > 20 ):
-                    force_y = -1.0
+                    force_y = TARGET_RIGHT
                 else:
-                    force_x = 1.5
-                self.control.publish_data( "Command force_xy is " + repr( (force_x , force_y) ) )
+                    force_x = TARGET_LEFT
+                self.control.publish_data( "Command force_xy is " + repr((force_x , force_y)) )
                 self.control.force_xy( force_x , force_y )
 
             else:
                 self.control.publish_data( "STRATEGY I not found bouy")
                 count_found = 0
-                self.control.force_xy( STRATEGY_FORCE_BUOY_ , 0 )
+                self.control.force_xy( STRATEGY_FORCE_BUOY , 0 )
 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
                 
@@ -230,7 +265,7 @@ class StrategySpeed:
         self.control.absolute_z( -1 )
         self.control.deactivate( ['x' , 'y' ] )
         count = 0
-        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_BUOY_PATH_ ):
+        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_BUOY_PATH ):
             self.rate.sleep()
             self.vision_path.call_data()
             self.vision_path.echo_data()
@@ -258,25 +293,27 @@ class StrategySpeed:
                         relative_y = 0
                         break
                     elif( self.vision_path.x_point[0] > 30 ):
-                        relative_y = -PATH_FORCE_Y_
+                        relative_y = TARGET_RIGHT
                     elif( self.vision_path.x_point[0] < -30 ):
-                        relative_y = PATH_FORCE_Y_
+                        relative_y = TARGET_LEFT
                     else:
                         ok_y = True
 
                     if( self.vision_path.num_point == 0):
                         relative_x = 0
+                    elif( self.vision_path.y_point[0] < -60 ):
+                        relative_x = TARGET_BACKWARD * 2.0
                     elif( self.vision_path.y_point[0] > 20 ):
-                        relative_x = PATH_FORCE_X_
+                        relative_x = TARGET_FORWARD
                     elif( self.vision_path.y_point[0] < -20 ):
-                        relative_x = -PATH_FORCE_X_
+                        relative_x = TARGET_BACKWARD
                     else:
                         ok_x = True
 
                     if( ok_x and ok_y ):
                         self.control.force_xy( 0 , 0 )
                         if( self.control.check_z( 0.15 ) ):
-                            if( target_depth < -2.4 ):
+                            if( target_depth < PATH_TARGET_DEPTH ):
                                 self.control.publish_data( "Breaking and go to setup point")
                                 break
                             else:
@@ -294,11 +331,13 @@ class StrategySpeed:
 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec() 
             self.control.publish_data( "STRATEGY forward time is " + str( diff_time ) )
-            self.control.force_xy( STRATEGY_FORCE_BUOY_PATH_ , 0 )
+            self.control.force_xy( STRATEGY_FORCE_BUOY_PATH , 0 )
 
-        # End part to search
+        # End part to search parh
 
         self.control.activate( ['x' , 'y'] )
+        self.control.relative_xy( 0 , 0 )
+        self.control.sleep()
         
         if( count == 2 ):
             self.control.publish_data( "I start path by ever found path" )
@@ -309,11 +348,119 @@ class StrategySpeed:
                 self.control.publish_data( "Good luck You finish second path")
             else:
                 self.control.publish_data( "It bad you failure mission path rotation to drop" )
-                self.control.relative_yaw( STRATEGY_ROTATION_BUOY_DROP_ )
+                self.control.relative_yaw( STRATEGY_ROTATION_BUOY_DROP )
 
-        self.control.publish_data( "I will waiting yaw before do next process")
-        while( not self.control.check_yaw( 0.15 ) ):
+        # Start part for search drop garliac mission
+        self.control.activate( ['x' , 'y'] )
+        self.control.relative_xy( 0 , 0 )
+        self.control.sleep()
+
+        self.control.absolute_z( STRATEGY_DEPTH_FIND_DROP )
+        self.control.sleep()
+        self.control.publish_data( "Waiting depth at error ok 0.5 meters" )
+        while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
+
+        self.control.publish_data( "Waiting yaw")
+        while( not self.control.check_yaw( 0.12 ) ):
+            self.rate.sleep()
+
+        self.control.deactivate( ['x' , 'y'] )
+        self.control.force_xy( STRATEGY_FORCE_DROP , 0 )
+
+        # Move free move
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        self.control.publish_data( "STRATEGY Move free time for drop")
+        while( (not rospy.is_shutdown() ) and diff_time < STRATEGY_FREE_TIME_DROP ):
+            self.rate.sleep()
+            self.control.force_xy( STRATEGY_FREE_FORCE_DROP , 0 )
+            self.control.publish_data( "STRATEGY Move free time is " 
+                + repr( ( diff_time , STRATEGY_FREE_TIME_DROP ) ) )
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        self.control.publish_data( "START FORWARD TO FIND DROP MISSION" )
+        count_found = 0
+        self.control.force_xy( STRATEGY_FORCE_DROP , 0 , True )
+        while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_DROP ):
+            self.rate.sleep()
+            self.vision_drop.call_data( DROP_FIND_TARGET )
+            self.vision_drop.echo_data()
+            if( self.vision_drop.result['found'] ):
+                count_found += 1
+                if( count_found == 5 ):
+                    self.control.publish_data( "STRATEGY Focuse on target")
+                    target_depth = STRATEGY_DEPTH_FIND_DROP
+                    self.control.force_xy( 0 , 0 )                
+                    while( ( not rospy.is_shutdown() ) and count_found > 0 ):
+                        self.rate.sleep()
+                        self.vision_drop.call_data( DROP_FIND_TARGET )
+                        self.vision_drop.echo_data()
+                        if( self.vision_drop.result['found'] ):
+                            count_found = 5
+                        else:
+                            count_found -= 1
+                            self.control.publish_data( "Don't found picture " 
+                                + str( count_found ) )
+                            continue
+                        force_x = 0 
+                        force_y = 0
+                        if( ( abs( self.vision_drop.result['center_x'] ) > 15 ) or
+                                ( abs( self.vision_drop.result['center_y'] ) > 15 ) ):
+
+                            if( self.vision_drop.result['center_y'] <  -15 ):
+                                force_x = TARGET_BACKWARD
+                            elif( self.vision_drop.result['center_y'] > 15 ):
+                                force_x = TARGET_FORWARD
+                            else:
+                                pass
+
+                            if( self.vision_drop.result['center_x'] > 15 ):
+                                force_y = SURVEY_RIGHT
+                            elif( self.vision_drop.result['center_x'] < -15 ):
+                                force_y = SURVEY_LEFT
+                            else:
+                                pass
+
+                            self.control.publish_data("Command force {:6.3f} , {:6.3f}".format(
+                                force_x , force_y ) ) 
+                            self.control.force_xy( force_x , force_y )
+                        else:
+                            if( self.control.check_z( 0.12 ) ):
+                                if( target_depth > DROP_START_DEPTH ):
+                                    self.control.publish_data( "Command to depth at " 
+                                        + str( DROP_START_DEPTH ) )
+                                    self.control.absolute_z( DROP_START_DEPTH )
+                                    target_depth = DROP_START_DEPTH
+                                else:
+                                    self.control.publish_data( "Depth is ok")
+                                    break
+                            else:
+                                self.control.force_xy( 0 , 0 )
+                                self.control.publish_data( "Now center waiting detph")
+                    break
+            else:
+                count_found = 0
+            distance = self.control.force_xy( STRATEGY_FORCE_DROP , 0 ) 
+            diff_time = (rospy.get_rostime() - start_time).to_sec()
+            self.control.publish_data( 
+                "time ( {:6.3f} , {:6.3f} ) and distance ( {:6.3f} , {:6.3f} ) found ".format(
+                    diff_time , STRATEGY_TIME_DROP , distance , STRATEGY_DISTANCE_DROP ) 
+                + str( count_found ) )
+            if( distance > STRATEGY_DISTANCE_DROP ):
+                self.control.publish_data( "Abort to find drop by distance")
+                break
+
+        self.control.activate( ['x' , 'y' ] )
+        self.control.relative_xy( 0 , 0 )
+
+        if( count_found > 0 ):
+            self.control.publish_data( "Found picture next play drop by operator function")
+            self.mission_drop.operator()
+        else:
+            self.control.publish_data( "Don't found drop" )
 
     # End part of play all mission
 
