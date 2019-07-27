@@ -188,18 +188,18 @@ class Path:
             
             if( self.vision.num_point == 0 ):
                 relative_y = 0
-            elif( self.vision.x_point[0] > 15 ):
+            elif( self.vision.x_point[0] > 10 ):
                 relative_y = TARGET_RIGHT
-            elif( self.vision.x_point[0] < -15 ):
+            elif( self.vision.x_point[0] < -10 ):
                 relative_y = TARGET_LEFT
             else:
                 ok_y = True
 
             if( self.vision.num_point == 0):
                 relative_x = 0
-            elif( self.vision.y_point[0] > 15 ):
+            elif( self.vision.y_point[0] > 0 ):
                 relative_x = TARGET_FORWARD
-            elif( self.vision.y_point[0] < -15 ):
+            elif( self.vision.y_point[0] < -20 ):
                 relative_x = TARGET_BACKWARD
             else:
                 ok_x = True
@@ -216,10 +216,43 @@ class Path:
 
         self.control.publish_data( "SETUP I will deactivate yaw for rotation")
         self.control.deactivate( ['x' , 'y' , 'yaw' ] )
+        now_tune = False
         while( not rospy.is_shutdown() ):
             self.rate.sleep()
             self.vision.call_data()
             self.vision.echo_data()
+            if( ( abs( self.vision.x_point[0] ) > 80 or abs( self.vision.y_point[0] ) > 80 ) 
+                    or now_tune) :
+                force_x = 0
+                force_y = 0
+                ok_x = False
+                ok_y = False
+
+                if not now_tune :
+                    self.control.deactivate( ['x' , 'y'])
+                    now_tune = True
+                if self.vision.x_point[0] > 10 :
+                    force_y = TARGET_RIGHT
+                elif self.vision.x_point[0] < -10 :
+                    force_y = TARGET_LEFT
+                else:
+                    ok_x = True
+                if self.vision.y_point[0] > 10 :
+                    force_x = TARGET_FORWARD
+                elif self.vision.y_point[0] < -10 :
+                    force_x = TARGET_BACKWARD
+                else:
+                    ok_y = True
+                self.control.publish_data( "SETUP mode rotation force " + 
+                     repr( ( force_x , force_y ) ) )
+                self.control.force_xy( force_x , force_y )
+
+                if ok_x and ok_y :
+                    self.control.force_xy( 0 , 0 )
+                    self.control.deactivate( ['x' , 'y' , 'yaw'] ) 
+                    now_tune = False
+                continue
+
             diff = zeabus_math.bound_radian( self.vision.rotation[0] - ( math.pi / 2 ) )
             self.control.publish_data( "SETUP diff yaw is " + str( diff ) )
             if( abs( diff ) < PATH_OK_DIFF_YAW ):
@@ -230,10 +263,10 @@ class Path:
                 break
             elif( diff > 0 ):
                 self.control.publish_data( "SETUP rotation left")
-                self.control.force_xy_yaw( 0 , 0 , PATH_FORCE_YAW )
+                self.control.force_xy_yaw( 0 , 0.0 , PATH_FORCE_YAW )
             else:
                 self.control.publish_data( "SETUP rotation right" )
-                self.control.force_xy_yaw( 0 , 0 , -1.0 * PATH_FORCE_YAW )
+                self.control.force_xy_yaw( 0 , 0.0 , -1.0 * PATH_FORCE_YAW )
 
         self.control.publish_data( "SETUP Now rotation finish next is moving on path")
         self.control.deactivate( [ 'x' , 'y' ])
@@ -275,17 +308,37 @@ class Path:
             self.control.publish_data( "MOVING_ON_PATH POINT 1 command " 
                 + repr( ( force_x , force_y )))
             self.control.force_xy( force_x , force_y )
-        self.vision.set_tracking( True )
 
-        self.control.publish_data( "MOVING_ON_PATH SECTION move to center of point 2")
+        if PATH_MODE :
+            self.control.publish_data( "MOVING_ON_PATH SECTION try move to center of point 2")
+            start_time = rospy.get_rostime()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            while( ( not rospy.is_shutdown ) and diff_time < 7 ):
+                self.rate.sleep()
+                self.control.publish_data("MOVING_ON_PATH try to find 3 point "+str(diff_time) )
+                self.control.force_xy( TARGET_FORWARD , 0 )
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
+        self.control.force_xy( 0 , 0 )
+        self.control.publish_data( "MOVING_ON_PATH Finish little mode to center")
+
+        count_unfound = 0
         while( ( not rospy.is_shutdown() ) ):
             self.rate.sleep()
             self.vision.call_data()
             self.vision.echo_data()
             force_x = 0
             force_y = 0
-            target_point = 0
+
+            if PATH_MODE :
+                target_point = self.vision.num_point - 1
+                if target_point < 0:
+                    self.control.publish_data( "MOVING_ON_PATH Think more forward make num 0")
+                    self.control.force_xy( TARGET_BACKWARD , 0 )
+                    continue
+            else:
+                target_point = 1
+
             if( self.vision.x_point[ 1 ] < -10  ):
                 force_y = TARGET_LEFT
             elif( self.vision.x_point[ 1 ] > 10 ):
@@ -303,31 +356,41 @@ class Path:
 
         self.control.publish_data( "MOVING_ON_PATH I will deactivate yaw for rotation")
         self.control.deactivate( ['x' , 'y' , 'yaw' ] )
-
+        now_tune = False
         while( not rospy.is_shutdown() ):
             self.rate.sleep()
             self.vision.call_data()
             self.vision.echo_data()
             diff = zeabus_math.bound_radian( self.vision.rotation[ self.vision.num_point -2 ] 
                 -  ( math.pi / 2 ) )
-            if( abs( self.vision.x_point[1] ) > 60 or abs( self.vision.y_point[1] ) > 60 ):
+            
+            if( ( abs( self.vision.x_point[1] ) > 80 or abs( self.vision.y_point[1] ) > 80 ) or
+                    now_tune ):
                 force_x = 0
                 force_y = 0
-                if self.vision.x_point[1] > 30 :
+                ok_x = False
+                ok_y = False
+                if( not now_tune ):
+                    self.control.deactivate( ['x' , 'y'] )
+                if self.vision.x_point[1] > 20 :
                     force_y = TARGET_RIGHT
-                elif self.vision.x_point[1] < -30 :
+                elif self.vision.x_point[1] < -20 :
                     force_y = TARGET_LEFT
                 else:
-                    pass
-                if self.vision.y_point[1] > 30 :
+                    ok_x = True
+                if self.vision.y_point[1] > 20 :
                     force_x = TARGET_FORWARD
-                elif self.vision.y_point[1] < -30 :
+                elif self.vision.y_point[1] < -20 :
                     force_x = TARGET_BACKWARD
                 else:
-                    pass
-                self.control.publish_data( "MOVING_ON_PATH mode rotation force " 
+                    ok_y = True
+                self.control.publish_data( "MOVING_ON_PATH mode rotation force " + 
                      repr( ( force_x , force_y ) ) )
-                self.control.force_xy_yaw( force_x , force_y , 0 )
+                self.control.force_xy( force_x , force_y )
+                if ok_x and ok_y :
+                    now_tune = False
+                    self.control.force_xy( 0 , 0 )
+                    self.control.deactivate( ['x' , 'y' , 'yaw'] )
                 continue
 
             self.control.publish_data( "MOVING_ON_PATH diff yaw is " + str( diff ) )
@@ -348,7 +411,6 @@ class Path:
 
         self.control.publish_data( "MOVING_ON_PATH Now rotation finish next is moving on path")
         self.control.deactivate( [ 'x' , 'y' ] )
-        self.vision.set_tracking( False )
 
         self.control.absolute_z( PATH_END_DEPTH )
         start_time = rospy.get_rostime()

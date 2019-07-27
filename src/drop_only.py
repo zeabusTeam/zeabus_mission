@@ -393,9 +393,17 @@ class Drop:
 
         if( count_unfound == 5 ):
             self.control.publish_data( "OPEN now picture is unfound ? try to open" )
-            self.control.absolute_z( DROP_ACTION_DEPTH )
-            self.control.force_xy( 0 , 0 )
-            self.control.sleep()
+            while not rospy.is_shutdown() and target_depth <= DROP_ACTION_DEPTH :
+                if not self.control.check_z( 0.15 ) :
+                    target_depth -= 0.4
+                    if( target_depth < DROP_ACTION_DEPTH ):
+                        self.control.absolute_z( DROP_ACTION_DEPTH )
+                        break
+                    else:
+                        self.control.absolute_z( target_depth )
+                        self.control.sleep()
+                self.control.force_xy( 0 , 0 )
+                self.rate.sleep()
 
             start_time = rospy.get_rostime()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
