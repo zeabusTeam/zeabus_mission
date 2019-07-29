@@ -154,7 +154,7 @@ class Exposed:
             self.operator()
             result = True
 
-        self.control.deactivate( ['x' , 'y'] )
+        self.control.activate( ['x' , 'y'] )
 
         return result
 
@@ -237,6 +237,8 @@ class Exposed:
                 break
             else:
                 count_unfound += 1
+
+        self.control.activate( ( 'x' , 'y' ) )
 
     def tune_center( self ):
         self.control.publish_data("TUNE_CENTER welcome to tune_center function")
