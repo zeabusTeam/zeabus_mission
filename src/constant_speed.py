@@ -132,7 +132,7 @@ DROP_DEPTH_ACTION = -3 # depth when you want to drop or open
 
 # Constant for connect mission
 # ====> Mission Path 
-STRATEGY_NO_PATH = True
+STRATEGY_NO_PATH = False
 # ====> Mission Gate
 STRATEGY_TIME_SURVEY_PATH = 2               # Time to survey before pass gate
 STRATEGY_FORCE_SURVEY_PATH = SUPER_RIGHT    # Force to survey before pass gate
@@ -149,7 +149,7 @@ STRATEGY_TIME_BUOY_PATH = 2                # This is time to use forward find bu
 STRATEGY_FORCE_BUOY_PATH = SURVEY_FORWARD   # This is force use to direct after buoy to search path
 # ====> Mission DROP
 STRATEGY_ROTATION_BUOY_DROP = math.pi/2.0  # This use rotation buoy to drop in case don't find path
-STRATEGY_DEPTH_FIND_DROP = DROP_FIND_DEPTH  # This use to depth for find depth
+STRATEGY_DEPTH_FIND_DROP = DROP_START_DEPTH  # This use to depth for find depth
 STRATEGY_FREE_TIME_DROP = 12
 STRATEGY_FREE_FORCE_DROP = SUPER_FORWARD
 STRATEGY_FORCE_DROP = SURVEY_FORWARD

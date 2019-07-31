@@ -410,7 +410,7 @@ class StrategySpeed:
         self.control.activate( ['x' , 'y'] )
         self.control.sleep()
 
-        self.control.absolute_z( STRATEGY_DEPTH_FIND_DROP  - 0.5)
+        self.control.absolute_z( STRATEGY_DEPTH_FIND_DROP )
         self.control.sleep()
         self.control.publish_data( "STRATEGY Command depth at " 
             + str( STRATEGY_DEPTH_FIND_DROP - 0.5)  )
