@@ -60,8 +60,8 @@ BUOY_AREA_ABORT = 8                 # In mode lock target you can out of loop by
 BUOY_LIMIT_TIME = 15                # This is limit time of dash mode only
 # ----> Below constant variable is use after finish dash mode
 BUOY_TARGET_DEPTH_FINISH = -0.5     # This is absolute depth when you finish dash mode
-BUOY_FORCE_SURVEY = -SURVEY_LEFT               # force to survey after dash mode
-BUOY_FORCE_FORWARD = 1.3            # force to forward and backward after dahs mode
+BUOY_FORCE_SURVEY = SURVEY_LEFT               # force to survey after dash mode
+BUOY_FORCE_FORWARD = SURVEY_FORWARD            # force to forward and backward after dahs mode
 BUOY_TIME_TO_BACK = 3               # forward will plus 5 second
 BUOY_TIME_TO_SURVEY = 5             # time to survey make increase opportunity to find path
 
@@ -106,9 +106,9 @@ EXPOSED_LIMIT_TIME_TO_FIND = 15
 
 # Constant for operator stake
 STAKE_START_DEPTH = -3.0
-STAKE_Z_DOWN = -3.2
+STAKE_Z_DOWN = -3.3
 STAKE_Z_FORCE_0 = -2.9
-STAKE_Z_UP = -2.6
+STAKE_Z_UP = -2.5
 STAKE_AREA_ROTATION = 15
 STAKE_AREA_ROTATION_OVER = 30
 STAKE_OVAL_DIRECTION = 'right'
@@ -135,7 +135,7 @@ DROP_DEPTH_ACTION = -3 # depth when you want to drop or open
 # ====> Mission Path 
 STRATEGY_NO_PATH = False
 # ====> Mission Gate
-STRATEGY_TIME_SURVEY_PATH = 1               # Time to survey before pass gate
+STRATEGY_TIME_SURVEY_PATH = 2               # Time to survey before pass gate
 STRATEGY_FORCE_SURVEY_PATH = SUPER_RIGHT    # Force to survey before pass gate
 STRATEGY_TIME_GATE_PATH = 30                # Time to forward and doing pass gate
 STRATEGY_FORCE_GATE_PATH = SUPER_FORWARD    # Force to forward and doing pass gate
@@ -181,3 +181,20 @@ STRATEGY_STAKE_DISTANCE_SURVEY = -10
 STRATEGY_STAKE_DEPTH_FIND = STAKE_START_DEPTH
 STRATEGY_FORCE_STAKE = 1.0
 STRATEGY_STAKE_AREA_FOCUS = STAKE_AREA_ROTATION - 3  # range 0 - 100
+
+# For special characteristice ROBOSUB for doing mission buoy
+ROBOSUB_TIME_SURVEY_TO_PATH = 8
+ROBOSUB_FORCE_SURVEY_TO_PATH = SURVEY_LEFT
+ROBOSUB_TIME_FORWARD_TO_PATH = 30
+ROBOSUB_FORCE_FORWARD_TO_PATH = SURVEY_FORWARD
+
+ROBOSUB_TIME_SURVEY_TRIANGLE_BUOY = 5
+ROBOSUB_FORCE_SURVEY_TRIANGLE_BUOY = TARGET_LEFT
+ROBOSUB_TIME_FORWARD_TRIANGLE_BUOY = 6
+ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY = TARGET_FORWARD
+# Auto backward
+ROBOSUB_TIME_FIRST_SURVEY_SINGLE_BUOY = 10
+ROBOSUB_FORCE_FIRST_SURVEY_SINGLE_BUOY = TARGET_RIGHT
+ROBOSUB_ROTATION_SINGLE_BUOY = -math.pi / 2.0
+ROBOSUB_TIME_SECOND_SURVEY_SINGLE_BUOY = 10
+ROBOSUB_FORCE_SECOND_SURVEY_SINGLE_BUOY = TARGET_RIGHT

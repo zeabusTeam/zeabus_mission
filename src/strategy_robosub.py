@@ -135,6 +135,12 @@ class StrategySpeed:
         if STRATEGY_NO_PATH :
             self.control.publish_data( "STRATEGY no play path")
 
+        temp_yaw = 0
+        if STRATEGY_FIX_YAW_GATE :
+            self.control.update_target()
+            temp_yaw = self.control.target_pose[5]
+            self.control.publish_data( "STRATEGY remember yaw is " + str( temp_yaw ) )
+
         while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_GATE_PATH ):
             self.rate.sleep()
             self.vision_path.call_data()
@@ -230,13 +236,107 @@ class StrategySpeed:
             self.control.relative_yaw( STRATEGY_ROTATION_GATE_BUOY )
             self.control.sleep()
 
-        self.control.publish_data( "STRATEGY waiting yaw before start buoy")
-        while( not self.control.check_yaw( 0.15 ) ):
-            self.rate.sleep()
+        if STRATEGY_FIX_YAW_GATE :
+            self.control.publish_data( "STRATEGY command fix yaw same rotation of gate")
+            self.control.absolute_yaw( temp_yaw )
+            self.control.sleep()
+            while not self.control.check_yaw( 0.12 ):
+                self.rate.sleep()
+        else :
+            self.control.publish_data( "STRATEGY waiting yaw before start buoy")
+            while( not self.control.check_yaw( 0.15 ) ):
+                self.rate.sleep()
 
         # Part of mission buoy
         # ROBOSUB SUPASAN
         self.control.publish_data("STRATEGY will be go to buoy by second path")
+
+        self.control.absolute_z( -0.75 )
+        self.control.publish_data("NOW use ROBOSUB parameter to do mission buoy")
+        self.control.deactivate( ('x' , 'y' ) )
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while ( not rospy.is_shutdown() ) and diff_time < ROBOSUB_TIME_SURVEY_TO_PATH :
+            self.rate.sleep()
+            self.control.force_xy( 0 , ROBOSUB_FORCE_SURVEY_TO_PATH )
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            self.control.publish_data( "ROBOSUB survey to path " + str( diff_time ) )
+
+        self.control.publish_data( "ROBOSUB continue to forward until find path")
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        count_found = 0
+        while (not rospy.is_shutdown() ) and diff_time < ROBOSUB_TIME_FORWARD_TO_PATH :
+            self.rate.sleep()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            self.vision_path.call_data()
+            self.vision_path.echo_data()
+            if self.vision_path.num_point != 0 :
+                count_found += 1
+                if count_found == 2 :
+                    never_rotation = True
+                    count_unfound = 0
+                    while ( not rospy.is_shutdown() ) and count_unfound < 4:
+                        self.vision_path.call_data()
+                        self.vision_path.echo_data()
+                        if self.vision_path.num_point != 0 :
+                            force_x = 0 
+                            force_y = 9
+                            ok_x = False
+                            ok_y = False
+                            if self.vision_path.x_point[0] < -20:
+                                force_y = TARGET_LEFT
+                            elif self.vision_path.x_point[0] > 20 :
+                                force_y = TARGET_RIGHT
+                            else:
+                                ok_x = True
+
+                            if self.vision_path.y_point[0] < -20 :
+                                force_x = TARGET_BACKWARD
+                            elif self.vision_path.y_point[0] > 20 :
+                                force_x = TARGET_FORWARD
+                            else:
+                                ok_y = True 
+
+                            if ok_x and ok_y :
+                                self.control.force_xy( 0 , 0 )
+                                if never_rotation :
+                                    self.control.activate( ( 'x' , 'y' ) )
+                                    self.control.sleep()
+                                    self.control.relative_yaw( math.pi )
+                                    self.control.publish_data( "ROBOSUB command relative yaw pi")
+                                    self.control.sleep()
+                                    while not self.control.check_yaw( 0.12 ):
+                                        self.rate.sleep()
+                                    self.control.deactivate( ('x' , 'y' ) )
+                                else:
+                                    self.control.publish_data( "ROBOSUB now start attack buoy?")
+                                    break 
+                            else:
+                                self.control.publish_data( "ROBOSUB command force " 
+                                    + repr( (force_x , force_y ) ) )
+                                self.control.force_xy( force_x , force_y )
+                        else:
+                            count_unfound += 1
+                            self.control.publish_data( "ROBOSUB focus path unfound " 
+                                + str( count_unfound ) )
+                    if count_unfound == 4 :
+                        self.control.publish_data( "ROBOSUB Failure to process rotation")
+                        count_found = 0
+                    else:
+                        count_found = 5
+                        break
+                else:
+                    self.control.force_xy( 0 , 0 )
+                    self.control.publish_data( "ROBOSUB found path " + str( count_found ) )
+            else:
+                count_found = 0
+                self.control.force_xy( ROBOSUB_FORCE_FORWARD_TO_PATH , 0 )
+                self.control.publish_data( "ROBOSUB forward to path " + str( diff_time ) )
+
+        if count_found == 5 :
+            self.control.publish_data( "ROBOSUB Finish process I will process for buoy")
+        
 
         # Start part for search drop garliac mission
         self.control.activate( ['x' , 'y'] )

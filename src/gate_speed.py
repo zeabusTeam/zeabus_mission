@@ -196,8 +196,8 @@ class Gate:
                 else:
                     relative_z = 0
 
-                if( ( relative_z != 0 ) and self.control.check_z( 0.15 ) ):
-                    self.control.publish_data( "LOCK_TARGET relative z : " + str( relative_z ) )
+#                if( ( relative_z != 0 ) and self.control.check_z( 0.15 ) ):
+#                    self.control.publish_data( "LOCK_TARGET relative z : " + str( relative_z ) )
 
             else:
                 count_unfound += 1
