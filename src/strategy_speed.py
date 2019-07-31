@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# FILE			: strategy_straight.py
+# FILE			: strategy_speed.py
 # AUTHOR		: K.Supasan
 # CREATE ON		: 2019, June 27 (UTC+0)
 # MAINTAINER	: K.Supasan
@@ -134,6 +134,12 @@ class StrategySpeed:
         if STRATEGY_NO_PATH :
             self.control.publish_data( "STRATEGY no play path")
 
+        temp_yaw = 0
+        if STRATEGY_FIX_YAW_GATE :
+            self.control.update_target()
+            temp_yaw = self.control.target_pose[5]
+            self.control.publish_data( "STRATEGY remember yaw is " + str( temp_yaw ) )
+
         while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_GATE_PATH ):
             self.rate.sleep()
             self.vision_path.call_data()
@@ -228,6 +234,13 @@ class StrategySpeed:
             self.control.publish_data( "STRATEGY don't found picture I will rotation" )
             self.control.relative_yaw( STRATEGY_ROTATION_GATE_BUOY )
             self.control.sleep()
+
+        if STRATEGY_FIX_YAW_GATE :
+            self.control.publish_data( "STRATEGY command fix yaw same rotation of gate")
+            self.control.absolute_yaw( temp_yaw )
+            self.control.sleep()
+            while not self.control.check_yaw( 0.12 ):
+                self.rate.sleep()
 
         self.control.publish_data( "STRATEGY waiting yaw before start buoy")
         while( not self.control.check_yaw( 0.15 ) ):
