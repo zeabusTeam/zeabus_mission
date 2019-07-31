@@ -28,7 +28,7 @@ SUPER_LEFT = 2.3
 SUPER_RIGHT = -2.3
 
 # Constant for first mission is mission gate
-GATE_START_DEPTH = -0.75            # This use to target depth of this mission
+GATE_START_DEPTH = -0.6            # This use to target depth of this mission
 GATE_START_FORWARD_TIME = 9         # This is limit of time to go forward
 GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
 GATE_START_SURVEY_TIME = 20         # This is limit time for go servey 
@@ -44,16 +44,16 @@ GATE_APPROVE_AGAIN = True           # This function help you.
 
 # Constant for mission path
 PATH_START_DEPTH = -1               # This will tell desire depth when want to start this mission
-PATH_TARGET_DEPTH = -2.4            # This target of path will want to go before do mission
+PATH_TARGET_DEPTH = -2.5            # This target of path will want to go before do mission
 PATH_FIND_TIME = 5                  # Left is constant but right + 2 second
 PATH_FORCE_YAW = 0.2                # This variable is force to use rotation
-PATH_OK_DIFF_YAW = 0.15             # This use ok yaw to don't rotation again 
+PATH_OK_DIFF_YAW = 0.12             # This use ok yaw to don't rotation again 
 PATH_LAST_TIME = 5
 PATH_END_DEPTH = -1.5               # This is absolute depth after do task path finish
 PATH_MODE = True                    # If true mean you don't use mode tracking to each point
 
 # Constant for mission buoy
-BUOY_START_DEPTH = -1.8             # This will tell desire depth when want to start this mission
+BUOY_START_DEPTH = -2             # This will tell desire depth when want to start this mission
 BUOY_FOUND_PICTURE = 1              # This use will deicision to change mode after found round
 BUOY_TIME_LOCK_TARGET = 60          # This is limit you still in mode lock target
 BUOY_AREA_ABORT = 8                 # In mode lock target you can out of loop by area
@@ -72,7 +72,7 @@ DROP_RADIAN_TO_ROTATION = math.pi
 # ----> Below 4 constant variable will connect about depth to manage or doing process
 DROP_FIND_DEPTH = -0.5
 DROP_START_DEPTH = -1.0             # Operator to do about search and start to find mission
-DROP_TARGET_DEPTH = -1.5            # Operator to using doing sub mission ( drop or open)
+DROP_TARGET_DEPTH = -1              # Operator to using doing sub mission ( drop or open)
 DROP_ONLY_DEPTH = -2.5              # Depth for using guess drop garlic
 DROP_ACTION_DEPTH = -3.4            # Depth for using open action by survey
 DROP_STEP_DEPTH = -0.3              # Depth is use for relative depth to command

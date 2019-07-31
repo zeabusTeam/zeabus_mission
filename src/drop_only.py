@@ -196,15 +196,32 @@ class Drop:
 
         self.control.publish_data( "OPERATOR Choose Process")
         self.control.deactivate( ['x' , 'y' ] )
+
         if( count_unfound == 5 ):
             self.control.publish_data( "OPERATOR stop process because don't found picture" )
         else:
             self.control.publish_data( "OPERATOR chosee drop" )
             self.control.update_target()
             self.drop( DROP_CENTER_X_DROP , self.control.target_pose[2] )
-            self.open( DROP_CENTER_X_OPEN )
 
-        self.control.absolute_z( DROP_START_DEPTH )
+            if DROP_WANT_OPEN :
+                self.open( DROP_CENTER_X_OPEN )
+
+        self.control.update_target()
+        target_depth = self.control.target_pose[2]
+        
+        self.control.publish_data( "FINISH will call depth to " + str( DROP_START_DEPTH ) )
+        while not rospy.is_shutdown():
+            self.rate.sleep()
+            if self.control.check_z( 0.12 ):
+                target_depth -= DROP_STEP_DEPTH
+                if target_depth > DROP_START_DEPTH :
+                    self.control.absolute_z( DROP_START_DEPTH )
+                else:
+                    self.control.publish_data( "FINISH absolute depth is " + 
+                        str( DROP_START_DEPTH ) )
+                    self.control.absolute_z( target_depth )
+                self.control.sleep()
 
     def drop( self , offset_center , start_depth ):
         self.control.publish_data("DROP start mission start at depth " + str( start_depth ) )
