@@ -22,7 +22,7 @@ class Exposed:
 
     def __init__( self ):
 
-        self.vision = AnalysisCoffin( "base_path")
+        self.vision = AnalysisCoffin( "base_coffin")
         self.control = CommandInterfaces( "PATH" )
 
         self.rate = rospy.Rate( 5 )
@@ -154,7 +154,7 @@ class Exposed:
             self.operator()
             result = True
 
-        self.control.deactivate( ['x' , 'y'] )
+        self.control.activate( ['x' , 'y'] )
 
         return result
 
@@ -237,6 +237,8 @@ class Exposed:
                 break
             else:
                 count_unfound += 1
+
+        self.control.activate( ( 'x' , 'y' ) )
 
     def tune_center( self ):
         self.control.publish_data("TUNE_CENTER welcome to tune_center function")
@@ -341,6 +343,7 @@ class Exposed:
         rospy.sleep( 6 )
         self.control.activate( ['x' . 'y' . 'z' . 'yaw' ] )
         self.control.publish_data( "TUNE_CENTER have to wakeup")
+        self.control.absolute_z( -0.5 )
         
 if __name__=="__main__" :
     rospy.init_node( "mission_exposed" )
