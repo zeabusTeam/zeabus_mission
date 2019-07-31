@@ -31,9 +31,9 @@ SUPER_RIGHT = -2.3
 GATE_START_DEPTH = -0.6            # This use to target depth of this mission
 GATE_START_FORWARD_TIME = 7         # This is limit of time to go forward
 GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
-GATE_START_SURVEY_TIME = 3        # This is limit time for go servey 
-GATE_START_SURVEY_DISTANCE = 8      # This is limit time for go survey 
-GATE_START_SURVEY_DIRECTION = -1.0   # positive is left and negative is right
+GATE_START_SURVEY_TIME = 5         # This is limit time for go servey 
+GATE_START_SURVEY_DISTANCE = 6      # This is limit time for go survey 
+GATE_START_SURVEY_DIRECTION = 1.0   # positive is left and negative is right
 # ----> two below variable we use to sure we can 
 GATE_FORWARD_ONLY_TIME = 35         # This is limit time for go direct. 
 GATE_FORWARD_ONLY_DISTANCE = 8      # This is limit distane for go direct
@@ -60,10 +60,10 @@ BUOY_AREA_ABORT = 8                 # In mode lock target you can out of loop by
 BUOY_LIMIT_TIME = 15                # This is limit time of dash mode only
 # ----> Below constant variable is use after finish dash mode
 BUOY_TARGET_DEPTH_FINISH = -0.5     # This is absolute depth when you finish dash mode
-BUOY_FORCE_SURVEY = SURVEY_LEFT               # force to survey after dash mode
+BUOY_FORCE_SURVEY = SURVEY_RIGHT               # force to survey after dash mode
 BUOY_FORCE_FORWARD = SURVEY_FORWARD            # force to forward and backward after dahs mode
 BUOY_TIME_TO_BACK = 3               # forward will plus 5 second
-BUOY_TIME_TO_SURVEY = 5             # time to survey make increase opportunity to find path
+BUOY_TIME_TO_SURVEY = 4             # time to survey make increase opportunity to find path
 
 # Constant for operator drop
 # ----> Below 2 constan variable will help you to manage about flip mission or task 
@@ -100,7 +100,7 @@ EXPOSED_FORCE_TO_FIND = SURVEY_LEFT
 EXPOSED_FORCE_TO_BACK = SURVEY_RIGHT
 # ====> Two below constant have relative
 # Please warning about wall please design direction to non wall 
-EXPOSED_CENTER_X_DIRECTION = 1.0    # positive 1 in case you survey left and -1 in case right
+EXPOSED_CENTER_X_DIRECTION = -1.0    # positive -1 in case you survey left and 1 in case right
 EXPOSED_CENTER_X_NEW_VALUE = 70
 EXPOSED_LIMIT_TIME_TO_FIND = 15 
 
@@ -117,7 +117,7 @@ if( STAKE_OVAL_DIRECTION == 'right' ):
 else:
     STAKE_OVAL_CENTER_X = -50
 STAKE_OVAL_AREA = 6
-STaKE_LIMIT_TIME = 10
+STAKE_LIMIT_TIME = 10
 STAKE_HEART_AREA = 3
 STAKE_TARGET_POINT = ( -50.1 , 11.2 )
 STAKE_TARGET_X = ( STAKE_TARGET_POINT[0] - 5 , STAKE_TARGET_POINT[0] + 5 )
@@ -135,7 +135,7 @@ DROP_DEPTH_ACTION = -3 # depth when you want to drop or open
 # ====> Mission Path 
 STRATEGY_NO_PATH = False
 # ====> Mission Gate
-STRATEGY_TIME_SURVEY_PATH = 2               # Time to survey before pass gate
+STRATEGY_TIME_SURVEY_PATH = 3               # Time to survey before pass gate
 STRATEGY_FORCE_SURVEY_PATH = SUPER_RIGHT    # Force to survey before pass gate
 STRATEGY_TIME_GATE_PATH = 30                # Time to forward and doing pass gate
 STRATEGY_FORCE_GATE_PATH = SUPER_FORWARD    # Force to forward and doing pass gate
@@ -143,11 +143,11 @@ STRATEGY_ROTATION_GATE_BUOY = -math.pi / 4   # Use rotation when don't found pat
 STRATEGY_FIX_YAW_GATE = True
 # ====> Mission Buoy
 STRATEGY_DEPTH_BOUY = BUOY_START_DEPTH      # This depth will use in buoy mission
-STRATEGY_TIME_BUOY = 15                      # This is time to forward search direct after path
+STRATEGY_TIME_BUOY = 25                      # This is time to forward search direct after path
 STRATEGY_FORCE_BUOY = SURVEY_FORWARD        # This is force forward search direct after path
-STRATEGY_TIME_BUOY_SURVEY = 6               # This is time to survey after path to buoy
-STRATEGY_FORCE_BUOY_SURVEY = SURVEY_RIGHT    # This is force survey after path to buoy
-STRATEGY_TIME_BUOY_PATH = 2                # This is time to use forward find buoy only direct 
+STRATEGY_TIME_BUOY_SURVEY = 5               # This is time to survey after path to buoy
+STRATEGY_FORCE_BUOY_SURVEY = SURVEY_LEFT    # This is force survey after path to buoy
+STRATEGY_TIME_BUOY_PATH = 5                # This is time to use forward find buoy only direct 
 STRATEGY_FORCE_BUOY_PATH = SURVEY_FORWARD   # This is force use to direct after buoy to search path
 # ====> Mission DROP
 STRATEGY_ROTATION_BUOY_DROP = math.pi/2.0  # This use rotation buoy to drop in case don't find path
@@ -159,25 +159,25 @@ STRATEGY_TIME_DROP = 30
 STRATEGY_DISTANCE_DROP = 6
 # ====> Choice to do last mission have 3 choind
 STRATEGY_CHOICE_PROCESS = 0
-STRATEGY_ROTATION_EXPOSED = 0      # This use to rotation from drop to exposed
-STRATEGY_ROTATION_STAKE = -math.pi/4        # This will use to collect for command absolute yaw
+STRATEGY_ROTATION_EXPOSED = math.pi/8.0      # This use to rotation from drop to exposed
+STRATEGY_ROTATION_STAKE = math.pi/4        # This will use to collect for command absolute yaw
 #========> 0 is No use dvl : 1 is use DVL : 2 is use hydophone
 # ====> Mission Exposed
 STRATEGY_EXPOSED_FIND = EXPOSED_START_DEPTH
-STRATEGY_TIME_SURVEY = 7
+STRATEGY_TIME_SURVEY = 3
 STRATEGY_DISTANCE_SURVEY = 4
-STRATEGY_FORCE_SURVEY = SURVEY_LEFT
+STRATEGY_FORCE_SURVEY = SURVEY_RIGHT
 STRATEGY_TIME_FORWARD = 12
 STRATEGY_FORCE_FORWARD = SURVEY_FORWARD
 STRATEGY_DISTANCE_FORWARD = 10
 # ====> Mission Stake
 STRATEGY_STAKE_DEPTH = STAKE_START_DEPTH
 STRATEGY_STAKE_TIME_FORWARD = 15
-STRATEGY_STAKE_FORCE_FORWARD = SUPER_FORWARD
+STRATEGY_STAKE_FORCE_FORWARD = SURVER_BACKWARD
 STRATEGY_STAKE_DISTANCE_FORWARD = 8
-STRATEGY_STAKE_TIME_SURVEY = 20
-STRATEGY_STAKE_FORCE_SURVEY = SUPER_RIGHT
-STRATEGY_STAKE_DISTANCE_SURVEY = -10
+STRATEGY_STAKE_TIME_SURVEY = 35
+STRATEGY_STAKE_FORCE_SURVEY = SURVEY_LEFT
+STRATEGY_STAKE_DISTANCE_SURVEY = 10
 STRATEGY_STAKE_DEPTH_FIND = STAKE_START_DEPTH
 STRATEGY_FORCE_STAKE = 1.0
 STRATEGY_STAKE_AREA_FOCUS = STAKE_AREA_ROTATION - 3  # range 0 - 100
