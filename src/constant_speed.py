@@ -29,9 +29,9 @@ SUPER_RIGHT = -2.3
 
 # Constant for first mission is mission gate
 GATE_START_DEPTH = -0.6            # This use to target depth of this mission
-GATE_START_FORWARD_TIME = 6         # This is limit of time to go forward
+GATE_START_FORWARD_TIME = 7         # This is limit of time to go forward
 GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
-GATE_START_SURVEY_TIME = 2         # This is limit time for go servey 
+GATE_START_SURVEY_TIME = 3        # This is limit time for go servey 
 GATE_START_SURVEY_DISTANCE = 8      # This is limit time for go survey 
 GATE_START_SURVEY_DIRECTION = -1.0   # positive is left and negative is right
 # ----> two below variable we use to sure we can 
