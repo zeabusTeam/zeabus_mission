@@ -229,7 +229,7 @@ class StrategySpeed:
             self.control.relative_yaw( STRATEGY_ROTATION_GATE_BUOY )
             self.control.sleep()
 
-        self.control.publish_data( "STRATEGY waiting yaw before start path")
+        self.control.publish_data( "STRATEGY waiting yaw before start buoy")
         while( not self.control.check_yaw( 0.15 ) ):
             self.rate.sleep()
 
