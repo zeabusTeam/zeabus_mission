@@ -827,7 +827,8 @@ class StrategySpeed:
             else:
                 count_found = 0
                 self.control.force_xy( SURVEY_FORWARD , 0 )
-                self.control.publish_data( "STRATEGY Don't found picture command survey forward" )
+                self.control.publish_data("STRATEGY Don't found target command survey forward")
+
             diff_time = (rospy.get_rostime() - start_time).to_sec()
 
         self.control.activate( [ 'x' , 'y' ] )
@@ -856,12 +857,12 @@ class StrategySpeed:
             self.control.deactivate( ('x' , 'y' ) )            
             start_time = rospy.get_rostime()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-            self.control.publish_data( "STRATEGY survey before try to forward find stake mission")
-            while ( not rospy.is_shutdown() ) and diff_time < STRATEGY_STAKE_TIME_SURVEY :
+            self.control.publish_data("STRATEGY forward before survey to stake mission")
+            while ( not rospy.is_shutdown() ) and diff_time < STRATEGY_STAKE_TIME_FORWARD :
                 self.rate.sleep()
-                self.control.force_xy( 0.0 , STRATEGY_STAKE_FORCE_SURVEY )
+                self.control.force_xy( STRATEGY_STAKE_FORCE_FORWARD , 0 )
                 diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-                self.control.publish_data( "STRATEGY Survey to stake on time " + str(diff_time) )
+                self.control.publish_data( "STRATEGY backward to stake on time " + str(diff_time) )
 
             self.control.activate( ('x' , 'y') )
             self.control.force_false()
@@ -873,9 +874,9 @@ class StrategySpeed:
             stat_time = rospy.get_rostime()
             diff_time = 0
             count_found = 0
-            while ( not rospy.is_shutdown() ) and diff_time < STRATEGY_STAKE_TIME_FORWARD :
+            while ( not rospy.is_shutdown() ) and diff_time < STRATEGY_STAKE_TIME_SURVEY :
                 self.rate.sleep()
-                self.control.force_xy( STRATEGY_TIME_FORWARD , 0.0 )
+                self.control.force_xy( 0.0 , STRATEGY_STAKE_FORCE_SURVEY )
                 diff_time = ( rospy.get_rostime() - start_time ).to_sec()
                 self.vision_stake.call_data()
                 self.vision_stake.echo_data()             
@@ -889,12 +890,12 @@ class StrategySpeed:
                         while not rospy.is_shutdown() and count_unfound < 3 :
                             self.rate.sleep()
                             self.vision_stake.call_data( STAKE_FIND_TARGET )
-                            self.vision_state.echo_data()
+                            self.vision_stake.echo_data()
                             force_x = 0 
                             force_y = 0
                             ok_x = False
                             ok_y = False
-                            if self.vision_state.result['found'] :
+                            if self.vision_stake.result['found'] :
                                 count_unfound = 0
                                 if self.vision_stake.result['center'][0] > 20 :
                                     force_y = TARGET_RIGHT

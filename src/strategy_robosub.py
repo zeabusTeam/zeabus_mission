@@ -335,9 +335,23 @@ class StrategySpeed:
                 self.control.publish_data( "ROBOSUB forward to path " + str( diff_time ) )
 
         if count_found == 5 :
-            self.control.publish_data( "ROBOSUB Finish process I will process for buoy")
-        
+            self.control.publish_data( "ROBOSUB Finish process I will process for buoy" )
+            start_time = rospy.get_rostime()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            while (not rospy.is_shutdown() ) and diff_time < ROBOSUB_TIME_SURVEY_TRIANGLE_BUOY :
+                self.rate.sleep()
+                self.control.force_xy( 0 , ROBOSUB_FORCE_SURVEY_TRIANGLE_BUOY )
+                self.control.publish_data( "ROBOSUB survey triangle buoy " + str( diff_time ) )
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
+            start_time = rospy.get_rostime()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            while (not rospy.is_shutdown() ) and diff_time < ROBOSUB_TIME_FORWARD_TRIANGLE_BUOY :
+                self.rate.sleep()
+                self.control.force_xy( ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY , 0 )
+                self.control.publish_data( "ROBOSUB forward triangle buoy " + str( diff_time ) )
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        
         # Start part for search drop garliac mission
         self.control.activate( ['x' , 'y'] )
         self.control.sleep()
