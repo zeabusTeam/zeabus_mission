@@ -294,7 +294,8 @@ class StrategySpeed:
                 self.control.force_xy( force_x , force_y )
 
             else:
-                self.control.publish_data( "STRATEGY I not found bouy")
+                self.control.publish_data( "STRATEGY I not found bouy and time is " 
+                    + str( diff_time ) )
                 count_found = 0
                 self.control.force_xy( STRATEGY_FORCE_BUOY , 0 )
 

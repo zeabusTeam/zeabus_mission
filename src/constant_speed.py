@@ -143,7 +143,7 @@ STRATEGY_ROTATION_GATE_BUOY = -math.pi / 4   # Use rotation when don't found pat
 STRATEGY_FIX_YAW_GATE = True
 # ====> Mission Buoy
 STRATEGY_DEPTH_BOUY = BUOY_START_DEPTH      # This depth will use in buoy mission
-STRATEGY_TIME_BUOY = 25                      # This is time to forward search direct after path
+STRATEGY_TIME_BUOY = 30                      # This is time to forward search direct after path
 STRATEGY_FORCE_BUOY = SURVEY_FORWARD        # This is force forward search direct after path
 STRATEGY_TIME_BUOY_SURVEY = 5               # This is time to survey after path to buoy
 STRATEGY_FORCE_BUOY_SURVEY = SURVEY_LEFT    # This is force survey after path to buoy
