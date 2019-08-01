@@ -326,10 +326,10 @@ class Stake:
                 ok_x = True
 
             if( ok_x and ok_y ):
-                if( self.vision.result['area'] > 30 ):
-                    force_x = -0.5
-                elif( self.vision.result['area'] < 10 ):
-                    force_x = 0.5
+                if( self.vision.result['area'] > STAKE_VAMPIRE_AREA + 15  ):
+                    force_x = TARGET_BACKWARD - 0.3
+                elif( self.vision.result['area'] < STAKE_VAMPIRE_AREA ):
+                    force_x = TARGET_FORWARD + 0.3
                 else:
                     ok_z = True
             else:
