@@ -212,10 +212,10 @@ class Gate:
         self.control.force_false()
         self.control.publish_data( "LOCK_TARGET to front gate {:4.2f} and center is {:4.2f}".format( 
             self.last_distance_to_found , self.vision.result['center_x'] ) )
-
+        # EDIT ABOUT LAST TIME TO PASS GATE
         if( self.last_distance_to_found > 2.5 ):
             self.control.publish_data( "LOCK_TARGET move for little forward")
-            limit_time = ( self.last_distance_to_found - 2.5 ) * 5
+            limit_time = ( self.last_distance_to_found - 2.0 ) * 5
             start_time = rospy.get_rostime()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             run_lock_target_again = False
