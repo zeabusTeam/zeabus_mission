@@ -246,6 +246,10 @@ class Stake:
                     else:
                         force_x = TARGET_FORWARD 
                 self.control.force_xyz( force_x , force_y , force_z )
+                self.control.publish_data( 
+                    "LOCK vision data target {:6.2f} {:6.2f} and now is {:6.2f} {:6.2f}".format(
+                        STAKE_TARGET_POINT[0] , STAKE_TARGET_POINT[1] 
+                        , self.vision.result['center'][0] , self.vision.result['center'][1]) )
                 self.control.publish_data( "LOCK " + target 
                     + " on area " + str( self.vision.result['area'] ) 
                     + " command force " + repr( ( force_x , force_y , force_z ) ) )
@@ -262,7 +266,10 @@ class Stake:
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             while( not rospy.is_shutdown() ) and diff_time < 2 :
                 self.rate.sleep()
+                self.vision.call_data( target )
+                self.vision.echo_data()
                 self.control.force_xyz( 0 , 0 , STAKE_Z_FORCE_0 )
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
         return can_fire
 
@@ -376,7 +383,7 @@ class Stake:
         while( ( not rospy.is_shutdown() ) and diff_time < STAKE_BACKWARD_TIME ):
             self.rate.sleep()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-            self.control.force_xyz( -0.8 , 0 , STAKE_Z_DOWN )
+            self.control.force_xyz( -0.8 , 0 , STAKE_Z_FORCE_0 )
             self.control.publish_data( "OVAL Backward time is " + str( diff_time ) )
 
 if __name__=="__main__":
