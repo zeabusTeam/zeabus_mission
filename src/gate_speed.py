@@ -176,9 +176,9 @@ class Gate:
             if( self.vision.result['found'] ):
                 self.last_distance_to_found = self.vision.result[ 'distance' ]
                 count_unfound = 0
-                if( self.vision.result['center_x'] < -20 ):
+                if( self.vision.result['center_x'] < -10 ):
                     relative_y = GATE_FORCE_Y
-                elif( self.vision.result[ 'center_x'] > 20 ):
+                elif( self.vision.result[ 'center_x'] > 10 ):
                     relative_y = -1.0 * GATE_FORCE_Y
                 else:
                     relative_x = GATE_FORCE_X
@@ -210,8 +210,8 @@ class Gate:
                 break
 
         self.control.force_false()
-        self.control.publish_data( "LOCK_TARGET to front gate {:4.2f}".format( 
-            self.last_distance_to_found ) )
+        self.control.publish_data( "LOCK_TARGET to front gate {:4.2f} and center is {:4.2f}".format( 
+            self.last_distance_to_found , self.vision.result['center_x'] ) )
 
         if( self.last_distance_to_found > 2.5 ):
             self.control.publish_data( "LOCK_TARGET move for little forward")
