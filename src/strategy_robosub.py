@@ -37,7 +37,7 @@ from zeabus.vision.analysis_drop import AnalysisDrop
 
 # For doing exposed by analysis coffin mission
 from exposed_speed import Exposed
-from zeabus.vision.analysis_exposed import AnalysisCoffin
+from zeabus.vision.analysis_coffin import AnalysisCoffin
 
 # For doing stake by analysis stake mission
 from stake_not_open import Stake
@@ -315,7 +315,7 @@ class StrategyRobosub:
                                 elif self.control.check_z( 0.12 ):
                                     if target_depth > STRATEGY_DEPTH_BOUY :
                                         target_depth -= 0.5
-                                        if target_depth < STRATEGY_DEPTH_BOUY
+                                        if target_depth < STRATEGY_DEPTH_BOUY:
                                             target_depth = STRATEGY_DEPTH_BOUY
                                         self.control.publish_data( "ROBOSUB command depth " + 
                                             str( target_depth ) )
@@ -380,7 +380,7 @@ class StrategyRobosub:
             continue_to_do_buoy = False
             count_found = 0
             target_depth = -1
-            while not rospy.is_shutdown() 
+            while not rospy.is_shutdown(): 
                 self.vision_path.call_data()
                 self.vision_path.echo_data()
                 if self.vision_path.num_point > 0 :
@@ -412,10 +412,10 @@ class StrategyRobosub:
 
                                 if ok_x and ok_y :
                                     self.control.force_xy( 0 , 0 )
-                                    if self.control.check_z( 0.12 )
+                                    if self.control.check_z( 0.12 ):
                                         if target_depth > STRATEGY_DEPTH_BOUY :
                                             target_depth -= 0.5
-                                            if target_depth < STRATEGY_DEPTH_BOUY
+                                            if target_depth < STRATEGY_DEPTH_BOUY:
                                                 target_depth = STRATEGY_DEPTH_BOUY
                                             self.control.publish_data( "ROBOSUB command depth " + 
                                                 str( target_depth ) )
@@ -765,7 +765,7 @@ class StrategyRobosub:
                                 else:
                                     ok_x = True
 
-                                if self.vision.result['area'] < STRATEGY_STAKE_AREA_FOCUS / 1.5
+                                if self.vision.result['area'] < STRATEGY_STAKE_AREA_FOCUS / 1.5:
                                     force_x = TARGET_FORWARD
                                 else:
                                     ok_z = True
@@ -878,7 +878,8 @@ class StrategyRobosub:
             else:
                 count_found = 0
                 self.control.force_xy( SURVEY_FORWARD , 0 )
-                self.control.publish_data( "STRATEGY Don't found picture command survey forward" )
+                self.control.publish_data("STRATEGY Don't found target command survey forward")
+
             diff_time = (rospy.get_rostime() - start_time).to_sec()
 
         self.control.activate( [ 'x' , 'y' ] )
@@ -907,12 +908,12 @@ class StrategyRobosub:
             self.control.deactivate( ('x' , 'y' ) )            
             start_time = rospy.get_rostime()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-            self.control.publish_data( "STRATEGY survey before try to forward find stake mission")
-            while ( not rospy.is_shutdown() ) and diff_time < STRATEGY_STAKE_TIME_SURVEY :
+            self.control.publish_data("STRATEGY forward before survey to stake mission")
+            while ( not rospy.is_shutdown() ) and diff_time < STRATEGY_STAKE_TIME_FORWARD :
                 self.rate.sleep()
-                self.control.force_xy( 0.0 , STRATEGY_STAKE_FORCE_SURVEY )
+                self.control.force_xy( STRATEGY_STAKE_FORCE_FORWARD , 0 )
                 diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-                self.control.publish_data( "STRATEGY Survey to stake on time " + str(diff_time) )
+                self.control.publish_data( "STRATEGY backward to stake on time " + str(diff_time) )
 
             self.control.activate( ('x' , 'y') )
             self.control.force_false()
@@ -924,9 +925,9 @@ class StrategyRobosub:
             stat_time = rospy.get_rostime()
             diff_time = 0
             count_found = 0
-            while ( not rospy.is_shutdown() ) and diff_time < STRATEGY_STAKE_TIME_FORWARD :
+            while ( not rospy.is_shutdown() ) and diff_time < STRATEGY_STAKE_TIME_SURVEY :
                 self.rate.sleep()
-                self.control.force_xy( STRATEGY_TIME_FORWARD , 0.0 )
+                self.control.force_xy( 0.0 , STRATEGY_STAKE_FORCE_SURVEY )
                 diff_time = ( rospy.get_rostime() - start_time ).to_sec()
                 self.vision_stake.call_data()
                 self.vision_stake.echo_data()             
@@ -940,12 +941,12 @@ class StrategyRobosub:
                         while not rospy.is_shutdown() and count_unfound < 3 :
                             self.rate.sleep()
                             self.vision_stake.call_data( STAKE_FIND_TARGET )
-                            self.vision_state.echo_data()
+                            self.vision_stake.echo_data()
                             force_x = 0 
                             force_y = 0
                             ok_x = False
                             ok_y = False
-                            if self.vision_state.result['found'] :
+                            if self.vision_stake.result['found'] :
                                 count_unfound = 0
                                 if self.vision_stake.result['center'][0] > 20 :
                                     force_y = TARGET_RIGHT

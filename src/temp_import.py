@@ -10,6 +10,7 @@
 # REFERENCE
 
 from strategy_speed import StrategySpeed
+from strategy_robosub import StrategyRobosub
 import rospy
 
 if __name__=="__main__":

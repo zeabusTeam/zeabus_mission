@@ -127,6 +127,8 @@ class Buoy:
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
         self.control.deactivate( ["x" , "y"] )
+
+        limit_time = BUOY_LIMIT_TIME
         
         while( ( not rospy.is_shutdown() ) and ( diff_time < time_out ) ):
 
@@ -151,7 +153,9 @@ class Buoy:
 
                 if( self.vision.result['area'] > BUOY_AREA_ABORT ):
                     self.control.publish_data( "Break from area condition") 
-                    break 
+                    break
+
+                limit_time = self.vision.result['distance'] * 4
 
             else:
                 unfound += 1
@@ -166,7 +170,7 @@ class Buoy:
                     warning_time , time_out ) )
                 warning_time += 5 
 
-        self.dash_mode( distance )
+        self.dash_mode( distance , limit_time)
 
         self.control.force_xy( 0 , 0 )
         self.rate.sleep()
@@ -176,13 +180,13 @@ class Buoy:
         
         self.control.activate( ["x" , "y"] )
 
-    def dash_mode( self , distance ):
+    def dash_mode( self , distance , limit_time = BUOY_LIMIT_TIME ):
 
         self.control.force_xy( 1 , 0 , True)
         start_time = rospy.get_rostime()
-        self.control.publish_data( "DASH Move forward limit time at " + str( BUOY_LIMIT_TIME ) )
+        self.control.publish_data( "DASH Move forward limit time at " + str( limit_time ) )
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-        while( ( not rospy.is_shutdown() ) and ( diff_time < BUOY_LIMIT_TIME ) ):
+        while( ( not rospy.is_shutdown() ) and ( diff_time < limit_time ) ):
             self.rate.sleep()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             temp = self.control.force_xy( SUPER_FORWARD , 0 )
