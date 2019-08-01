@@ -727,8 +727,8 @@ class StrategySpeed:
                                     break
                                 else:
                                     self.control.force_xy( force_x , force_y )
-                                    self.control.publish_data("STRATEGY command force is " + repr(
-                                        force_x , force_y ) )
+                                    self.control.publish_data("STRATEGY command force is " 
+                                        + repr( ( force_x , force_y ) ) )
                             else:
                                 count_unfound += 1
                         self.control.activate( ('x' , 'y' ) )
