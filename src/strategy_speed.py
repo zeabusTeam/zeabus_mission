@@ -768,8 +768,7 @@ class StrategySpeed:
         else:
             self.control.publish_data( "STRATEGY don't continue to play because exposed false")
 
-            
-
+    # NO USE DVL SUPASAN
     def not_use_dvl( self ):
 
         self.control.publish_data( "STRATEGY not use DVL start mission by target at exposed")
