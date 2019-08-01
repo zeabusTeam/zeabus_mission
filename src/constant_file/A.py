@@ -28,7 +28,7 @@ SUPER_LEFT = 2.3
 SUPER_RIGHT = -2.3
 
 # Constant for first mission is mission gate
-GATE_START_DEPTH = -0.4            # This use to target depth of this mission
+GATE_START_DEPTH = -0.2            # This use to target depth of this mission
 GATE_START_FORWARD_TIME = 7         # This is limit of time to go forward
 GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
 GATE_START_SURVEY_TIME = 5         # This is limit time for go servey 
@@ -53,7 +53,7 @@ PATH_END_DEPTH = -1.5               # This is absolute depth after do task path 
 PATH_MODE = True                    # If true mean you don't use mode tracking to each point
 
 # Constant for mission buoy
-BUOY_START_DEPTH = -2.7             # This will tell desire depth when want to start this mission
+BUOY_START_DEPTH = -2.4             # This will tell desire depth when want to start this mission
 BUOY_FOUND_PICTURE = 1              # This use will deicision to change mode after found round
 BUOY_TIME_LOCK_TARGET = 60          # This is limit you still in mode lock target
 BUOY_AREA_ABORT = 8                 # In mode lock target you can out of loop by area
