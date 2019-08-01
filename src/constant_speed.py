@@ -35,7 +35,7 @@ GATE_START_SURVEY_TIME = 3         # This is limit time for go servey
 GATE_START_SURVEY_DISTANCE = 6      # This is limit time for go survey 
 GATE_START_SURVEY_DIRECTION = 1.0   # positive is left and negative is right
 # ----> two below variable we use to sure we can 
-GATE_FORWARD_ONLY_TIME = 20         # This is limit time for go direct. 
+GATE_FORWARD_ONLY_TIME = 25         # This is limit time for go direct. 
 GATE_FORWARD_ONLY_DISTANCE = 8      # This is limit distane for go direct
 GATE_FORCE_Y = TARGET_LEFT * 100    # unit is / 100 kgf
 GATE_FORCE_X = SURVEY_FORWARD * 100 # unit is / 100 kgf
@@ -116,6 +116,7 @@ if( STAKE_OVAL_DIRECTION == 'right' ):
 else:
     STAKE_OVAL_CENTER_X = -50
 STAKE_OVAL_AREA = 6
+STAKE_VAMPIRE_AREA = 18
 STAKE_LIMIT_TIME = 10
 STAKE_HEART_AREA = 3
 STAKE_TARGET_POINT = ( -50.1 , 11.2 )
@@ -134,7 +135,7 @@ DROP_DEPTH_ACTION = -3 # depth when you want to drop or open
 # ====> Mission Path 
 STRATEGY_NO_PATH = False
 # ====> Mission Gate
-STRATEGY_TIME_SURVEY_PATH = 2               # Time to survey before pass gate
+STRATEGY_TIME_SURVEY_PATH = 3               # Time to survey before pass gate
 STRATEGY_FORCE_SURVEY_PATH = SUPER_RIGHT    # Force to survey before pass gate
 STRATEGY_TIME_GATE_PATH = 30                # Time to forward and doing pass gate
 STRATEGY_FORCE_GATE_PATH = SUPER_FORWARD    # Force to forward and doing pass gate

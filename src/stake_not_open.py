@@ -273,49 +273,6 @@ class Stake:
 
         return can_fire
 
-#    def heart( self ):
-#
-#        self.control.activate( ['x' , 'y' , 'z'] )
-#        self.control.sleep()
-#        self.control.publish_data( "HEART start mission go to depth " + str( STAKE_START_DEPTH ) )
-#        
-#        while not self.control.check_z( 0.12 ):
-#            self.rate.sleep()
-#
-#        self.control.publish_data( "HEART Try find target again" )
-#        self.control.deactivate( ['x' , 'y' ] ) 
-#        start_time = rospy.get_rostime()
-#        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-#        found_picture = False
-#        while ( not rospy.is_shutdown() ) and diff_time < STAKE_LIMIT_TIME :
-#            self.rate.sleep()
-#            self.vision.call_data( STAKE_FIND_HEART )
-#            self.vision.echo_data()
-#            
-#            if( self.vision.result['found'] ):
-#                found_pitcure = True
-#                if self.vision.result['center'][ 1 ] < -40 :
-#                    self.control.relative_z( -0.3 )
-#                elif( self.vision.result['center'][ 1 ] > 40 ):
-#                    self.control.relative_z( 0.3 )
-#                else:
-#                    pass
-#
-#                force_x = 0
-#                force_y = 0
-#                if self.vision.result['center'][0] > 20 :
-#                    force_y = TARGET_RIGHT
-#                elif self.vision.result['center'][0] < -20 :
-#                    force_y = TARGET_LEFT
-#                else:
-#                    pass
-#
-#                if self.vision.result['area'] > STAKE_AREA_ROTATION_OVER :
-#                    force_x = TARGET_BACKWARD
-#
-#                self.control.force_xy( force_x , force_y )
-#                break
-        
     def oval( self ):
         self.control.deactivate( ['x' , 'y' , 'z'] ) 
 
@@ -334,9 +291,14 @@ class Stake:
             ok_x = False
             ok_y = False
             ok_z = False
-            if self.lock_target( STAKE_OVAL_DIRECTION , STAKE_OVAL_AREA ) :
-                self.control.publish_data( "SPECIAL OVAL Have do mission end this process")
-                break
+            if self.vision.result['area'] > STAKE_VAMPIRE_AREA :
+                if self.lock_target( STAKE_OVAL_DIRECTION , STAKE_OVAL_AREA ) :
+                    self.control.publish_data( "SPECIAL OVAL Have do mission end this process")
+                    break
+                else:
+                    pass
+            else:
+                self.control.publish_data("OVAL waiting area")                
 
             if not self.vision.result['found'] :
                 count_unfound += 1
