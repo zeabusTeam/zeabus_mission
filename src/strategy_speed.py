@@ -443,13 +443,36 @@ class StrategySpeed:
         # Move free move
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-        self.control.publish_data( "STRATEGY Move free time for drop")
+        self.control.publish_data( "STRATEGY Move free time before drop")
         while( (not rospy.is_shutdown() ) and diff_time < STRATEGY_FREE_TIME_DROP ):
             self.rate.sleep()
             self.control.force_xy( STRATEGY_FREE_FORCE_DROP , 0 )
             self.control.publish_data( "STRATEGY Move free time is " 
                 + repr( ( diff_time , STRATEGY_FREE_TIME_DROP ) ) )
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+
+        # START TO FIND TARGET DROP
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        self.control.publish_data( "STRATEGY START survey to find drop mission")
+        count_found = 0
+        while (not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_SURVEY_DROP :
+            self.rate.sleep()
+            self.vision_drop.call_data( DROP_FIND_TARGET )
+            self.vision_drop.echo_data()
+            if self.vision_drop.result['found'] :
+                count_found += 1
+                if count_found == 5 :
+                    self.control.publish_data( "STRATEGY found target and break")
+                    break
+                else:
+                    self.control.publish_data( "STRATEGY found target " + str( count_found ) )
+                    self.control.force_xy( 0 , 0 )
+            else:
+                self.control.force_xy( 0.0 , STRATEGY_FORCE_SURVEY_DROP )
+                count_found = 0
+                self.control.publish_data( "STRATEGY survey for DROP " + str( count_found ) )
+                diff_time = (rospy.get_rostime() - start_time ).to_sec()
 
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
