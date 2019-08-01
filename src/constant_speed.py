@@ -47,7 +47,7 @@ PATH_START_DEPTH = -1               # This will tell desire depth when want to s
 PATH_TARGET_DEPTH = -2.5            # This target of path will want to go before do mission
 PATH_FIND_TIME = 5                  # Left is constant but right + 2 second
 PATH_FORCE_YAW = 0.2                # This variable is force to use rotation
-PATH_OK_DIFF_YAW = 0.13             # This use ok yaw to don't rotation again 
+PATH_OK_DIFF_YAW = 0.16             # This use ok yaw to don't rotation again 
 PATH_LAST_TIME = 8
 PATH_END_DEPTH = -1.5               # This is absolute depth after do task path finish
 PATH_MODE = True                    # If true mean you don't use mode tracking to each point
@@ -140,7 +140,7 @@ STRATEGY_FORCE_SURVEY_PATH = SUPER_RIGHT    # Force to survey before pass gate
 STRATEGY_TIME_GATE_PATH = 20                # Time to forward and doing pass gate
 STRATEGY_FORCE_GATE_PATH = SUPER_FORWARD    # Force to forward and doing pass gate
 STRATEGY_ROTATION_GATE_BUOY = -math.pi / 4   # Use rotation when don't found path
-STRATEGY_FIX_YAW_GATE = True
+STRATEGY_FIX_YAW_GATE = True                # If this true don't care above variable
 # ====> Mission Buoy
 STRATEGY_DEPTH_BOUY = BUOY_START_DEPTH      # This depth will use in buoy mission
 STRATEGY_TIME_BUOY = 30                      # This is time to forward search direct after path
