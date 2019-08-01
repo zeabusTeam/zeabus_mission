@@ -941,4 +941,3 @@ if __name__=="__main__":
     rospy.init_node('strategy_mission')
 
     mission = StrategySpeed()
-
