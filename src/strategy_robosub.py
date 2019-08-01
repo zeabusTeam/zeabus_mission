@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# FILE			: strategy_straight.py
+# FILE			: strategy_robosub.py
 # AUTHOR		: K.Supasan
 # CREATE ON		: 2019, August 1 (UTC+0)
 # MAINTAINER	: K.Supasan
@@ -55,7 +55,7 @@ from zeabus_utility.srv import SendBoolResponse, SendBool
 from constant_speed import *
 from zeabus.vision.analysis_constant import *
 
-class StrategySpeed:
+class StrategyRobosub:
 
     def __init__( self ):
         self.control = CommandInterfaces( "strategy" )
@@ -266,6 +266,8 @@ class StrategySpeed:
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
         count_found = 0
+        self.control.update_target()
+        target_depth = self.control.target_pose[2]
         while (not rospy.is_shutdown() ) and diff_time < ROBOSUB_TIME_FORWARD_TO_PATH :
             self.rate.sleep()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
@@ -309,9 +311,20 @@ class StrategySpeed:
                                     while not self.control.check_yaw( 0.12 ):
                                         self.rate.sleep()
                                     self.control.deactivate( ('x' , 'y' ) )
+                                    never_rotation = False
+                                elif self.control.check_z( 0.12 ):
+                                    if target_depth > STRATEGY_DEPTH_BOUY :
+                                        target_depth -= 0.5
+                                        if target_depth < STRATEGY_DEPTH_BOUY
+                                            target_depth = STRATEGY_DEPTH_BOUY
+                                        self.control.publish_data( "ROBOSUB command depth " + 
+                                            str( target_depth ) )
+                                        self.control.absolute_z( target_depth )
+                                    else:
+                                        self.control.publish_data( "ROBOSUB now start attack buoy?")
+                                        break 
                                 else:
-                                    self.control.publish_data( "ROBOSUB now start attack buoy?")
-                                    break 
+                                    self.control.publish_data( "ROBOSUB Waiting z are OK")
                             else:
                                 self.control.publish_data( "ROBOSUB command force " 
                                     + repr( (force_x , force_y ) ) )
@@ -351,6 +364,111 @@ class StrategySpeed:
                 self.control.force_xy( ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY , 0 )
                 self.control.publish_data( "ROBOSUB forward triangle buoy " + str( diff_time ) )
                 diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+
+            start_time = rospy.get_rostime()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            self.control.absolute_z( STRATEGY_DEPTH_BOUY / 2 )
+            self.control.publish_data( "ROBOSUB command depth to "+str( STRATEGY_DEPTH_BOUY / 2 ) )
+            while (not rospy.is_shutdown() ) and diff_time < ROBOSUB_TIME_FORWARD_TRIANGLE_BUOY :
+                self.rate.sleep()
+                self.control.force_xy( -1.0*ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY , 0 )
+                self.control.publish_data( "ROBOSUB backward triangle buoy " + str( diff_time ) )
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+
+            self.control.absolute_z( -1 )
+            self.control.publish_data( "ROBOSUB Move untill find path")
+            continue_to_do_buoy = False
+            count_found = 0
+            target_depth = -1
+            while not rospy.is_shutdown() 
+                self.vision_path.call_data()
+                self.vision_path.echo_data()
+                if self.vision_path.num_point > 0 :
+                    count_found += 1
+                    if count_found == 3 :
+                        self.control.publish_data( "ROBOSUB start center of picture")
+                        count_unfound = 0 
+                        while not rospy.is_shutdown() and count_unfound < 4 :
+                            self.vision_path.call_data()
+                            self.vision_path.echo_data()
+                            if self.vision_path.num_point > 0:
+                                count_unfound = 0
+                                force_x = 0
+                                force_y = 0
+                                ok_x = False
+                                ok_y = False
+                                if self.vision_path.x_point[0] > -20 :
+                                    force_y = TARGET_LEFT
+                                elif self.vision_path.x_point[ 0 ] > 20 :
+                                    force_y = TARGET_RIGHT
+                                else:
+                                    ok_x = True
+                                if self.vision_path.y_point[0] < -20 :
+                                    force_x = TARGET_BACKWARD
+                                elif self.vision_path.y_point[ 0 ] > 20  :
+                                    force_x = TARGET_FORWARD
+                                else:
+                                    ok_y = True
+
+                                if ok_x and ok_y :
+                                    self.control.force_xy( 0 , 0 )
+                                    if self.control.check_z( 0.12 )
+                                        if target_depth > STRATEGY_DEPTH_BOUY :
+                                            target_depth -= 0.5
+                                            if target_depth < STRATEGY_DEPTH_BOUY
+                                                target_depth = STRATEGY_DEPTH_BOUY
+                                            self.control.publish_data( "ROBOSUB command depth " + 
+                                                str( target_depth ) )
+                                            self.control.absolute_z( target_depth )
+                                        else:
+                                            self.control.publish_data( "ROBOSUB now find SINGLE")
+                                            continue_to_do_buoy = True
+                                            break 
+                                    else:
+                                        self.control.publish_data( "ROBOSUB Waiting z are OK")
+                                else:
+                                    self.control.publish_data( "ROBOSUB command force " 
+                                        + repr( (force_x , force_y ) ) )
+                                    self.control.force_xy( force_x , force_y )
+                            else:
+                                count_unfound += 1
+                                self.control.publish_data( "ROBOSUB don't found path")
+
+                        if continue_to_do_buoy :
+                            self.control.publish_data( "ROBOSUB doing single BUOY")
+                            break
+                    else:
+                        self.control.force_xy( 0 , 0 )
+                        self.control.publish_data( "ROBOSUB find path count " + str( count_found ) )
+                else:
+                    count_found = 0
+                    self.control.publish_data( "ROBOSUB survey find path" )
+                    self.control.force_xy( 0.0 , -1.0*ROBOSUB_FORCE_SURVEY_TRIANGLE_BUOY )
+            
+            if continue_to_do_buoy :
+                self.control.publish_data( "ROBOSUB I will survey to find BUOY" )
+                start_time = rospy.get_rostime()
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+                count_found = 0
+                finish_buoy = False
+                while( ( not rospy.is_shutdown() ) and ( not finish_buoy )
+                        and diff_time < ROBOSUB_TIME_FIRST_SURVEY_SINGLE_BUOY ):
+                    self.vision_buoy.call_data()
+                    self.vision_buoy.echo_data()
+                    if self.vision_buoy.result['found']:
+                        count_found += 1
+                        if count_found == 3 :
+                            self.control.publish_data( "ROBOSUB Found Single Buoy and will play")
+                            finish_buoy = True
+                            break
+                        else:
+                            self.control.publish_data( "ROBOSUB Found SINGLE BUOY " 
+                                + str( count_found ) )
+                    else:
+                        count_found = 0
+                        self.control.publish_data( "ROBOSUB survey SINGLE BUOY " + str( diff_time ) )
+                        self.control.force_xy( 0 , ROBOSUB_FORCE_FIRST_SURVEY_SINGLE_BUOY )
+                        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
         
         # Start part for search drop garliac mission
         self.control.activate( ['x' , 'y'] )
@@ -871,5 +989,4 @@ class StrategySpeed:
 if __name__=="__main__":
     rospy.init_node('strategy_mission')
 
-    mission = StrategySpeed()
-
+    mission = StrategyRobosub()
