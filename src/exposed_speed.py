@@ -252,7 +252,7 @@ class Exposed:
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
         can_go_up = False
-        while( not rospy.is_shutdown(() ) and diff_time < EXPOSED_LIMIT_TIME_TO_FIND :
+        while( ( not rospy.is_shutdown() ) and diff_time < EXPOSED_LIMIT_TIME_TO_FIND ):
             self.vision.call_data()
             self.vision.echo_data()
             if( self.vision.result['num_object'] == 2 ):
@@ -261,8 +261,8 @@ class Exposed:
                 self.control.publish_data( "TUNE_CENTER found two object")
                 break
             elif( self.vision.result['num_object'] == 1 ):
-               if( self.vision.result['object_1']['center_x'] * EXPOSED_CENTER_X_DIRECTION ) >
-                    EXPOSED_CENTER_X_NEW_VALUE :
+                if( ( self.vision.result['object_1']['center_x'] * EXPOSED_CENTER_X_DIRECTION ) >
+                    EXPOSED_CENTER_X_NEW_VALUE ) :
                     can_go_up = True 
                     self.control.force_xy( 0 , 0 )
 
@@ -341,7 +341,7 @@ class Exposed:
         self.control.publish_data( "TUNE_CENTER have to sleep")
         self.control.deactivate( ['x' , 'y' , 'z' , 'yaw'] )
         rospy.sleep( 6 )
-        self.control.activate( ['x' . 'y' . 'z' . 'yaw' ] )
+        self.control.activate( ['x' , 'y' , 'z' , 'yaw' ] )
         self.control.publish_data( "TUNE_CENTER have to wakeup")
         self.control.absolute_z( -0.5 )
         

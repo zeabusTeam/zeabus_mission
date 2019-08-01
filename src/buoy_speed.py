@@ -208,7 +208,7 @@ class Buoy:
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
         while( (not rospy.is_shutdown() ) and diff_time < BUOY_TIME_TO_SURVEY ):
             self.rate.sleep()
-            self.control.force_xy( 0 , -1.0*BUOY_FORCE_SURVEY )
+            self.control.force_xy( 0 , BUOY_FORCE_SURVEY )
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             self.control.publish_data( "FINISH survey current , limit " 
                 + repr( ( diff_time , BUOY_TIME_TO_SURVEY ) ) )

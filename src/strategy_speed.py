@@ -36,7 +36,7 @@ from zeabus.vision.analysis_drop import AnalysisDrop
 
 # For doing exposed by analysis coffin mission
 from exposed_speed import Exposed
-from zeabus.vision.analysis_exposed import AnalysisCoffin
+from zeabus.vision.analysis_coffin import AnalysisCoffin
 
 # For doing stake by analysis stake mission
 from stake_not_open import Stake
@@ -714,7 +714,7 @@ class StrategySpeed:
                                 else:
                                     ok_x = True
 
-                                if self.vision.result['area'] < STRATEGY_STAKE_AREA_FOCUS / 1.5
+                                if self.vision.result['area'] < STRATEGY_STAKE_AREA_FOCUS / 1.5:
                                     force_x = TARGET_FORWARD
                                 else:
                                     ok_z = True
