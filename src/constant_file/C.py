@@ -52,7 +52,7 @@ PATH_END_DEPTH = -1.5               # This is absolute depth after do task path 
 PATH_MODE = True                    # If true mean you don't use mode tracking to each point
 
 # Constant for mission buoy
-BUOY_START_DEPTH = -2.2             # This will tell desire depth when want to start this mission
+BUOY_START_DEPTH = -2.4             # This will tell desire depth when want to start this mission
 BUOY_FOUND_PICTURE = 1              # This use will deicision to change mode after found round
 BUOY_TIME_LOCK_TARGET = 60          # This is limit you still in mode lock target
 BUOY_AREA_ABORT = 8                 # In mode lock target you can out of loop by area
@@ -104,10 +104,10 @@ EXPOSED_CENTER_X_NEW_VALUE = 70
 EXPOSED_LIMIT_TIME_TO_FIND = 15 
 
 # Constant for operator stake
-STAKE_START_DEPTH = -2.7
-STAKE_Z_DOWN = -3.3
-STAKE_Z_FORCE_0 = -2.9
-STAKE_Z_UP = -2.5
+STAKE_START_DEPTH = -2.2
+STAKE_Z_DOWN = -3.2
+STAKE_Z_FORCE_0 = -2.8
+STAKE_Z_UP = -2.4
 STAKE_AREA_ROTATION = 15
 STAKE_AREA_ROTATION_OVER = 30
 STAKE_OVAL_DIRECTION = 'right'
@@ -116,6 +116,7 @@ if( STAKE_OVAL_DIRECTION == 'right' ):
 else:
     STAKE_OVAL_CENTER_X = -50
 STAKE_OVAL_AREA = 6
+STAKE_VAMPIRE_AREA = 18
 STAKE_LIMIT_TIME = 10
 STAKE_HEART_AREA = 3
 STAKE_TARGET_POINT = ( -50.1 , 11.2 )
