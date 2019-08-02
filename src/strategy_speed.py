@@ -791,7 +791,7 @@ class StrategySpeed:
 
         self.control.update_target()
         collective_target_yaw = zeabus_math.bound_radian( 
-            self.control.target[5] + STRATEGY_ROTATION_STAKE )
+            self.control.target_pose[5] + STRATEGY_ROTATION_STAKE )
 
         self.control.absolute_z( STRATEGY_EXPOSED_FIND )
         self.control.publish_data( "STRATEGY command depth to " + str( STRATEGY_EXPOSED_FIND ) )

@@ -28,7 +28,7 @@ SUPER_LEFT = 2.3
 SUPER_RIGHT = -2.3
 
 # Constant for first mission is mission gate
-GATE_START_DEPTH = -0.65            # This use to target depth of this mission
+GATE_START_DEPTH = -0.4            # This use to target depth of this mission
 GATE_START_FORWARD_TIME = 10         # This is limit of time to go forward
 GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
 GATE_START_SURVEY_TIME = 3         # This is limit time for go servey 
@@ -137,15 +137,15 @@ DROP_DEPTH_ACTION = -3 # depth when you want to drop or open
 # ====> Mission Path 
 STRATEGY_NO_PATH = False
 # ====> Mission Gate
-STRATEGY_TIME_SURVEY_PATH = 1               # Time to survey before pass gate
-STRATEGY_FORCE_SURVEY_PATH = SUPER_LEFT    # Force to survey before pass gate
+STRATEGY_TIME_SURVEY_PATH = 0.5               # Time to survey before pass gate
+STRATEGY_FORCE_SURVEY_PATH = SUPER_RIGHT    # Force to survey before pass gate
 STRATEGY_TIME_GATE_PATH = 25                # Time to forward and doing pass gate
 STRATEGY_FORCE_GATE_PATH = SUPER_FORWARD    # Force to forward and doing pass gate
 STRATEGY_ROTATION_GATE_BUOY = -math.pi / 8   # Use rotation when don't found path
 STRATEGY_FIX_YAW_GATE = False                # If this true don't care above variable
 # ====> Mission Buoy
 STRATEGY_DEPTH_BOUY = BUOY_START_DEPTH      # This depth will use in buoy mission
-STRATEGY_TIME_BUOY = 32                      # This is time to forward search direct after path
+STRATEGY_TIME_BUOY = 70                      # This is time to forward search direct after path
 STRATEGY_FORCE_BUOY = SURVEY_FORWARD        # This is force forward search direct after path
 STRATEGY_TIME_BUOY_SURVEY = 5             # This is time to survey after path to buoy
 STRATEGY_FORCE_BUOY_SURVEY = SURVEY_RIGHT    # This is force survey after path to buoy
