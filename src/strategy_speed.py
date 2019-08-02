@@ -142,7 +142,8 @@ class StrategySpeed:
         temp_drop_yaw = 0
         if STRATEGY_FIX_YAW_DROP :
             self.control.update_target()
-            temp_drop_yaw = self.control.target_pose[5] + DROP_RELATIVE_YAW_GATE
+            temp_drop_yaw = zeabus_math.bound_radian( 
+                self.control.target_pose[5] + DROP_RELATIVE_YAW_GATE )
 
         while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_GATE_PATH ):
             self.rate.sleep()
@@ -241,10 +242,8 @@ class StrategySpeed:
 
         if STRATEGY_FIX_YAW_GATE :
             self.control.publish_data( "STRATEGY command fix yaw same rotation of gate")
-            self.control.absolute_yaw( temp_yaw )
+            self.control.absolute_yaw( temp_yaw + STRATEGY_ROTATION_GATE_BUOY)
             self.control.sleep()
-            while not self.control.check_yaw( 0.12 ):
-                self.rate.sleep()
 
         self.control.publish_data( "STRATEGY waiting yaw before start buoy")
         while( not self.control.check_yaw( 0.15 ) ):
@@ -434,7 +433,7 @@ class StrategySpeed:
         self.control.absolute_z( STRATEGY_DEPTH_FIND_DROP )
         self.control.sleep()
         self.control.publish_data( "STRATEGY Command depth at " 
-            + str( STRATEGY_DEPTH_FIND_DROP - 0.5)  )
+            + str( STRATEGY_DEPTH_FIND_DROP )  )
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
 

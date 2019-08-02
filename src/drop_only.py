@@ -215,6 +215,8 @@ class Drop:
 
         self.control.update_target()
         target_depth = self.control.target_pose[2]
+
+        self.control.activate( ('x' , 'y') )
         
         self.control.publish_data( "FINISH will call depth to " + str( DROP_START_DEPTH ) )
         while not rospy.is_shutdown():
