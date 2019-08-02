@@ -126,7 +126,10 @@ class Drop:
         finish = False
 
         count_unfound = 0
-        while( ( not rospy.is_shutdown() ) and count_unfound < 5 ): 
+        start_time = rospy.get_rostime()
+        diff_time = (rospy.get_rostime() - start_time ).to_sec()
+
+        while( ( not rospy.is_shutdown() ) and ( count_unfound < 5 ) and ( diff_time < 30 ) ): 
             self.rate.sleep()
             self.vision.call_data( DROP_FIND_TARGET )
             self.vision.echo_data()
@@ -194,11 +197,14 @@ class Drop:
                 self.control.force_xy( 0 , 0 )
                 self.control.publish_data( "OPERATOR Don't found picture")
 
+            diff_time = (rospy.get_rostime() - start_time ).to_sec()
+
         self.control.publish_data( "OPERATOR Choose Process")
         self.control.deactivate( ['x' , 'y' ] )
 
         if( count_unfound == 5 ):
             self.control.publish_data( "OPERATOR stop process because don't found picture" )
+            self.control.command_gripper( True )
         else:
             self.control.publish_data( "OPERATOR chosee drop" )
             self.control.update_target()

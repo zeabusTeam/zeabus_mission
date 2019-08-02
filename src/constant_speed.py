@@ -75,7 +75,7 @@ DROP_TARGET_DEPTH = -1              # Operator to using doing sub mission ( drop
 DROP_ONLY_DEPTH = -2.5              # Depth for using guess drop garlic
 DROP_ACTION_DEPTH = -3.4            # Depth for using open action by survey
 DROP_STEP_DEPTH = -0.3              # Depth is use for relative depth to command
-DROP_BACKWARD_TIME = 5              # This time to backward before drop
+DROP_BACKWARD_TIME = 4              # This time to backward before drop
 DROP_BACKWARD_FORCE=SURVEY_BACKWARD # This is force to backward before drop
 # ----> Below constant in mission will may use for case you see all
 DROP_WANT_OPEN = False              # This variable use to consider you want to try open or not

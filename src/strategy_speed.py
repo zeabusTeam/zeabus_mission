@@ -565,7 +565,7 @@ class StrategySpeed:
                 while not self.control.check_yaw( 0.15 ):
                     self.rate.sleep()
                 self.control.update_target()
-                self.mission_drop.drop( DROP_CENTER_X_DROP , self.control.target_pose[2])
+                self.mission_drop.operator()
             else:
                 self.mission_drop.operator()
         else:

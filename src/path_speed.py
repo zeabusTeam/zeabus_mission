@@ -108,6 +108,8 @@ class Path:
                                 break
                             else:
                                 target_depth -= 0.5
+                                if target_depth < PATH_TARGET_DEPTH :
+                                    target_depth = PATH_TARGET_DEPTH - 0.05
                                 self.control.publish_data( "FIND command depth to " 
                                     + str( target_depth ) )
                                 self.control.absolute_z( target_depth )
