@@ -139,6 +139,10 @@ class StrategySpeed:
             self.control.update_target()
             temp_yaw = self.control.target_pose[5]
             self.control.publish_data( "STRATEGY remember yaw is " + str( temp_yaw ) )
+        temp_drop_yaw = 0
+        if STRATEGY_FIX_YAW_DROP :
+            self.control.update_target()
+            temp_drop_yaw = self.control.target_pose[5] + DROP_RELATIVE_YAW_GATE
 
         while( ( not rospy.is_shutdown() ) and diff_time < STRATEGY_TIME_GATE_PATH ):
             self.rate.sleep()
@@ -553,7 +557,17 @@ class StrategySpeed:
 
         if( count_found > 0 ):
             self.control.publish_data( "Found picture next play drop by operator function")
-            self.mission_drop.operator()
+            if STRATEGY_FIX_YAW_DROP :
+                self.control.publish_data( "STRATEGY fix yaw for drop is " 
+                    + str( temp_drop_yaw ) )
+                self.control.absolute_yaw( temp_drop_yaw )
+                self.control.sleep()
+                while not self.control.check_yaw( 0.15 ):
+                    self.rate.sleep()
+                self.control.update_target()
+                self.mission_drop.drop( DROP_CENTER_X_DROP , self.control.target_pose[2])
+            else:
+                self.mission_drop.operator()
         else:
             self.control.publish_data( "Don't found drop" )
 
