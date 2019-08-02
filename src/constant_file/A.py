@@ -150,7 +150,7 @@ STRATEGY_FORCE_BUOY_SURVEY = SURVEY_LEFT    # This is force survey after path to
 STRATEGY_TIME_BUOY_PATH = 10                # This is time to use forward find buoy only direct
 STRATEGY_FORCE_BUOY_PATH = SURVEY_FORWARD   # This is force use to direct after buoy to search path
 # ====> Mission DROP
-STRATEGY_ROTATION_BUOY_DROP = -math.pi/4  # This use rotation buoy to drop in case don't find path
+STRATEGY_ROTATION_BUOY_DROP = -math.pi/4  # This rotation buoy to drop in case don't find path
 STRATEGY_DEPTH_FIND_DROP = DROP_START_DEPTH  # This use to depth for find depth
 STRATEGY_FREE_TIME_DROP = 5
 STRATEGY_FREE_FORCE_DROP = SURVEY_FORWARD

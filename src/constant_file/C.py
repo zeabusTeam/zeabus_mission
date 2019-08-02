@@ -52,7 +52,7 @@ PATH_END_DEPTH = -1.5               # This is absolute depth after do task path 
 PATH_MODE = True                    # If true mean you don't use mode tracking to each point
 
 # Constant for mission buoy
-BUOY_START_DEPTH = -2.2             # This will tell desire depth when want to start this mission
+BUOY_START_DEPTH = -2.4             # This will tell desire depth when want to start this mission
 BUOY_FOUND_PICTURE = 1              # This use will deicision to change mode after found round
 BUOY_TIME_LOCK_TARGET = 60          # This is limit you still in mode lock target
 BUOY_AREA_ABORT = 8                 # In mode lock target you can out of loop by area
@@ -87,6 +87,7 @@ DROP_FORCE_YAW = 0.2
 DROP_CENTER_X_DROP = 20             # POSITIVE FOR DROP LEFT
 DROP_CENTER_X_OPEN = 40
 DROP_CENTER_Y = 55 # target of center y when you want to drop and can use for estimate open
+DROP_RELATIVE_YAW_GATE = -math.pi/4
 
 # Constant for operator exposed
 EXPOSED_START_DEPTH = -0.75
@@ -104,10 +105,10 @@ EXPOSED_CENTER_X_NEW_VALUE = 70
 EXPOSED_LIMIT_TIME_TO_FIND = 15 
 
 # Constant for operator stake
-STAKE_START_DEPTH = -2.7
-STAKE_Z_DOWN = -3.3
-STAKE_Z_FORCE_0 = -2.9
-STAKE_Z_UP = -2.5
+STAKE_START_DEPTH = -2.2
+STAKE_Z_DOWN = -3.2
+STAKE_Z_FORCE_0 = -2.8
+STAKE_Z_UP = -2.4
 STAKE_AREA_ROTATION = 15
 STAKE_AREA_ROTATION_OVER = 30
 STAKE_OVAL_DIRECTION = 'right'
@@ -116,6 +117,7 @@ if( STAKE_OVAL_DIRECTION == 'right' ):
 else:
     STAKE_OVAL_CENTER_X = -50
 STAKE_OVAL_AREA = 6
+STAKE_VAMPIRE_AREA = 18
 STAKE_LIMIT_TIME = 10
 STAKE_HEART_AREA = 3
 STAKE_TARGET_POINT = ( -50.1 , 11.2 )
@@ -149,6 +151,7 @@ STRATEGY_FORCE_BUOY_SURVEY = SURVEY_RIGHT    # This is force survey after path t
 STRATEGY_TIME_BUOY_PATH = 10                # This is time to use forward find buoy only direct 
 STRATEGY_FORCE_BUOY_PATH = SURVEY_FORWARD   # This is force use to direct after buoy to search path
 # ====> Mission DROP
+STRATEGY_FIX_YAW_DROP = False
 STRATEGY_ROTATION_BUOY_DROP = -math.pi/4  # This use rotation buoy to drop in case don't find path
 STRATEGY_DEPTH_FIND_DROP = DROP_START_DEPTH  # This use to depth for find depth
 STRATEGY_FREE_TIME_DROP = 5
