@@ -389,9 +389,12 @@ class StrategySpeed:
                         if( self.control.check_z( 0.15 ) ):
                             if( target_depth < PATH_TARGET_DEPTH ):
                                 self.control.publish_data( "Breaking and go to setup point")
+                                count = 4
                                 break
                             else:
                                 target_depth -= 0.5
+                                if target_depth < PATH_TARGET_DEPTH :
+                                    target_depth = PATH_TARGET_DEPTH - 0.05
                                 self.control.publish_data( "STRATGY I command depth to " 
                                     + str( target_depth ) )
                                 self.control.absolute_z( target_depth )
