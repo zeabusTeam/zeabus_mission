@@ -239,6 +239,13 @@ class Stake:
                 else:
                     ok_y = False
 
+                if self.vision.result['area'] < area + 1 :
+                    force_x = TARGET_FORWARD
+                elif self.vision.result['area'] > area + 3 :
+                    force_x = TARGET_BACKWARD
+                else:
+                    pass
+
                 if( ok_x and ok_y ):
                     if( self.vision.result['area'] >  area ):
                         can_fire = True

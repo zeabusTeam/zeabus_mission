@@ -87,6 +87,7 @@ DROP_FORCE_YAW = 0.2
 DROP_CENTER_X_DROP = 20             # POSITIVE FOR DROP LEFT
 DROP_CENTER_X_OPEN = 40
 DROP_CENTER_Y = 55 # target of center y when you want to drop and can use for estimate open
+DROP_RELATIVE_YAW_GATE = -math.pi/4
 
 # Constant for operator exposed
 EXPOSED_START_DEPTH = -0.75
@@ -150,6 +151,7 @@ STRATEGY_FORCE_BUOY_SURVEY = SURVEY_RIGHT    # This is force survey after path t
 STRATEGY_TIME_BUOY_PATH = 10                # This is time to use forward find buoy only direct 
 STRATEGY_FORCE_BUOY_PATH = SURVEY_FORWARD   # This is force use to direct after buoy to search path
 # ====> Mission DROP
+STRATEGY_FIX_YAW_DROP = False
 STRATEGY_ROTATION_BUOY_DROP = -math.pi/4  # This use rotation buoy to drop in case don't find path
 STRATEGY_DEPTH_FIND_DROP = DROP_START_DEPTH  # This use to depth for find depth
 STRATEGY_FREE_TIME_DROP = 5
