@@ -209,10 +209,10 @@ class Exposed:
                                 self.rate.sleep()
                                 self.vision.call_data()
                                 self.vision.echo_data()
-                                if( self.vision.result['object_1']['rotation'] > 0.12 ):
+                                if( self.vision.result['object_1']['rotation'] > 0.2 ):
                                     self.control.publish_data("OPERATOR rotation left")
                                     self.control.force_xy_yaw( 0 , 0 , EXPOSED_FORCE_YAW )
-                                elif( self.vision.result['object_1']['rotation'] < -0.12 ):
+                                elif( self.vision.result['object_1']['rotation'] < -0.2 ):
                                     self.control.publish_data( "OPERATOR rotation right" )
                                     self.control.force_xy_yaw( 0 , 0 ,-EXPOSED_FORCE_YAW )
                                 else:
@@ -281,9 +281,11 @@ class Exposed:
                 diff_time = ( rospy.get_rostime() - start_time ).to_sec()
                 self.control.publish_data( "TUNE_CENTER Don'found object " + str( diff_time ) )
                 self.control.force_xy( 0 , EXPOSED_FORCE_TO_FIND )
-
+        self.control.force_xy( 0 , 0 )
         if( not can_go_up ):
             self.control.publish_data( "TUNE_CENTER We want to find again")
+            while not self.control.check_yaw( 0.12 ):
+                self.rate.sleep()
             start_time = rospy.get_rostime()
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             while( not rospy.is_shutdown() ) and ( diff_time < EXPOSED_LIMIT_TIME_TO_FIND * 2.5 ):
@@ -312,7 +314,7 @@ class Exposed:
                             ok_x = True
 
                         if( ok_x and ok_y ):
-                            self.control.publish_data("TUNE_CENTER now opk")
+                            self.control.publish_data("TUNE_CENTER now ok")
                             break
                         else:
                             self.control.publish_data( "TUNE_CENTER force " 
