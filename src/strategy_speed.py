@@ -137,7 +137,7 @@ class StrategySpeed:
         temp_yaw = 0
         if STRATEGY_FIX_YAW_GATE :
             self.control.update_target()
-            temp_yaw = self.control.target_pose[5]
+            temp_yaw = self.control.target_pose[5] + BUOY_RELATIVE_YAW_GATE
             self.control.publish_data( "STRATEGY remember yaw is " + str( temp_yaw ) )
         temp_drop_yaw = 0
         if STRATEGY_FIX_YAW_DROP :
@@ -225,7 +225,17 @@ class StrategySpeed:
 
         self.control.relative_xy( 0 , 0 )
         self.control.activate( ['x' , 'y'] )
-
+        self.control.publish_data( "STRATEGY will rotation")
+        round_spin = 0
+        while not rospy.is_shutdown() :
+            self.rate.sleep()
+            if self.control.check_yaw( 0.15 ):
+                if round_spin == 6 :
+                    break
+                else:
+                    self.control.relative_yaw( math.pi )
+                    self.control.sleep()
+            
         # Part to move forward for path If you see path
 
         if( count == 3 ) and not STRATEGY_NO_PATH:
@@ -405,7 +415,7 @@ class StrategySpeed:
                 self.control.force_xy( 0 , 0 )
                 break
 
-        # End part to search parh
+        # End part to search path
 
         self.control.activate( ['x' , 'y'] )
         self.control.relative_xy( 0 , 0 )
