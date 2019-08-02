@@ -140,9 +140,9 @@ class Buoy:
             relative_y = 0
             if( self.vision.result['found'] ):
                 unfound = 0
-                if( self.vision.result['center_x'] > 20 ):
+                if( self.vision.result['center_x'] > 15 ):
                     relative_y = TARGET_RIGHT
-                elif( self.vision.result['center_x'] < -20 ):
+                elif( self.vision.result['center_x'] < -15 ):
                     relative_y = TARGET_LEFT
                 else:
                     relative_x = SUPER_FORWARD
@@ -207,9 +207,9 @@ class Buoy:
             self.control.publish_data( "FINISH back current , limit " 
                 + repr( ( diff_time , BUOY_TIME_TO_BACK ) ) )
 
-        self.control.force_false() 
         self.control.publish_data( "FINISH Waiting depth")
         while( not self.control.check_z( 0.15 ) ):
+            self.control.force_xy( 0 , 0 )
             self.rate.sleep()
 
         self.control.publish_data( "FINISH Survey right")

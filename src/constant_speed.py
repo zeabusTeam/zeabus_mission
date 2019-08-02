@@ -28,14 +28,14 @@ SUPER_LEFT = 2.3
 SUPER_RIGHT = -2.3
 
 # Constant for first mission is mission gate
-GATE_START_DEPTH = -0.2            # This use to target depth of this mission
-GATE_START_FORWARD_TIME = 8         # This is limit of time to go forward
+GATE_START_DEPTH = -0.3            # This use to target depth of this mission
+GATE_START_FORWARD_TIME = 9         # This is limit of time to go forward
 GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
-GATE_START_SURVEY_TIME = 5         # This is limit time for go servey 
+GATE_START_SURVEY_TIME = 3         # This is limit time for go servey 
 GATE_START_SURVEY_DISTANCE = 6      # This is limit time for go survey 
-GATE_START_SURVEY_DIRECTION = 1.0   # positive is left and negative is right
+GATE_START_SURVEY_DIRECTION = -1.0   # positive is left and negative is right
 # ----> two below variable we use to sure we can 
-GATE_FORWARD_ONLY_TIME = 35         # This is limit time for go direct. 
+GATE_FORWARD_ONLY_TIME = 32         # This is limit time for go direct. 
 GATE_FORWARD_ONLY_DISTANCE = 8      # This is limit distane for go direct
 GATE_FORCE_Y = TARGET_LEFT * 100    # unit is / 100 kgf
 GATE_FORCE_X = SURVEY_FORWARD * 100 # unit is / 100 kgf
@@ -43,7 +43,7 @@ GATE_APPROVE_AGAIN = True           # This function help you.
                                     # If you are mode last move will be call data again
 # Constant for mission path
 PATH_START_DEPTH = -1               # This will tell desire depth when want to start this mission
-PATH_TARGET_DEPTH = -2.3            # This target of path will want to go before do mission
+PATH_TARGET_DEPTH = -2.2            # This target of path will want to go before do mission
 PATH_FIND_TIME = 5                  # Left is constant but right + 2 second
 PATH_FORCE_YAW = 0.2                # This variable is force to use rotation
 PATH_OK_DIFF_YAW = 0.16             # This use ok yaw to don't rotation again 
@@ -52,7 +52,7 @@ PATH_END_DEPTH = -1.5               # This is absolute depth after do task path 
 PATH_MODE = True                    # If true mean you don't use mode tracking to each point
 
 # Constant for mission buoy
-BUOY_START_DEPTH = -2.4             # This will tell desire depth when want to start this mission
+BUOY_START_DEPTH = -2.3             # This will tell desire depth when want to start this mission
 BUOY_FOUND_PICTURE = 1              # This use will deicision to change mode after found round
 BUOY_TIME_LOCK_TARGET = 60          # This is limit you still in mode lock target
 BUOY_AREA_ABORT = 8                 # In mode lock target you can out of loop by area
@@ -87,7 +87,8 @@ DROP_FORCE_YAW = 0.2
 DROP_CENTER_X_DROP = 20             # POSITIVE FOR DROP LEFT
 DROP_CENTER_X_OPEN = 40
 DROP_CENTER_Y = 55 # target of center y when you want to drop and can use for estimate open
-DROP_RELATIVE_YAW_GATE = -math.pi/4
+DROP_RELATIVE_YAW_GATE = -math.pi/8
+DROP_HAVE_ROTATION_FOLLOW_GATE = True
 
 # Constant for operator exposed
 EXPOSED_START_DEPTH = -0.75
@@ -151,7 +152,7 @@ STRATEGY_FORCE_BUOY_SURVEY = SURVEY_RIGHT    # This is force survey after path t
 STRATEGY_TIME_BUOY_PATH = 10                # This is time to use forward find buoy only direct 
 STRATEGY_FORCE_BUOY_PATH = SURVEY_FORWARD   # This is force use to direct after buoy to search path
 # ====> Mission DROP
-STRATEGY_FIX_YAW_DROP = False
+STRATEGY_FIX_YAW_DROP = DROP_HAVE_ROTATION_FOLLOW_GATE
 STRATEGY_ROTATION_BUOY_DROP = -math.pi/4  # This use rotation buoy to drop in case don't find path
 STRATEGY_DEPTH_FIND_DROP = DROP_START_DEPTH  # This use to depth for find depth
 STRATEGY_FREE_TIME_DROP = 5
@@ -163,20 +164,20 @@ STRATEGY_TIME_DROP = 30
 STRATEGY_DISTANCE_DROP = 6
 # ====> Choice to do last mission have 3 choind
 STRATEGY_CHOICE_PROCESS = 0
-STRATEGY_ROTATION_EXPOSED = 0      # This use to rotation from drop to exposed
-STRATEGY_ROTATION_STAKE = 0        # This will use to collect for command absolute yaw
+STRATEGY_ROTATION_EXPOSED = -3.0* math.pi/ 8      # This use to rotation from drop to exposed
+STRATEGY_ROTATION_STAKE = -math.pi/2        # This will use to collect for command absolute yaw
 #========> 0 is No use dvl : 1 is use DVL : 2 is use hydophone
 # ====> Mission Exposed
 STRATEGY_EXPOSED_FIND = EXPOSED_START_DEPTH
-STRATEGY_TIME_SURVEY = 2
+STRATEGY_TIME_SURVEY = 4
 STRATEGY_DISTANCE_SURVEY = 7
 STRATEGY_FORCE_SURVEY = SURVEY_LEFT
-STRATEGY_TIME_FORWARD = 20
+STRATEGY_TIME_FORWARD = 30
 STRATEGY_FORCE_FORWARD = SURVEY_FORWARD
 STRATEGY_DISTANCE_FORWARD = 10
 # ====> Mission Stake
 STRATEGY_STAKE_DEPTH = STAKE_START_DEPTH
-STRATEGY_STAKE_TIME_FORWARD = 30
+STRATEGY_STAKE_TIME_FORWARD = 40
 STRATEGY_STAKE_FORCE_FORWARD = SURVEY_BACKWARD
 STRATEGY_STAKE_DISTANCE_FORWARD = 10
 STRATEGY_STAKE_TIME_SURVEY = 35
