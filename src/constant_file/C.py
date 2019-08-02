@@ -43,7 +43,7 @@ GATE_APPROVE_AGAIN = True           # This function help you.
                                     # If you are mode last move will be call data again
 # Constant for mission path
 PATH_START_DEPTH = -1               # This will tell desire depth when want to start this mission
-PATH_TARGET_DEPTH = -2.5            # This target of path will want to go before do mission
+PATH_TARGET_DEPTH = -2.3            # This target of path will want to go before do mission
 PATH_FIND_TIME = 5                  # Left is constant but right + 2 second
 PATH_FORCE_YAW = 0.2                # This variable is force to use rotation
 PATH_OK_DIFF_YAW = 0.16             # This use ok yaw to don't rotation again 
