@@ -471,7 +471,7 @@ class StrategySpeed:
                 self.vision_path.call_data()
                 self.vision_path.echo_data()
             
-                if self.vision_path.num_point != 0
+                if self.vision_path.num_point != 0:
                     count_found += 1
                     self.control.force_xy( 0 , 0 )
                     count_unfound = 0
@@ -532,7 +532,7 @@ class StrategySpeed:
                                 self.control.publish_data( "STRATEGY command " 
                                     + repr(( relative_x , relative_y ) ) )
                                 self.control.force_xy( relative_x , relative_y )
-                        if count = 4 :
+                        if count == 4 :
                             break
                         else:
                             count_found = 0
