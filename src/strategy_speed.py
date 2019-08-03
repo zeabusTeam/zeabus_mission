@@ -188,18 +188,18 @@ class StrategySpeed:
                         if count_unfound == 3:
                             break
                         continue
-                    elif( self.vision_path.x_point[1] > 20 ):
+                    elif( self.vision_path.x_point[0] > 20 ):
                         relative_y = SURVEY_RIGHT
-                    elif( self.vision_path.x_point[1] < -20 ):
+                    elif( self.vision_path.x_point[0] < -20 ):
                         relative_y = SURVEY_LEFT
                     else:
                         ok_y = True
                     count_unfound = 0
                     if( self.vision_path.num_point == 0):
                         relative_x = 0
-                    elif( self.vision_path.y_point[1] > 20 ):
+                    elif( self.vision_path.y_point[0] > 20 ):
                         relative_x = SURVEY_FORWARD
-                    elif( self.vision_path.y_point[1] < -20 ):
+                    elif( self.vision_path.y_point[0] < -20 ):
                         relative_x = SURVEY_BACKWARD
                     else:
                         ok_x = True
@@ -422,8 +422,133 @@ class StrategySpeed:
         self.control.sleep()
         
         if( count == 4 ) and not STRATEGY_NO_PATH:
-            self.control.publish_data( "I start path by ever found path" )
-            self.mission_path.setup_point()
+            self.control.absolute_z( ROBOSUB_DEPTH_TRIANGLE )
+            self.control.publish_data( "STRATEGY TRY TO ATTACK TRIANGLE BUOY")
+            self.control.deactivate( ('x' , 'y')  )
+            start_time = rospy.get_rostime()
+            diff_time = (rospy.get_rostime() - start_time ).to_sec()
+            while (not rospy.is_shutdown()) and diff_time < ROBOSUB_TIME_SURVEY_TRIANGLE_BUOY:
+                self.control.force_xy( 0 , ROBOSUB_FORCE_SURVEY_TRIANGLE_BUOY )
+                self.control.publish_data( "STRATEGY SURVEY TRIANGLE " + str( diff_time ) )
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+
+            start_time = rospy.get_rostime()
+            diff_time = (rospy.get_rostime() - start_time ).to_sec()
+            while (not rospy.is_shutdown()) and diff_time < ROBOSUB_TIME_FORWARD_TRIANGLE_BUOY:
+                self.rate.sleep()
+                self.control.force_xy( ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY , 0 )
+                self.control.publish_data( "STRATEGY FORWARD TRIANLGE " + str( diff_time ) )
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        
+            start_time = rospy.get_rostime()
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            while (not rospy.is_shutdown()) and diff_time < 3 :
+                self.rate.sleep()
+                self.control.force_xy( -ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY , 0 )
+                self.control.publish_data( "STRATEGY BACKWARD TRIANLGE " + str( diff_time ) )
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            self.control.absolute_z( -1.2 )
+            start_time = rospy.get_rostime()
+            diff_time = ( rospy.get_rostime() -  start_time ).to_sec()
+            while (not rospy.is_shutdown()) and diff_time < ROBOSUB_TIME_SURVEY_TRIANGLE_BUOY:
+                self.rate.sleep()
+                self.control.force_xy( 0 , -ROBOSUB_FORCE_SURVEY_TRIANGLE_BUOY)
+                self.control.publish_data( "STRATEGY SURVEY REVERSE " + str( diff_time ) )
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+
+            self.control.force_xy( 0 , 0 )
+            self.control.publish_data( "STRATEGY will try to find path again")
+            while not self.control.check_z( 0.1 ) :
+                self.rate.sleep()
+
+            count_found = 0
+            start_time = rospy.get_rostime()
+            diff_time = (rospy.get_rostime() - start_time ).to_sec()
+            self.control.force_xy( -ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY , 0 )
+            target_depth = -1
+            while (not rospy.is_shutdown() ) and diff_time < (ROBOSUB_TIME_FORWARD_TRIANGLE_BUOY - 1):
+                self.rate.sleep()
+                self.vision_path.call_data()
+                self.vision_path.echo_data()
+            
+                if self.vision_path.num_point != 0
+                    count_found += 1
+                    self.control.force_xy( 0 , 0 )
+                    count_unfound = 0
+                    if count_found == 3 :
+                        # Set center to prepare play path
+                        self.control.publish_data( "STRATEGY try to center path")
+                        while( not rospy.is_shutdown() ):
+                            self.rate.sleep()
+                            self.vision_path.call_data()
+                            self.vision_path.echo_data()
+
+                            relative_x = 0
+                            relative_y = 0
+                            ok_x = False
+                            ok_y = False
+                            
+                            if( self.vision_path.num_point == 0 ):
+                                rospy.logfatal("STRATGY path disappear noooooooo")
+                                count = 0
+                                relative_y = 0
+                                count_unfound += 1
+                                if count_unfound == 3:
+                                    break
+                                continue
+                            elif( self.vision_path.x_point[0] > 30 ):
+                                relative_y = TARGET_RIGHT
+                            elif( self.vision_path.x_point[0] < -30 ):
+                                relative_y = TARGET_LEFT
+                            else:
+                                ok_y = True
+                            count_unfound = 0 
+                            if( self.vision_path.num_point == 0):
+                                relative_x = 0
+                            elif( self.vision_path.y_point[0] < -60 ):
+                                relative_x = TARGET_BACKWARD * 2.0
+                            elif( self.vision_path.y_point[0] > 20 ):
+                                relative_x = TARGET_FORWARD
+                            elif( self.vision_path.y_point[0] < -20 ):
+                                relative_x = TARGET_BACKWARD
+                            else:
+                                ok_x = True
+
+                            if( ok_x and ok_y ):
+                                self.control.force_xy( 0 , 0 )
+                                if( self.control.check_z( 0.15 ) ):
+                                    if( target_depth < PATH_TARGET_DEPTH ):
+                                        self.control.publish_data( "Breaking and go to setup point")
+                                        count = 4
+                                        break
+                                    else:
+                                        target_depth -= 0.5
+                                        if target_depth < PATH_TARGET_DEPTH :
+                                            target_depth = PATH_TARGET_DEPTH - 0.05
+                                        self.control.publish_data( "STRATGY I command depth to " 
+                                            + str( target_depth ) )
+                                        self.control.absolute_z( target_depth )
+                            else:
+                                self.control.publish_data( "STRATEGY command " 
+                                    + repr(( relative_x , relative_y ) ) )
+                                self.control.force_xy( relative_x , relative_y )
+                        if count = 4 :
+                            break
+                        else:
+                            count_found = 0
+                    else:
+                        self.control.publish_data( "STRATEGY find path " + str( count_found ))
+                else:
+                    self.control.force_xy( -ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY , 0 )
+                    diff_time = (rospy.get_rostime() - start_time).to_sec()
+                    self.control.publish_data( "STRATEGY try to find path " + str( diff_time ) )
+
+            if count_found == 3 :
+                self.mission_path.setup_point()
+            else:
+                self.control.publish_data( "Try to survey find path")
+                self.mission_path.find_path()
+                
         elif STRATEGY_NO_PATH :
             self.control.publish_data( "STRATEGY No play path")
             self.control.relative_yaw( STRATEGY_ROTATION_BUOY_DROP )
@@ -447,8 +572,6 @@ class StrategySpeed:
         while( not self.control.check_z( 0.15 ) ):
             self.rate.sleep()
 
-        self.control.absolute_z( STRATEGY_DEPTH_FIND_DROP )
-        self.control.publish_data( "STRATEGY Command depth at " + str(STRATEGY_DEPTH_FIND_DROP))
         self.control.publish_data( "Waiting yaw")
         while( not self.control.check_yaw( 0.12 ) ):
             self.rate.sleep()

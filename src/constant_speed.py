@@ -63,7 +63,7 @@ BUOY_TARGET_DEPTH_FINISH = -0.8     # This is absolute depth when you finish das
 BUOY_FORCE_SURVEY = SURVEY_RIGHT               # force to survey after dash mode
 BUOY_FORCE_FORWARD = SURVEY_FORWARD            # force to forward and backward after dahs mode
 BUOY_TIME_TO_BACK = 5               # forward will plus 5 second
-BUOY_TIME_TO_SURVEY = 5             # time to survey make increase opportunity to find path
+BUOY_TIME_TO_SURVEY = 10             # time to survey make increase opportunity to find path
 
 # Constant for operator drop
 # ----> Below 2 constan variable will help you to manage about flip mission or task 
@@ -194,10 +194,11 @@ ROBOSUB_FORCE_SURVEY_TO_PATH = SURVEY_LEFT
 ROBOSUB_TIME_FORWARD_TO_PATH = 30
 ROBOSUB_FORCE_FORWARD_TO_PATH = SURVEY_FORWARD
 
+ROBOSUB_DEPTH_TRIANGLE = -2.4
 ROBOSUB_TIME_SURVEY_TRIANGLE_BUOY = 5
-ROBOSUB_FORCE_SURVEY_TRIANGLE_BUOY = TARGET_LEFT
+ROBOSUB_FORCE_SURVEY_TRIANGLE_BUOY = SURVEY_RIGHT
 ROBOSUB_TIME_FORWARD_TRIANGLE_BUOY = 6
-ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY = TARGET_FORWARD
+ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY = SURVEY_BACKWARD
 # Auto backward
 ROBOSUB_TIME_FIRST_SURVEY_SINGLE_BUOY = 10
 ROBOSUB_FORCE_FIRST_SURVEY_SINGLE_BUOY = TARGET_RIGHT
