@@ -468,7 +468,7 @@ class StrategySpeed:
             diff_time = (rospy.get_rostime() - start_time ).to_sec()
             self.control.force_xy( -ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY , 0 )
             target_depth = -1
-            while (not rospy.is_shutdown() ) and diff_time < (ROBOSUB_TIME_FORWARD_TRIANGLE_BUOY - 1):
+            while (not rospy.is_shutdown() ) and diff_time < (ROBOSUB_TIME_FORWARD_TRIANGLE_BUOY-2):
                 self.rate.sleep()
                 self.vision_path.call_data()
                 self.vision_path.echo_data()

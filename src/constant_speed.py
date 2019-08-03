@@ -28,10 +28,10 @@ SUPER_LEFT = 2.3
 SUPER_RIGHT = -2.3
 
 # Constant for first mission is mission gate
-GATE_START_DEPTH = -0.2            # This use to target depth of this mission
+GATE_START_DEPTH = -0.25            # This use to target depth of this mission
 GATE_START_FORWARD_TIME = 4         # This is limit of time to go forward
 GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
-GATE_START_SURVEY_TIME = 7         # This is limit time for go servey 
+GATE_START_SURVEY_TIME = 2         # This is limit time for go servey 
 GATE_START_SURVEY_DISTANCE = 6      # This is limit time for go survey 
 GATE_START_SURVEY_DIRECTION = 1.0   # positive is left and negative is right
 # ----> two below variable we use to sure we can 
@@ -150,7 +150,7 @@ STRATEGY_TIME_BUOY = 30                      # This is time to forward search di
 STRATEGY_FORCE_BUOY = SURVEY_FORWARD        # This is force forward search direct after path
 STRATEGY_TIME_BUOY_SURVEY = 3             # This is time to survey after path to buoy
 STRATEGY_FORCE_BUOY_SURVEY = SURVEY_LEFT    # This is force survey after path to buoy
-STRATEGY_TIME_BUOY_PATH = 15                # This is time to use forward find buoy only direct 
+STRATEGY_TIME_BUOY_PATH = 20                # This is time to use forward find buoy only direct 
 STRATEGY_FORCE_BUOY_PATH = SURVEY_FORWARD   # This is force use to direct after buoy to search path
 # ====> Mission DROP
 STRATEGY_FIX_YAW_DROP = DROP_HAVE_ROTATION_FOLLOW_GATE
@@ -159,18 +159,18 @@ STRATEGY_DEPTH_FIND_DROP = DROP_START_DEPTH  # This use to depth for find depth
 STRATEGY_FREE_TIME_DROP = 3
 STRATEGY_FREE_FORCE_DROP = SURVEY_FORWARD
 STRATEGY_FORCE_SURVEY_DROP = SURVEY_RIGHT
-STRATEGY_TIME_SURVEY_DROP = 2
+STRATEGY_TIME_SURVEY_DROP = 3
 STRATEGY_FORCE_DROP = SURVEY_FORWARD
 STRATEGY_TIME_DROP = 25
 STRATEGY_DISTANCE_DROP = 6
 # ====> Choice to do last mission have 3 choind
 STRATEGY_CHOICE_PROCESS = 0
-STRATEGY_ROTATION_EXPOSED = math.pi/8      # This use to rotation from drop to exposed
+STRATEGY_ROTATION_EXPOSED = 1.5*math.pi/8      # This use to rotation from drop to exposed
 STRATEGY_ROTATION_STAKE = math.pi/2        # This will use to collect for command absolute yaw
 #========> 0 is No use dvl : 1 is use DVL : 2 is use hydophone
 # ====> Mission Exposed
 STRATEGY_EXPOSED_FIND = EXPOSED_START_DEPTH
-STRATEGY_TIME_SURVEY = 3
+STRATEGY_TIME_SURVEY = 4
 STRATEGY_DISTANCE_SURVEY = 7
 STRATEGY_FORCE_SURVEY = SURVEY_RIGHT
 STRATEGY_TIME_FORWARD = 30
