@@ -151,6 +151,19 @@ class Buoy:
                     relative_x , relative_y ) )
                 self.control.force_xy( relative_x , relative_y )
 
+                if self.control.check_z( 0.11 ):
+                    if self.vision.result['center_y'] > 30 :
+                        self.control.relative_z( 0.1 )
+                        self.control.sleep()
+                        self.control.publish_data("Lock Target depth relative 0.1")
+                    elif self.vision.result['center_y'] < -30 :
+                        self.control.relative_z( -0.1 )
+                        self.control.sleep()
+                        self.control.publish_data("Lock Target depth relative -0.1")
+                    else:
+                        self.control.publish_data("Lock Target ok center_y")
+                    
+
                 if( self.vision.result['area'] > BUOY_AREA_ABORT ):
                     self.control.publish_data( "Break from area condition") 
                     break

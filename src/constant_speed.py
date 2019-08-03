@@ -28,14 +28,14 @@ SUPER_LEFT = 2.3
 SUPER_RIGHT = -2.3
 
 # Constant for first mission is mission gate
-GATE_START_DEPTH = -0.25            # This use to target depth of this mission
-GATE_START_FORWARD_TIME = 15         # This is limit of time to go forward
+GATE_START_DEPTH = -0.3            # This use to target depth of this mission
+GATE_START_FORWARD_TIME = 7         # This is limit of time to go forward
 GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
-GATE_START_SURVEY_TIME = 0         # This is limit time for go servey 
+GATE_START_SURVEY_TIME = 3         # This is limit time for go servey 
 GATE_START_SURVEY_DISTANCE = 6      # This is limit time for go survey 
 GATE_START_SURVEY_DIRECTION = 1.0   # positive is left and negative is right
 # ----> two below variable we use to sure we can 
-GATE_FORWARD_ONLY_TIME = 30         # This is limit time for go direct. 
+GATE_FORWARD_ONLY_TIME = 25         # This is limit time for go direct. 
 GATE_FORWARD_ONLY_DISTANCE = 8      # This is limit distane for go direct
 GATE_FORCE_Y = TARGET_LEFT * 100    # unit is / 100 kgf
 GATE_FORCE_X = SURVEY_FORWARD * 100 # unit is / 100 kgf
@@ -53,7 +53,7 @@ PATH_MODE = True                    # If true mean you don't use mode tracking t
 
 # Constant for mission buoy
 BUOY_RELATIVE_YAW_GATE = math.pi/8
-BUOY_START_DEPTH = -2.4             # This will tell desire depth when want to start this mission
+BUOY_START_DEPTH = -2.2             # This will tell desire depth when want to start this mission
 BUOY_FOUND_PICTURE = 1              # This use will deicision to change mode after found round
 BUOY_TIME_LOCK_TARGET = 60          # This is limit you still in mode lock target
 BUOY_AREA_ABORT = 8                 # In mode lock target you can out of loop by area
@@ -138,7 +138,7 @@ DROP_DEPTH_ACTION = -3 # depth when you want to drop or open
 # ====> Mission Path 
 STRATEGY_NO_PATH = False
 # ====> Mission Gate
-STRATEGY_TIME_SURVEY_PATH = 3               # Time to survey before pass gate
+STRATEGY_TIME_SURVEY_PATH = 1               # Time to survey before pass gate
 STRATEGY_FORCE_SURVEY_PATH = SUPER_RIGHT    # Force to survey before pass gate
 STRATEGY_TIME_GATE_PATH = 40                # Time to forward and doing pass gate
 STRATEGY_FORCE_GATE_PATH = SUPER_FORWARD    # Force to forward and doing pass gate

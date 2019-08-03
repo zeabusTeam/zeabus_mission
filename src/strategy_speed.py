@@ -188,18 +188,18 @@ class StrategySpeed:
                         if count_unfound == 3:
                             break
                         continue
-                    elif( self.vision_path.x_point[0] > 30 ):
+                    elif( self.vision_path.x_point[1] > 20 ):
                         relative_y = SURVEY_RIGHT
-                    elif( self.vision_path.x_point[0] < -30 ):
+                    elif( self.vision_path.x_point[1] < -20 ):
                         relative_y = SURVEY_LEFT
                     else:
                         ok_y = True
                     count_unfound = 0
                     if( self.vision_path.num_point == 0):
                         relative_x = 0
-                    elif( self.vision_path.y_point[0] > 20 ):
+                    elif( self.vision_path.y_point[1] > 20 ):
                         relative_x = SURVEY_FORWARD
-                    elif( self.vision_path.y_point[0] < -20 ):
+                    elif( self.vision_path.y_point[1] < -20 ):
                         relative_x = SURVEY_BACKWARD
                     else:
                         ok_x = True
@@ -223,7 +223,6 @@ class StrategySpeed:
                 self.control.force_xy( 0 , 0 )
                 break
 
-        self.control.relative_xy( 0 , 0 )
         self.control.activate( ['x' , 'y'] )
         self.control.publish_data( "STRATEGY will rotation")
         round_spin = 0
@@ -235,6 +234,7 @@ class StrategySpeed:
                 else:
                     self.control.relative_yaw( math.pi / 3 )
                     self.control.sleep()
+                    self.control.publish_data( "STRATEGY SPIN ROUND " + str( round_spin ) )
                     round_spin += 1
             
         # Part to move forward for path If you see path
@@ -419,7 +419,6 @@ class StrategySpeed:
         # End part to search path
 
         self.control.activate( ['x' , 'y'] )
-        self.control.relative_xy( 0 , 0 )
         self.control.sleep()
         
         if( count == 4 ) and not STRATEGY_NO_PATH:
