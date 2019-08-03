@@ -379,20 +379,20 @@ class StrategySpeed:
                         if count_unfound == 3:
                             break
                         continue
-                    elif( self.vision_path.x_point[0] > 20 ):
+                    elif( self.vision_path.x_point[ self.vision_path.num_point - 1] > 20 ):
                         relative_y = TARGET_RIGHT
-                    elif( self.vision_path.x_point[0] < -20 ):
+                    elif( self.vision_path.x_point[ self.vision_path.num_point - 1] < -20 ):
                         relative_y = TARGET_LEFT
                     else:
                         ok_y = True
                     count_unfound = 0 
                     if( self.vision_path.num_point == 0):
                         relative_x = 0
-                    elif( self.vision_path.y_point[0] < -60 ):
+                    elif( self.vision_path.y_point[ self.vision_path.num_point - 1] < -60 ):
                         relative_x = TARGET_BACKWARD * 2.0
-                    elif( self.vision_path.y_point[0] > 20 ):
+                    elif( self.vision_path.y_point[ self.vision_path.num_point - 1] > 20 ):
                         relative_x = TARGET_FORWARD
-                    elif( self.vision_path.y_point[0] < -20 ):
+                    elif( self.vision_path.y_point[ self.vision_path.num_point - 1] < -20 ):
                         relative_x = TARGET_BACKWARD
                     else:
                         ok_x = True
@@ -970,7 +970,7 @@ class StrategySpeed:
             self.rate.sleep()
             self.vision_coffin.call_data()
             self.vision_coffin.echo_data()
-            if self.vision.result['num_object'] > 0 :
+            if self.vision_coffin.result['num_object'] > 0 :
                 count_found += 1
                 force_x = 0
                 force_y = 0
@@ -1006,7 +1006,7 @@ class StrategySpeed:
 
             diff_time = (rospy.get_rostime() - start_time).to_sec()
 
-        self.control.activate( [ 'x' , 'y' ] )
+        self.control.force_xy( 0 , 0 )
         result = False        
         if( count_found == 5 ):
             self.control.publish_data( "STRATEGY finish and found object let operator")
@@ -1014,6 +1014,8 @@ class StrategySpeed:
             result = True
         else:
             self.control.publish_data( "STRATEGY finish forward search let find object")
+            self.control.sleep()
+            self.control.activate( [ 'x' , 'y' ] )
             result = self.mission_exposed.find()
 
         if result :
