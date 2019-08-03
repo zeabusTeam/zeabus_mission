@@ -62,16 +62,15 @@ class Path:
             self.vision.call_data()
             self.vision.echo_data()
             if( self.vision.num_point != 0 ):
-                self.control.get_state()
                 count += 1
             else:
                 count = 0
 
-            if( count == 2 ):
+            if( count == 3 ):
                 self.control.publish_data("FIND I find path now !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" )
                 target_depth = -1.0
-                real_found = True
                 count_unfound = 0
+                real_found = True
                 while( not rospy.is_shutdown() ):
                     self.rate.sleep()
                     self.vision.call_data()
@@ -102,6 +101,7 @@ class Path:
 
                     if( ok_x and ok_y ):
                         self.control.force_xy( 0 , 0 )
+                        count_unfound = 0
                         if( self.control.check_z( 0.15 ) ):
                             if( target_depth < PATH_TARGET_DEPTH ):
                                 self.control.publish_data( "FIND and go to setup point")
@@ -121,17 +121,21 @@ class Path:
                             real_found = False
                             break
                     else:
+                        count_unfound = 0
                         self.control.publish_data( "FIND command " 
                             + repr(( relative_x , relative_y ) ) )
                         self.control.force_xy( relative_x , relative_y )
 
                 self.control.force_xy( 0 , 0 )
                 if( real_found ):
+                    count_found = 3
                     break
+                else:
+                    count = 0
 
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             if( mode == 1 ):
-                self.control.force_xy( 0.1 , SURVEY_RIGHT )
+                self.control.force_xy( 0.0 , SURVEY_RIGHT )
                 if( diff_time > PATH_FIND_TIME ):
                     self.control.publish_data( "FIND mode 1 time out")
                     mode = 2
@@ -140,7 +144,7 @@ class Path:
                     self.control.publish_data( "FIND mode 1 (diff , limit ) : " 
                         + repr( ( diff_time , PATH_FIND_TIME ) ) )
             elif( mode == 2 ):
-                self.control.force_xy( 0.1 , SURVEY_LEFT )
+                self.control.force_xy( 0.0 , SURVEY_LEFT )
                 if( diff_time > (PATH_FIND_TIME * 2.0) + 3 ):
                     self.control.publish_data( "FIND mode 2 time out")
                     mode = 3
@@ -149,7 +153,7 @@ class Path:
                     self.control.publish_data( "FIND mode 2 (diff , limit ) : " 
                         + repr( ( diff_time , PATH_FIND_TIME * 2.0 + 3 ) ) )
             elif( mode == 3 ):
-                self.control.force_xy( 0.1 , SUPER_RIGHT )
+                self.control.force_xy( 0.0 , SUPER_RIGHT )
                 if( diff_time > ( PATH_FIND_TIME + 3 ) ):
                     self.control.publish_data( "FIND mode 3 time out")
                     mode = 4 
@@ -160,13 +164,12 @@ class Path:
                 self.control.force_false() 
                 break
 
-        self.control.activate( ['x' , 'y'])
-
         result = False
-        if( count == 2 ):
+        if( count == 3 ):
             self.setup_point()
             result = True
         else:
+            self.control.activate( ['x' , 'y'] ) 
             self.control.publish_data( "FIND Don't found path")
             result = False
 

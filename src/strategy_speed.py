@@ -206,6 +206,7 @@ class StrategySpeed:
 
                     if( ok_x and ok_y ):
                         self.control.force_xy( 0 , 0 )
+                        count = 3
                         if( self.control.check_z( 0.15 ) ):
                             if( target_depth < PATH_TARGET_DEPTH ):
                                 self.control.publish_data( "STRATEGY Breaking and setup point")
@@ -232,7 +233,7 @@ class StrategySpeed:
                 if round_spin == 6 :
                     break
                 elif round_spin < 6 :
-                    self.control.relative_yaw( math.pi / 3 )
+                    self.control.relative_yaw( 2.0 * math.pi / 3 )
                     self.control.sleep()
                     self.control.publish_data( "STRATEGY SPIN ROUND " + str( round_spin ) )
                     round_spin += 1
@@ -241,7 +242,7 @@ class StrategySpeed:
             
         # Part to move forward for path If you see path
 
-        if( count == 3 ) and not STRATEGY_NO_PATH:
+        if( ( count == 3 ) and ( not STRATEGY_NO_PATH) ):
             self.control.publish_data( "STRATEGY start mission path on setup_point" )
             self.mission_path.setup_point()
         elif STRATEGY_NO_PATH : 
