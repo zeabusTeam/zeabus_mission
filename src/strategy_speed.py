@@ -231,11 +231,13 @@ class StrategySpeed:
             if self.control.check_yaw( 0.15 ):
                 if round_spin == 6 :
                     break
-                else:
+                elif round_spin < 6 :
                     self.control.relative_yaw( math.pi / 3 )
                     self.control.sleep()
                     self.control.publish_data( "STRATEGY SPIN ROUND " + str( round_spin ) )
                     round_spin += 1
+                else:
+                    pass
             
         # Part to move forward for path If you see path
 
@@ -376,9 +378,9 @@ class StrategySpeed:
                         if count_unfound == 3:
                             break
                         continue
-                    elif( self.vision_path.x_point[0] > 30 ):
+                    elif( self.vision_path.x_point[0] > 20 ):
                         relative_y = TARGET_RIGHT
-                    elif( self.vision_path.x_point[0] < -30 ):
+                    elif( self.vision_path.x_point[0] < -20 ):
                         relative_y = TARGET_LEFT
                     else:
                         ok_y = True
