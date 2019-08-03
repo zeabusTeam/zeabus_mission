@@ -29,9 +29,9 @@ SUPER_RIGHT = -2.3
 
 # Constant for first mission is mission gate
 GATE_START_DEPTH = -0.25            # This use to target depth of this mission
-GATE_START_FORWARD_TIME = 12         # This is limit of time to go forward
+GATE_START_FORWARD_TIME = 15         # This is limit of time to go forward
 GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
-GATE_START_SURVEY_TIME = 3         # This is limit time for go servey 
+GATE_START_SURVEY_TIME = 0         # This is limit time for go servey 
 GATE_START_SURVEY_DISTANCE = 6      # This is limit time for go survey 
 GATE_START_SURVEY_DIRECTION = 1.0   # positive is left and negative is right
 # ----> two below variable we use to sure we can 
@@ -138,9 +138,9 @@ DROP_DEPTH_ACTION = -3 # depth when you want to drop or open
 # ====> Mission Path 
 STRATEGY_NO_PATH = False
 # ====> Mission Gate
-STRATEGY_TIME_SURVEY_PATH = 2               # Time to survey before pass gate
+STRATEGY_TIME_SURVEY_PATH = 3               # Time to survey before pass gate
 STRATEGY_FORCE_SURVEY_PATH = SUPER_RIGHT    # Force to survey before pass gate
-STRATEGY_TIME_GATE_PATH = 30                # Time to forward and doing pass gate
+STRATEGY_TIME_GATE_PATH = 40                # Time to forward and doing pass gate
 STRATEGY_FORCE_GATE_PATH = SUPER_FORWARD    # Force to forward and doing pass gate
 STRATEGY_ROTATION_GATE_BUOY = -math.pi / 8   # Use rotation when don't found path
 STRATEGY_FIX_YAW_GATE = True                # If this true don't care above variable

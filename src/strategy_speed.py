@@ -233,8 +233,9 @@ class StrategySpeed:
                 if round_spin == 6 :
                     break
                 else:
-                    self.control.relative_yaw( math.pi )
+                    self.control.relative_yaw( math.pi / 3 )
                     self.control.sleep()
+                    round_spin += 1
             
         # Part to move forward for path If you see path
 
@@ -887,7 +888,7 @@ class StrategySpeed:
             self.mission_exposed.operator()
             result = True
         else:
-            self.mission_exposed.publish_data( "STRATEGY finish forward search let find object")
+            self.control.publish_data( "STRATEGY finish forward search let find object")
             result = self.mission_exposed.find()
 
         if result :

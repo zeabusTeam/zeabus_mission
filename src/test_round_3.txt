@@ -1,0 +1,307 @@
+[INFO] [1564783049.719261]: Waiting service of command to control
+[INFO] [1564783049.725282]: Waiting service of master to control
+[INFO] [1564783049.727954]: Waiting service of elec
+[INFO] [1564783049.735978]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564783050.038778]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564783050.046217]: Now already for using
+=====>Waiting service name /vision/gate
+[INFO] [1564783050.071662]: Waiting service of /vision/gate
+[INFO] [1564783050.095386]: Waiting service of command to control
+[INFO] [1564783050.145733]: Waiting service of master to control
+[INFO] [1564783050.151713]: Waiting service of elec
+[INFO] [1564783050.154374]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564783050.459041]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564783050.464553]: Now already for using
+[INFO] [1564783050.475077]: Waiting service of /vision/path
+[INFO] [1564783050.485445]: Waiting service of command to control
+[INFO] [1564783050.498738]: Waiting service of master to control
+[INFO] [1564783050.518035]: Waiting service of elec
+[INFO] [1564783050.525373]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564783050.845994]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564783050.855589]: Now already for using
+[INFO] [1564783050.865316]: Waiting service of /vision/path
+CONSTANT : ( AREA , SCORE ) : (  0.00500 , 10.00000)
+[INFO] [1564783050.879488]: Waiting service of /vision/buoy
+[INFO] [1564783050.904284]: Waiting service of command to control
+[INFO] [1564783050.919131]: Waiting service of master to control
+[INFO] [1564783050.927338]: Waiting service of elec
+[INFO] [1564783050.929883]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564783051.236171]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564783051.240767]: Now already for using
+CONSTANT : ( AREA , SCORE ) : (  0.00500 , 10.00000)
+[INFO] [1564783051.247556]: Waiting service of /vision/buoy
+[INFO] [1564783051.260723]: Waiting service of /vision/drop_garlic
+[INFO] [1564783051.277073]: Waiting service of command to control
+[INFO] [1564783051.291837]: Waiting service of master to control
+[INFO] [1564783051.310279]: Waiting service of elec
+[INFO] [1564783051.321102]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564783051.634208]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564783051.638906]: Now already for using
+[INFO] [1564783051.644285]: Waiting service of /vision/drop_garlic
+[INFO] [1564783051.658793]: Waiting service of /vision/coffin
+[INFO] [1564783051.673500]: Waiting service of command to control
+[INFO] [1564783051.686558]: Waiting service of master to control
+[INFO] [1564783051.711320]: Waiting service of elec
+[INFO] [1564783051.723008]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564783052.034185]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564783052.039844]: Now already for using
+[INFO] [1564783052.045782]: Waiting service of /vision/coffin
+[INFO] [1564783052.057978]: Waiting service of /vision/stake
+[INFO] [1564783052.076210]: Waiting service of command to control
+[INFO] [1564783052.086782]: Waiting service of master to control
+[INFO] [1564783052.110374]: Waiting service of elec
+[INFO] [1564783052.121077]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564783052.432919]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564783052.439811]: Now already for using
+[INFO] [1564783052.445982]: Waiting service of /vision/stake
+=====>Waiting command to run mission
+=====>STRATEGY I will start run mission now
+=====>START doing mission gate
+=====>START survey to find mission by survey
+=====>START Waiting yaw are ok
+error_yaw : temp  0.02 :  0.15
+=====>START DEACTIVATE XY and forward
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>GATE START free forward
+=====>START survey to gate mission
+=====>START next function is direct_search
+=====>DIRECT_SEARCH start to search
+=====>DIRECT_SEARCH waiting yaw
+error_yaw : temp  0.11 :  0.15
+=====>DIRECT_SEARCH start to forward
+Don't found target
+=====>DIRECT_SEARCH abort by distance
+=====>We don't found picture abort that
+=====>STRATEGY Finish gate next forward and found path
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+=====>STRATEGY remember yaw is -2.30131321672
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY will rotation
+=====>STRATEGY don't found picture I will rotation
+=====>STRATEGY command fix yaw same rotation of gate
+=====>STRATEGY waiting yaw before start buoy
+error_yaw : temp  0.11 :  0.15
+=====>STRATEGY Command depth -2.4
+error_z : error  0.05 :  0.12
+=====>STRATEGY start survey for init do mission buoy
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY will give process to find_target
+=====>Welcome to mode find_target
+=====>Find target Have to waiting depth before go to find target
+error_z : error  0.05 :  0.15
+=====>Find target move relative y -0.8
+=====>FIND_TARGET reset position xy
+=====>Welcome to mode lock target
+=====>You have limit time in mode lock_target 60
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+=====>DASH Move forward limit time at 15
+=====>Finish dash mode move back
+=====>FINISH this task, Move back
+=====>FINISH Waiting depth
+error_z : error  0.05 :  0.15
+=====>FINISH Survey right
+=====>FINISH Forward
+=====>Finish task buoy?
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY command depth -1 meter
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>Try to survey find path
+=====>FIND doing mission to find
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>FIND Don't found path
+=====>It bad you failure mission path rotation to drop
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY Command depth at -1.5
+error_z : error  0.05 :  0.15
+=====>STRATEGY Command depth at -1.5
+=====>Waiting yaw
+error_yaw : temp  0.11 :  0.12
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+=====>STRATEGY Move free time before drop
+=====>STRATEGY START survey to find drop mission
+=====>START FORWARD TO FIND DROP MISSION
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>Don't found drop
+=====>STRATEGY to choose process last mission by don't use dvl
+=====>STRATEGY not use DVL start mission by target at exposed
+=====>STRATEGY command depth to -0.75
+=====>STRATEGY rotation for find target coffin to exposed 0
+error_yaw : temp  0.11 :  0.12
+error_z : error  0.05 :  0.12
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY Waiting yaw before forward
+error_yaw : temp  0.11 :  0.12
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+=====>STRATEGY forward to find exposed
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY finish forward search let find object
+=====>FIND start find expose
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY faliure mission exposed don't play stake
+=====>STRATEGY finish function play not_use_dvl
+=====>Finish all strategy mission
+('WARNING you are call master_mask ', (False, False, False, False, False, False))
+... logging to /home/zeabus/.ros/log/1265f136-b56a-11e9-9309-f44d306ff428/roslaunch-zeabus03-11657.log
+Checking log directory for disk usage. This may take awhile.
+Press Ctrl-C to interrupt
+]2;/home/zeabus/zeabus_workspace/src/zeabus/zeabus_component/zeabus_minimal/launch/speed.launch
+[1mstarted roslaunch server http://zeabus03:45533/[0m
+
+SUMMARY
+========
+
+PARAMETERS
+ * /rosdistro: melodic
+ * /rosversion: 1.14.3
+
+NODES
+  /
+    strategy_mission (zeabus_mission/strategy_speed.py)
+
+[1mROS_MASTER_URI=http://192.168.1.103:11311[0m
+]2;/home/zeabus/zeabus_workspace/src/zeabus/zeabus_component/zeabus_minimal/launch/speed.launch http://192.168.1.103:11311
+[1mprocess[strategy_mission-1]: started with pid [11741][0m
+[strategy_mission-1] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m

@@ -52,6 +52,14 @@ class Gate:
         self.control.force_xy( SURVEY_FORWARD , 0 , True )
         count = 0
         start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( diff_time < 12 ) and not rospy.is_shutdown() :
+            self.rate.sleep()
+            self.control.force_xy( SURVEY_FORWARD , 0 )
+            self.control.publish_data("GATE START free forward")
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+            
+        start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()  
         while( diff_time < GATE_START_FORWARD_TIME and count < 3 and not rospy.is_shutdown() ):
             self.rate.sleep()

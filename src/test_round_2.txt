@@ -1,0 +1,537 @@
+[INFO] [1564782524.157159]: Waiting service of command to control
+[INFO] [1564782524.159737]: Waiting service of master to control
+[INFO] [1564782524.161649]: Waiting service of elec
+[INFO] [1564782524.170348]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782524.474164]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782524.478859]: Now already for using
+=====>Waiting service name /vision/gate
+[INFO] [1564782524.491206]: Waiting service of /vision/gate
+[INFO] [1564782524.520052]: Waiting service of command to control
+[INFO] [1564782524.534472]: Waiting service of master to control
+[INFO] [1564782524.545490]: Waiting service of elec
+[INFO] [1564782524.551126]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782524.562012]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782524.876894]: Now already for using
+[INFO] [1564782524.896223]: Waiting service of /vision/path
+[INFO] [1564782524.898960]: Waiting service of command to control
+[INFO] [1564782524.901052]: Waiting service of master to control
+[INFO] [1564782524.903179]: Waiting service of elec
+[INFO] [1564782524.904244]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782525.207084]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782525.212242]: Now already for using
+[INFO] [1564782525.217014]: Waiting service of /vision/path
+CONSTANT : ( AREA , SCORE ) : (  0.00500 , 10.00000)
+[INFO] [1564782525.232224]: Waiting service of /vision/buoy
+[INFO] [1564782525.261070]: Waiting service of command to control
+[INFO] [1564782525.274837]: Waiting service of master to control
+[INFO] [1564782525.286237]: Waiting service of elec
+[INFO] [1564782525.303915]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782525.612097]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782525.617324]: Now already for using
+CONSTANT : ( AREA , SCORE ) : (  0.00500 , 10.00000)
+[INFO] [1564782525.627117]: Waiting service of /vision/buoy
+[INFO] [1564782525.642333]: Waiting service of /vision/drop_garlic
+[INFO] [1564782525.659376]: Waiting service of command to control
+[INFO] [1564782525.674519]: Waiting service of master to control
+[INFO] [1564782525.686960]: Waiting service of elec
+[INFO] [1564782525.694704]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782526.008897]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782526.016291]: Now already for using
+[INFO] [1564782526.021222]: Waiting service of /vision/drop_garlic
+[INFO] [1564782526.034330]: Waiting service of /vision/coffin
+[INFO] [1564782526.050377]: Waiting service of command to control
+[INFO] [1564782526.068537]: Waiting service of master to control
+[INFO] [1564782526.084942]: Waiting service of elec
+[INFO] [1564782526.096239]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782526.422837]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782526.427824]: Now already for using
+[INFO] [1564782526.434038]: Waiting service of /vision/coffin
+[INFO] [1564782526.462518]: Waiting service of /vision/stake
+[INFO] [1564782526.473963]: Waiting service of command to control
+[INFO] [1564782526.494586]: Waiting service of master to control
+[INFO] [1564782526.521769]: Waiting service of elec
+[INFO] [1564782526.529928]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782526.850425]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782526.857818]: Now already for using
+[INFO] [1564782526.864220]: Waiting service of /vision/stake
+=====>Waiting command to run mission
+=====>STRATEGY I will start run mission now
+=====>START doing mission gate
+=====>START survey to find mission by survey
+=====>START Waiting yaw are ok
+error_yaw : temp  0.01 :  0.15
+=====>START DEACTIVATE XY and forward
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+Don't found target
+=====>START forward time : limit (0.09773016, 15)
+Don't found target
+=====>START forward time : limit (0.308084011, 15)
+x_point ( left , center , right ) : (-18.182 ,  1.963 , 22.107)
+length data 40.2892561983
+distance 5.19421487603
+=====>START Found picture count is 1
+=====>START forward time : limit (0.468742133, 15)
+Don't found target
+=====>START forward time : limit (0.67019105, 15)
+Don't found target
+=====>START forward time : limit (0.874618054, 15)
+Don't found target
+=====>START forward time : limit (1.081462145, 15)
+Don't found target
+=====>START forward time : limit (1.2428741460000001, 15)
+Don't found target
+=====>START forward time : limit (1.497418166, 15)
+Don't found target
+=====>START forward time : limit (1.700512171, 15)
+Don't found target
+=====>START forward time : limit (1.8834710129999999, 15)
+Don't found target
+=====>START forward time : limit (2.100680113, 15)
+Don't found target
+=====>START forward time : limit (2.268439055, 15)
+Don't found target
+=====>START forward time : limit (2.465031147, 15)
+Don't found target
+=====>START forward time : limit (2.66791606, 15)
+Don't found target
+=====>START forward time : limit (2.870876074, 15)
+Don't found target
+=====>START forward time : limit (3.098716021, 15)
+Don't found target
+=====>START forward time : limit (3.25208807, 15)
+Don't found target
+=====>START forward time : limit (3.507757187, 15)
+Don't found target
+=====>START forward time : limit (3.687678099, 15)
+Don't found target
+=====>START forward time : limit (3.856375218, 15)
+x_point ( left , center , right ) : ( 8.678 , 30.475 , 52.273)
+length data 43.5950413223
+distance 5.12809917355
+=====>START Found picture count is 1
+=====>START forward time : limit (4.108058215, 15)
+Don't found target
+=====>START forward time : limit (4.328559161, 15)
+Don't found target
+=====>START forward time : limit (4.542676211, 15)
+Don't found target
+=====>START forward time : limit (4.694115162, 15)
+Don't found target
+=====>START forward time : limit (4.883356095, 15)
+Don't found target
+=====>START forward time : limit (5.104885102, 15)
+Don't found target
+=====>START forward time : limit (5.265811205, 15)
+Don't found target
+=====>START forward time : limit (5.468826056, 15)
+Don't found target
+=====>START forward time : limit (5.701990128, 15)
+Don't found target
+=====>START forward time : limit (5.899023056, 15)
+Don't found target
+=====>START forward time : limit (6.091871024, 15)
+Don't found target
+=====>START forward time : limit (6.293962002, 15)
+Don't found target
+=====>START forward time : limit (6.489120007, 15)
+Don't found target
+=====>START forward time : limit (6.694494009, 15)
+Don't found target
+=====>START forward time : limit (6.886346102, 15)
+Don't found target
+=====>START forward time : limit (7.0409832, 15)
+Don't found target
+=====>START forward time : limit (7.270651102, 15)
+Don't found target
+=====>START forward time : limit (7.464281083, 15)
+Don't found target
+=====>START forward time : limit (7.662327052, 15)
+Don't found target
+=====>START forward time : limit (7.942386151, 15)
+Don't found target
+=====>START forward time : limit (8.094338179, 15)
+Don't found target
+=====>START forward time : limit (8.263222218, 15)
+Don't found target
+=====>START forward time : limit (8.457658053, 15)
+Don't found target
+=====>START forward time : limit (8.657309056, 15)
+Don't found target
+=====>START forward time : limit (8.841612100999999, 15)
+Don't found target
+=====>START forward time : limit (9.09751916, 15)
+Don't found target
+=====>START forward time : limit (9.273808003, 15)
+Don't found target
+=====>START forward time : limit (9.475785017, 15)
+Don't found target
+=====>START forward time : limit (9.694054127, 15)
+Don't found target
+=====>START forward time : limit (9.946057082, 15)
+Don't found target
+=====>START forward time : limit (10.081063033, 15)
+Don't found target
+=====>START forward time : limit (10.287055016, 15)
+Don't found target
+=====>START forward time : limit (10.483369112, 15)
+Don't found target
+=====>START forward time : limit (10.650704146, 15)
+Don't found target
+=====>START forward time : limit (10.878735066, 15)
+Don't found target
+=====>START forward time : limit (11.054149151, 15)
+Don't found target
+=====>START forward time : limit (11.271519185, 15)
+Don't found target
+=====>START forward time : limit (11.470066071, 15)
+Don't found target
+=====>START forward time : limit (11.675508023, 15)
+Don't found target
+=====>START forward time : limit (11.896740199, 15)
+Don't found target
+=====>START forward time : limit (12.093326092, 15)
+Don't found target
+=====>START forward time : limit (12.256373167, 15)
+Don't found target
+=====>START forward time : limit (12.475794077, 15)
+Don't found target
+=====>START forward time : limit (12.653555155, 15)
+Don't found target
+=====>START forward time : limit (12.878699065, 15)
+x_point ( left , center , right ) : (-64.876 , -42.252 , -19.628)
+length data 45.2479338843
+distance 5.09504132231
+=====>START Found picture count is 1
+=====>START forward time : limit (13.110602141, 15)
+Don't found target
+=====>START forward time : limit (13.329950095, 15)
+Don't found target
+=====>START forward time : limit (13.506609202, 15)
+x_point ( left , center , right ) : (-63.430 , -40.083 , -16.736)
+length data 46.694214876
+distance 5.06611570248
+=====>START Found picture count is 1
+=====>START forward time : limit (13.69569707, 15)
+Don't found target
+=====>START forward time : limit (13.903218985, 15)
+Don't found target
+=====>START forward time : limit (14.063647032, 15)
+Don't found target
+=====>START forward time : limit (14.265121222, 15)
+Don't found target
+=====>START forward time : limit (14.497599125, 15)
+Don't found target
+=====>START forward time : limit (14.647858143, 15)
+Don't found target
+=====>START forward time : limit (14.882105112, 15)
+Don't found target
+=====>START forward time : limit (15.138693095, 15)
+=====>START survey to gate mission
+=====>START next function is direct_search
+=====>DIRECT_SEARCH start to search
+=====>DIRECT_SEARCH waiting yaw
+error_yaw : temp  0.02 :  0.15
+=====>DIRECT_SEARCH start to forward
+Don't found target
+=====>DIRECT_SEARCH abort by distance
+=====>We don't found picture abort that
+=====>STRATEGY Finish gate next forward and found path
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+=====>STRATEGY survey before path 6.2943e-05
+=====>STRATEGY survey before path 0.001863003
+=====>STRATEGY survey before path 0.102616072
+=====>STRATEGY survey before path 0.201608896
+=====>STRATEGY survey before path 0.301928997
+=====>STRATEGY survey before path 0.402795076
+=====>STRATEGY survey before path 0.503561974
+=====>STRATEGY survey before path 0.601169109
+=====>STRATEGY survey before path 0.702055931
+=====>STRATEGY survey before path 0.802222014
+=====>STRATEGY survey before path 0.902904987
+=====>STRATEGY survey before path 1.002095938
+=====>STRATEGY survey before path 1.103364945
+=====>STRATEGY survey before path 1.202539921
+=====>STRATEGY survey before path 1.302659989
+=====>STRATEGY survey before path 1.40300107
+=====>STRATEGY survey before path 1.502331019
+=====>STRATEGY survey before path 1.603059054
+=====>STRATEGY survey before path 1.702863932
+=====>STRATEGY survey before path 1.803111076
+=====>STRATEGY survey before path 1.901627064
+=====>STRATEGY survey before path 2.003139019
+=====>STRATEGY survey before path 2.102679014
+=====>STRATEGY survey before path 2.201746941
+=====>STRATEGY survey before path 2.30154109
+=====>STRATEGY survey before path 2.401556969
+=====>STRATEGY survey before path 2.503789902
+=====>STRATEGY survey before path 2.601402998
+=====>STRATEGY survey before path 2.703373909
+=====>STRATEGY survey before path 2.802814961
+=====>STRATEGY survey before path 2.902513027
+=====>STRATEGY remember yaw is -2.30928617234
+Numpoint is    0
+=====>STRATEGY forward time is 0.369746924
+Numpoint is    0
+=====>STRATEGY forward time is 0.866508961
+Numpoint is    0
+=====>STRATEGY forward time is 1.331614972
+Numpoint is    0
+=====>STRATEGY forward time is 1.758155108
+Numpoint is    0
+=====>STRATEGY forward time is 2.154335976
+Numpoint is    0
+=====>STRATEGY forward time is 2.697901965
+Numpoint is    0
+=====>STRATEGY forward time is 3.180936098
+Numpoint is    0
+=====>STRATEGY forward time is 3.594661951
+Numpoint is    0
+=====>STRATEGY forward time is 3.974823952
+Numpoint is    0
+=====>STRATEGY forward time is 4.288016081
+Numpoint is    0
+=====>STRATEGY forward time is 4.643496037
+Numpoint is    0
+=====>STRATEGY forward time is 4.997882128
+Numpoint is    0
+=====>STRATEGY forward time is 5.340631962
+Numpoint is    0
+=====>STRATEGY forward time is 5.782421112
+Numpoint is    0
+=====>STRATEGY forward time is 6.250463009
+Numpoint is    0
+=====>STRATEGY forward time is 6.612507105
+Numpoint is    0
+=====>STRATEGY forward time is 7.14820695
+Numpoint is    0
+=====>STRATEGY forward time is 7.5640409
+Numpoint is    0
+=====>STRATEGY forward time is 8.046324015
+Numpoint is    0
+=====>STRATEGY forward time is 8.502830029
+Numpoint is    0
+=====>STRATEGY forward time is 8.895452977
+Numpoint is    0
+=====>STRATEGY forward time is 9.299372912
+Numpoint is    0
+=====>STRATEGY forward time is 9.642362118
+Numpoint is    0
+=====>STRATEGY forward time is 10.069067955
+Numpoint is    0
+=====>STRATEGY forward time is 10.677166939
+Numpoint is    0
+=====>STRATEGY forward time is 11.239126921
+Numpoint is    0
+=====>STRATEGY forward time is 11.613085032
+Numpoint is    0
+=====>STRATEGY forward time is 12.230869055
+Numpoint is    0
+=====>STRATEGY forward time is 12.674766064
+Numpoint is    0
+=====>STRATEGY forward time is 13.070622921
+Numpoint is    0
+=====>STRATEGY forward time is 13.474765063
+Numpoint is    0
+=====>STRATEGY forward time is 13.950035096
+Numpoint is    0
+=====>STRATEGY forward time is 14.428909064
+Numpoint is    3
+Point is ( 33.22,-82.47) : (-22.89,-37.53) : (-40.79,  9.04) : 
+Rotation value  2.466 ,  1.938
+Area is   0.00 :   0.00
+=====>STRATEGY forward time is 14.905463934
+Numpoint is    0
+=====>STRATEGY forward time is 15.497222901
+Numpoint is    0
+=====>STRATEGY forward time is 16.048162938
+Numpoint is    0
+=====>STRATEGY forward time is 16.534747124
+Numpoint is    0
+=====>STRATEGY forward time is 17.100721121
+Numpoint is    0
+=====>STRATEGY forward time is 17.69055605
+Numpoint is    0
+=====>STRATEGY forward time is 18.251897097
+Numpoint is    0
+=====>STRATEGY forward time is 18.619846106
+Numpoint is    0
+=====>STRATEGY forward time is 19.040652037
+Numpoint is    0
+=====>STRATEGY forward time is 19.555634022
+Numpoint is    0
+=====>STRATEGY forward time is 20.03342104
+Numpoint is    0
+=====>STRATEGY forward time is 20.436115027
+Numpoint is    0
+=====>STRATEGY forward time is 20.900666952
+Numpoint is    0
+=====>STRATEGY forward time is 21.29834795
+Numpoint is    0
+=====>STRATEGY forward time is 21.749390126
+Numpoint is    0
+=====>STRATEGY forward time is 22.313935042
+Numpoint is    0
+=====>STRATEGY forward time is 22.825102091
+Numpoint is    0
+=====>STRATEGY forward time is 23.285897017
+Numpoint is    0
+=====>STRATEGY forward time is 23.590465069
+[INFO] [1564782606.319861]: Service call to code node
+Numpoint is    0
+=====>STRATEGY forward time is 23.986373902
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY will rotation
+=====>STRATEGY don't found picture I will rotation
+=====>STRATEGY command fix yaw same rotation of gate
+=====>STRATEGY waiting yaw before start buoy
+error_yaw : temp  0.09 :  0.15
+=====>STRATEGY Command depth -2.4
+error_z : error  0.10 :  0.12
+=====>STRATEGY start survey for init do mission buoy
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY will give process to find_target
+=====>Welcome to mode find_target
+=====>Find target Have to waiting depth before go to find target
+error_z : error  0.10 :  0.15
+=====>Find target move relative y -0.8
+=====>FIND_TARGET reset position xy
+=====>Welcome to mode lock target
+=====>You have limit time in mode lock_target 60
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+=====>DASH Move forward limit time at 15
+=====>Finish dash mode move back
+=====>FINISH this task, Move back
+=====>FINISH Waiting depth
+error_z : error  0.10 :  0.15
+=====>FINISH Survey right
+=====>FINISH Forward
+=====>Finish task buoy?
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY command depth -1 meter
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>Try to survey find path
+=====>FIND doing mission to find
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>FIND Don't found path
+=====>It bad you failure mission path rotation to drop
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY Command depth at -1.5
+error_z : error  0.10 :  0.15
+=====>STRATEGY Command depth at -1.5
+=====>Waiting yaw
+error_yaw : temp  0.09 :  0.12
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+=====>STRATEGY Move free time before drop
+=====>STRATEGY START survey to find drop mission
+=====>START FORWARD TO FIND DROP MISSION
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>Don't found drop
+=====>STRATEGY to choose process last mission by don't use dvl
+=====>STRATEGY not use DVL start mission by target at exposed
+=====>STRATEGY command depth to -0.75
+=====>STRATEGY rotation for find target coffin to exposed 0
+error_yaw : temp  0.09 :  0.12
+error_z : error  0.10 :  0.12
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY Waiting yaw before forward
+error_yaw : temp  0.09 :  0.12
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+=====>STRATEGY forward to find exposed
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY finish forward search let find object
+=====>FIND start find expose
+('WARNING you are call master_mask ', (False, False, True, True, True, True))
+('WARNING you are call master_mask ', (True, True, True, True, True, True))
+=====>STRATEGY faliure mission exposed don't play stake
+=====>STRATEGY finish function play not_use_dvl
+=====>Finish all strategy mission
+('WARNING you are call master_mask ', (False, False, False, False, False, False))
+[INFO] [1564782610.646386]: Waiting service of command to control
+[INFO] [1564782610.653236]: Waiting service of master to control
+[INFO] [1564782610.657247]: Waiting service of elec
+[INFO] [1564782610.667141]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782610.971068]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782610.973983]: Now already for using
+=====>Waiting service name /vision/gate
+[INFO] [1564782610.984124]: Waiting service of /vision/gate
+[INFO] [1564782610.996316]: Waiting service of command to control
+[INFO] [1564782611.000588]: Waiting service of master to control
+[INFO] [1564782611.004689]: Waiting service of elec
+[INFO] [1564782611.006332]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782611.310454]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782611.317458]: Now already for using
+[INFO] [1564782611.336624]: Waiting service of /vision/path
+[INFO] [1564782611.346493]: Waiting service of command to control
+[INFO] [1564782611.367061]: Waiting service of master to control
+[INFO] [1564782611.386208]: Waiting service of elec
+[INFO] [1564782611.395108]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782611.706031]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782611.710322]: Now already for using
+[INFO] [1564782611.715957]: Waiting service of /vision/path
+CONSTANT : ( AREA , SCORE ) : (  0.00500 , 10.00000)
+[INFO] [1564782611.730263]: Waiting service of /vision/buoy
+[INFO] [1564782611.746924]: Waiting service of command to control
+[INFO] [1564782611.774342]: Waiting service of master to control
+[INFO] [1564782611.796152]: Waiting service of elec
+[INFO] [1564782611.810504]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782612.124751]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782612.132981]: Now already for using
+CONSTANT : ( AREA , SCORE ) : (  0.00500 , 10.00000)
+[INFO] [1564782612.138281]: Waiting service of /vision/buoy
+[INFO] [1564782612.154255]: Waiting service of /vision/drop_garlic
+[INFO] [1564782612.163610]: Waiting service of command to control
+[INFO] [1564782612.168061]: Waiting service of master to control
+[INFO] [1564782612.171355]: Waiting service of elec
+[INFO] [1564782612.173515]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782612.477171]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782612.485298]: Now already for using
+[INFO] [1564782612.495062]: Waiting service of /vision/drop_garlic
+[INFO] [1564782612.509931]: Waiting service of /vision/coffin
+[INFO] [1564782612.522676]: Waiting service of command to control
+[INFO] [1564782612.536695]: Waiting service of master to control
+[INFO] [1564782612.548015]: Waiting service of elec
+[INFO] [1564782612.558900]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782612.870878]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782612.875525]: Now already for using
+[INFO] [1564782612.880987]: Waiting service of /vision/coffin
+[INFO] [1564782612.899410]: Waiting service of /vision/stake
+[INFO] [1564782612.923800]: Waiting service of command to control
+[INFO] [1564782612.938058]: Waiting service of master to control
+[INFO] [1564782612.956527]: Waiting service of elec
+[INFO] [1564782612.963871]: Waiting for tf trasform /odom to /base_link_target
+[INFO] [1564782613.278336]: Waiting for tf trasform /odom to /base_link
+[INFO] [1564782613.286066]: Now already for using
+[INFO] [1564782613.300193]: Waiting service of /vision/stake
+=====>Waiting command to run mission
+... logging to /home/zeabus/.ros/log/1265f136-b56a-11e9-9309-f44d306ff428/roslaunch-zeabus03-4444.log
+Checking log directory for disk usage. This may take awhile.
+Press Ctrl-C to interrupt
+]2;/home/zeabus/zeabus_workspace/src/zeabus/zeabus_component/zeabus_minimal/launch/speed.launch
+[1mstarted roslaunch server http://zeabus03:42007/[0m
+
+SUMMARY
+========
+
+PARAMETERS
+ * /rosdistro: melodic
+ * /rosversion: 1.14.3
+
+NODES
+  /
+    strategy_mission (zeabus_mission/strategy_speed.py)
+
+[1mROS_MASTER_URI=http://192.168.1.103:11311[0m
+]2;/home/zeabus/zeabus_workspace/src/zeabus/zeabus_component/zeabus_minimal/launch/speed.launch http://192.168.1.103:11311
+[1mprocess[strategy_mission-1]: started with pid [4515][0m
+[1m[strategy_mission-1] process has finished cleanly
+log file: /home/zeabus/.ros/log/1265f136-b56a-11e9-9309-f44d306ff428/strategy_mission-1*.log[0m
+[strategy_mission-1] restarting process
+[1mprocess[strategy_mission-1]: started with pid [11088][0m
+[strategy_mission-1] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
