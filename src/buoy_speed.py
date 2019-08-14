@@ -145,7 +145,7 @@ class Buoy:
                 elif( self.vision.result['center_x'] < -15 ):
                     relative_y = TARGET_LEFT
                 else:
-                    relative_x = SUPER_FORWARD
+                    relative_x = SURVEY_FORWARD
 
                 self.control.publish_data( "Lock Target command force ({:4.2f},{:4.2f})".format(
                     relative_x , relative_y ) )
@@ -209,7 +209,6 @@ class Buoy:
     def finish_task( self ):
         self.rate.sleep()
         self.control.publish_data( "FINISH this task, Move back")
-        self.control.absolute_z( BUOY_TARGET_DEPTH_FINISH )
 
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
@@ -220,11 +219,6 @@ class Buoy:
             self.control.publish_data( "FINISH back current , limit " 
                 + repr( ( diff_time , BUOY_TIME_TO_BACK ) ) )
 
-        self.control.publish_data( "FINISH Waiting depth")
-        while( not self.control.check_z( 0.15 ) ):
-            self.control.force_xy( 0 , 0 )
-            self.rate.sleep()
-
         self.control.publish_data( "FINISH Survey right")
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
@@ -234,7 +228,17 @@ class Buoy:
             diff_time = ( rospy.get_rostime() - start_time ).to_sec()
             self.control.publish_data( "FINISH survey current , limit " 
                 + repr( ( diff_time , BUOY_TIME_TO_SURVEY ) ) )
-           
+
+        self.control.absolute_z( BUOY_TARGET_DEPTH_FINISH )
+        self.control.sleep()
+        self.control.publish_data( "FINISH Waiting depth")
+        while( not self.control.check_z( 0.15 ) ):
+            self.control.force_xy( 0 , 0 )
+            self.rate.sleep()
+
+        while not self.control.check_yaw( 0.15 ):
+            self.rate.sleep()
+ 
         self.control.publish_data( "FINISH Forward")
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()

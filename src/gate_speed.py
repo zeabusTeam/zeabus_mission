@@ -157,9 +157,8 @@ class Gate:
             else:
                 count = 0
 
-            if( self.control.force_xy( SURVEY_FORWARD , 0 ) < GATE_FORWARD_ONLY_DISTANCE ):
-                self.control.publish_data( "DIRECT_SEARCH abort by distance")
-                break
+            diff_time = ( rospy.get_rostime() - start_time ).to_sec() 
+            self.control.force_xy( SURVEY_FORWARD , 0 )
 
         if( count == 3 ):
             self.control.force_false()

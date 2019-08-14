@@ -108,6 +108,39 @@ class StrategySpeed:
         self.control.publish_data( "STRATEGY I will start run mission now")
 
         self.mission_gate.start_mission()
+#        time_for_front_gate = 40
+#        self.control.deactivate( ('x' , 'y') )
+#        start_time = rospy.get_rostime()
+#        diff_time = (rospy.get_rostime() - start_time ).to_sec()
+#        while (not rospy.is_shutdown() ) and diff_time < time_for_front_gate :
+#            self.rate.sleep()
+#            self.control.force_xy( SUPER_FORWARD , 0 )
+#            diff_time = (rospy.get_rostime() - start_time ).to_sec()
+            
+#        self.control.absolute_z( PATH_START_DEPTH )
+        self.control.activate( ('x' , 'y' ) )
+        self.control.absolute_z( -0.6 )
+        while not self.control.check_z( 0.15 ):
+            self.rate.sleep()
+
+        time_to_spin = 15
+        self.control.update_target()
+        start_yaw = self.control.target_pose[5]
+        self.control.deactivate( ('yaw') )
+        start_time = rospy.get_rostime()
+        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+        while( diff_time < time_to_spin ) and ( not rospy.is_shutdown() ):
+            self.rate.sleep()
+            self.control.force_yaw( 1.5 )
+            self.control.publish_data( "STRATEGY now spinning " + str( diff_time ) )
+            diff_time = (rospy.get_rostime() - start_time ).to_sec()
+
+        self.control.activate( ('yaw') )
+        self.control.absolute_yaw( start_yaw )
+        self.control.publish_data( "STRATEGY waiting yaw " + str( start_yaw ) )
+        self.control.sleep()
+        while not self.control.check_yaw( 0.15 ):
+            self.rate.sleep()
 
         self.control.publish_data( "STRATEGY Finish gate next forward and found path")
 
@@ -130,9 +163,6 @@ class StrategySpeed:
         count = 0
         start_time = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-
-        if STRATEGY_NO_PATH :
-            self.control.publish_data( "STRATEGY no play path")
 
         temp_yaw = 0
         if STRATEGY_FIX_YAW_GATE :
@@ -195,6 +225,7 @@ class StrategySpeed:
                     else:
                         ok_y = True
                     count_unfound = 0
+                    count = 3
                     if( self.vision_path.num_point == 0):
                         relative_x = 0
                     elif( self.vision_path.y_point[0] > 20 ):
@@ -206,7 +237,6 @@ class StrategySpeed:
 
                     if( ok_x and ok_y ):
                         self.control.force_xy( 0 , 0 )
-                        count = 3
                         if( self.control.check_z( 0.15 ) ):
                             if( target_depth < PATH_TARGET_DEPTH ):
                                 self.control.publish_data( "STRATEGY Breaking and setup point")
@@ -226,23 +256,10 @@ class StrategySpeed:
 
         self.control.activate( ['x' , 'y'] )
         self.control.publish_data( "STRATEGY will rotation")
-        round_spin = 0
-        while not rospy.is_shutdown() :
-            self.rate.sleep()
-            if self.control.check_yaw( 0.15 ):
-                if round_spin == 6 :
-                    break
-                elif round_spin < 6 :
-                    self.control.relative_yaw( 2.0 * math.pi / 3 )
-                    self.control.sleep()
-                    self.control.publish_data( "STRATEGY SPIN ROUND " + str( round_spin ) )
-                    round_spin += 1
-                else:
-                    pass
             
         # Part to move forward for path If you see path
-
-        if( ( count == 3 ) and ( not STRATEGY_NO_PATH) ):
+        self.control.publish_data( "STRATEGY count is " + str( count ) )
+        if( count == 3 ):
             self.control.publish_data( "STRATEGY start mission path on setup_point" )
             self.mission_path.setup_point()
         elif STRATEGY_NO_PATH : 
@@ -425,132 +442,8 @@ class StrategySpeed:
         self.control.sleep()
         
         if( count == 4 ) and not STRATEGY_NO_PATH:
-            self.control.absolute_z( ROBOSUB_DEPTH_TRIANGLE )
-            self.control.publish_data( "STRATEGY TRY TO ATTACK TRIANGLE BUOY")
-            self.control.deactivate( ('x' , 'y')  )
-            start_time = rospy.get_rostime()
-            diff_time = (rospy.get_rostime() - start_time ).to_sec()
-            while (not rospy.is_shutdown()) and diff_time < ROBOSUB_TIME_SURVEY_TRIANGLE_BUOY:
-                self.control.force_xy( 0 , ROBOSUB_FORCE_SURVEY_TRIANGLE_BUOY )
-                self.control.publish_data( "STRATEGY SURVEY TRIANGLE " + str( diff_time ) )
-                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-
-            start_time = rospy.get_rostime()
-            diff_time = (rospy.get_rostime() - start_time ).to_sec()
-            while (not rospy.is_shutdown()) and diff_time < ROBOSUB_TIME_FORWARD_TRIANGLE_BUOY:
-                self.rate.sleep()
-                self.control.force_xy( ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY , 0 )
-                self.control.publish_data( "STRATEGY FORWARD TRIANLGE " + str( diff_time ) )
-                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-        
-            start_time = rospy.get_rostime()
-            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-            while (not rospy.is_shutdown()) and diff_time < 3 :
-                self.rate.sleep()
-                self.control.force_xy( -ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY , 0 )
-                self.control.publish_data( "STRATEGY BACKWARD TRIANLGE " + str( diff_time ) )
-                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-            self.control.absolute_z( -1.2 )
-            start_time = rospy.get_rostime()
-            diff_time = ( rospy.get_rostime() -  start_time ).to_sec()
-            while (not rospy.is_shutdown()) and diff_time < ROBOSUB_TIME_SURVEY_TRIANGLE_BUOY:
-                self.rate.sleep()
-                self.control.force_xy( 0 , -ROBOSUB_FORCE_SURVEY_TRIANGLE_BUOY)
-                self.control.publish_data( "STRATEGY SURVEY REVERSE " + str( diff_time ) )
-                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-
-            self.control.force_xy( 0 , 0 )
-            self.control.publish_data( "STRATEGY will try to find path again")
-            while not self.control.check_z( 0.1 ) :
-                self.rate.sleep()
-
-            count_found = 0
-            start_time = rospy.get_rostime()
-            diff_time = (rospy.get_rostime() - start_time ).to_sec()
-            self.control.force_xy( -ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY , 0 )
-            target_depth = -1
-            while (not rospy.is_shutdown() ) and diff_time < (ROBOSUB_TIME_FORWARD_TRIANGLE_BUOY-2):
-                self.rate.sleep()
-                self.vision_path.call_data()
-                self.vision_path.echo_data()
-            
-                if self.vision_path.num_point != 0:
-                    count_found += 1
-                    self.control.force_xy( 0 , 0 )
-                    count_unfound = 0
-                    if count_found == 3 :
-                        # Set center to prepare play path
-                        self.control.publish_data( "STRATEGY try to center path")
-                        while( not rospy.is_shutdown() ):
-                            self.rate.sleep()
-                            self.vision_path.call_data()
-                            self.vision_path.echo_data()
-
-                            relative_x = 0
-                            relative_y = 0
-                            ok_x = False
-                            ok_y = False
-                            
-                            if( self.vision_path.num_point == 0 ):
-                                rospy.logfatal("STRATGY path disappear noooooooo")
-                                count = 0
-                                relative_y = 0
-                                count_unfound += 1
-                                if count_unfound == 3:
-                                    break
-                                continue
-                            elif( self.vision_path.x_point[0] > 30 ):
-                                relative_y = TARGET_RIGHT
-                            elif( self.vision_path.x_point[0] < -30 ):
-                                relative_y = TARGET_LEFT
-                            else:
-                                ok_y = True
-                            count_unfound = 0 
-                            if( self.vision_path.num_point == 0):
-                                relative_x = 0
-                            elif( self.vision_path.y_point[0] < -60 ):
-                                relative_x = TARGET_BACKWARD * 2.0
-                            elif( self.vision_path.y_point[0] > 20 ):
-                                relative_x = TARGET_FORWARD
-                            elif( self.vision_path.y_point[0] < -20 ):
-                                relative_x = TARGET_BACKWARD
-                            else:
-                                ok_x = True
-
-                            if( ok_x and ok_y ):
-                                self.control.force_xy( 0 , 0 )
-                                if( self.control.check_z( 0.15 ) ):
-                                    if( target_depth < PATH_TARGET_DEPTH ):
-                                        self.control.publish_data( "Breaking and go to setup point")
-                                        count = 4
-                                        break
-                                    else:
-                                        target_depth -= 0.5
-                                        if target_depth < PATH_TARGET_DEPTH :
-                                            target_depth = PATH_TARGET_DEPTH - 0.05
-                                        self.control.publish_data( "STRATGY I command depth to " 
-                                            + str( target_depth ) )
-                                        self.control.absolute_z( target_depth )
-                            else:
-                                self.control.publish_data( "STRATEGY command " 
-                                    + repr(( relative_x , relative_y ) ) )
-                                self.control.force_xy( relative_x , relative_y )
-                        if count == 4 :
-                            break
-                        else:
-                            count_found = 0
-                    else:
-                        self.control.publish_data( "STRATEGY find path " + str( count_found ))
-                else:
-                    self.control.force_xy( -ROBOSUB_FORCE_FORWARD_TRIANGLE_BUOY , 0 )
-                    diff_time = (rospy.get_rostime() - start_time).to_sec()
-                    self.control.publish_data( "STRATEGY try to find path " + str( diff_time ) )
-
-            if count_found == 3 :
-                self.mission_path.setup_point()
-            else:
-                self.control.publish_data( "Try to survey find path")
-                self.mission_path.find_path()
+            self.control.publish_data( "STRATEGY go to for setup point")
+            self.mission_path.setup_point()
                 
         elif STRATEGY_NO_PATH :
             self.control.publish_data( "STRATEGY No play path")
@@ -737,188 +630,189 @@ class StrategySpeed:
         return SendBoolResponse()
 
     def use_dvl( self ):
-        self.control.publish_data( "STRATEGY use DVL start mission by target at exposed")
-
-        self.control.update_target()
-        collective_target_yaw = zeabus_math.bound_radian(
-            self.control.target[ 5 ] + STRATEGY_ROTATION_STAKE )
-
-        self.control.absolute_z( STRATEGY_EXPOSED_FIND )
-        self.control.publish_data( "STRATEGY command depth to " + str( STRATEGY_EXPOSED_FIND ) )
-        self.control.sleep()
-
-        self.control.relative_yaw( STRATEGY_ROTATION_EXPOSED )
-        self.control.publish_data( "STRATEGY rotation for find target coffin to exposed " + str( 
-            STRATEGY_ROTATION_EXPOSED ) )
-        self.control.sleep()
-
-        while not self.control.check_yaw( 0.15 ):
-            self.rate.sleep()
-
-        self.control.publish_data( "STRATEGY distance survey is " + str( STRATEGY_DISTANCE_SURVEY ) )
-        self.control.relative_xy( 0 , STRATEGY_DISTANCE_SURVEY )
-        self.control.sleep()
-
-        while not self.control.check_xy( 0.15 , 0.15 ):
-            self.rate.sleep()
-
-        self.control.publish_data( "STRATEGY distance forward is " + str(STRATEGY_DISTANCE_FORWARD) )
-        self.control.relative_xy( STRATEGY_DISTANCE_FORWARD , 0 )
-        self.control.update_target()
-        collective_point = ( self.control.target_pose[0] , self.control.target_pose[1] )
-        play_mission = False 
-        count_found = 0
-        while not self.control.check_xy( 0.15 , 0.15 ) :
-            self.rate.sleep()
-            self.vision_coffin.call_data()
-            self.vision_coffin.echo_data()
-            if self.vision_coffin.result['num_object'] > 0 :
-                count_found += 1            
-                if count_found == 3:
-                    self.control.publish_data( "STRATEGY Find coffind stop survey and make center")
-                    self.control.deactivate( ('x' , 'y' ) )
-                    count_unfound = 0 
-                    while ( not rospy.is_shutdown() ) and count_unfound < 3 :
-                        self.rate.sleep()
-                        self.vision_coffin.call_data()
-                        self.vision_coffin.echo_data()
-                        if self.vision_coffin.result['num_object'] > 0 :
-                            count_unfound = 0
-                            force_x = 0 
-                            force_y = 0 
-                            ok_x = False
-                            ok_y = False
-                            if self.vision_coffin.result['center_x'] < -20 :
-                                force_y = SURVEY_LEFT
-                            elif self.vision_coffin.result['center_x' ] > 20 :
-                                force_y = SURVEY_RIGHT
-                            else:
-                                ok_y = True
-
-                            if self.vision_coffin.result['center_y'] < -20 :
-                                force_x = SURVEY_BACKWARD
-                            elif self.vision_coffin.result['center_y'] > 20 :
-                                force_x = SURVEY_FORWARD
-                            else:
-                                ok_x = True
-                            if ok_x and ok_y :
-                                count_found = 3
-                                self.control.publish_data( "STRATEGY now center point of coffin")
-                                self.control.force_xy( 0 , 0 )
-                                break
-                            else:
-                                self.control.force_xy( force_x , force_y )
-                                self.control.publish_data( "STRATEGY command force " 
-                                    + repr( (force_x , force_y ) ) )    
-                        else:
-                            count_unfound += 1
-                            count_found = 0
-                    self.control.activate( ('x' , 'y' ) )
-                    if count_unfound == 3 :
-                        self.control.publish_data( "STRATEGY think target it is noise continue")
-                        self.control.absolute_xy( collective_point[0] , collective_point[1] )
-                        self.control.sleep() 
-                    else:
-                        break
-                else:
-                    self.control.publish_data( "STRATEGY found coffin object is " 
-                        + str( count_found ))
-            else:
-                count_found = 0
-
-        result = False
-        if count_found == 3 :
-            self.mission_exposed.operator()
-            result = True
-        else:
-            result = self.mission_exposed.find()
-
-        if result:
-            self.control.publish_data( "STRATEGY finish play exposed consider try to play stake")
-            self.control.absolute_yaw( collective_target_yaw )
-            self.control.publish_data( "STRATEGY command target yaw is " 
-                + str( collective_target_yaw ) )
-            self.control.absolute_z( STRATEGY_STAKE_DEPTH )
-            self.control.publish_data( "STRATEGY command depth to " 
-                + str( STRATEGY_STAKE_DEPTH ) )
-            self.control.sleep()
-
-            while not self.control.check_yaw( 0.15 ):
-                self.rate.sleep()
-
-            self.control.relative_xy( 0 , STRATEGY_STAKE_DISTANCE_SURVEY )
-            self.control.publish_data( "STRATEGY command survey is " 
-                + str( STRATEGY_STAKE_DISTANCE_SURVEY ) )
-            self.control.sleep()
-            while not self.control.check_xy( 0.15 ):
-                self.rate.sleep()
-
-            self.control.relative_xy( STRATEGY_STAKE_DISTANCE_FORWARD , 0 )
-            self.control.publish_data( "STRATEGY command forward is " 
-                + str( STRATEGY_STAKE_DISTANCE_FORWARD ) )
-            self.control.sleep()
-
-            self.control.update_target()
-            collective_point = ( self.control.target_pose[0] , self.control.target_pose[1] )
-
-            count_found = 0
-            while ( not self.control.check_xy( 0.15 ) ) and count_found < 3 :
-                self.rate.sleep()
-                self.vision_stake.call_data( STAKE_FIND_TARGET )
-                self.vision_stake.echo_data()
-
-                if self.vision_stake.result['found'] :
-                    count_found += 1
-                    if count_found == 3 :
-                        self.control.publish_data( "STRATEGY Now found target stop and focus")
-                        count_unfound = 0
-                        self.control.deactivate( ('x' , 'y' ) )
-                        while ( not rospy.is_shutdown() ) and count_unfound < 3 :
-                            self.rate.sleep()
-                            self.vision_stake.call_data( STAKE_FIND_TARGET )
-                            self.vision_stake.echo_data()
-                            if self.vision.result['found'] :
-                                count_unfound = 0
-                                force_x = 0
-                                force_y = 0
-                                ok_x = False
-                                ok_z = False
-                                if self.vision.result['center'][0] > 10 :
-                                    force_y = TARGET_LEFT
-                                elif self.vision.result['center'][0] < -10 :
-                                    force_y = TARGET_RIGHT
-                                else:
-                                    ok_x = True
-
-                                if self.vision.result['area'] < STRATEGY_STAKE_AREA_FOCUS / 1.5:
-                                    force_x = TARGET_FORWARD
-                                else:
-                                    ok_z = True
-                                
-                                if ok_x and ok_z :
-                                    count_found = 3 
-                                    self.control.force_xy( 0 , 0 )
-                                    self.mission_stake.operator()
-                                    break
-                                else:
-                                    self.control.force_xy( force_x , force_y )
-                                    self.control.publish_data("STRATEGY command force is " 
-                                        + repr( ( force_x , force_y ) ) )
-                            else:
-                                count_unfound += 1
-                        self.control.activate( ('x' , 'y' ) )
-                        if count_unfound == 3:
-                            self.control.publish_data( "STRATEGY target disapper" )
-                            self.control.absolute_xy( collective_point[0] , collective_point[1] )
-                            self.control.sleep()
-                        else:
-                            self.control.publish_data( "STRATEGY Give process to stake")
-                    else:
-                        self.control.publish_data( "STRATEGY found target " + str( count_found ) )
-                else:
-                    count_found = 0
-        else:
-            self.control.publish_data( "STRATEGY don't continue to play because exposed false")
+        pass
+#        self.control.publish_data( "STRATEGY use DVL start mission by target at exposed")
+#
+#        self.control.update_target()
+#        collective_target_yaw = zeabus_math.bound_radian(
+#            self.control.target[ 5 ] + STRATEGY_ROTATION_STAKE )
+#
+#        self.control.absolute_z( STRATEGY_EXPOSED_FIND )
+#        self.control.publish_data( "STRATEGY command depth to " + str( STRATEGY_EXPOSED_FIND ) )
+#        self.control.sleep()
+#
+#        self.control.relative_yaw( STRATEGY_ROTATION_EXPOSED )
+#        self.control.publish_data( "STRATEGY rotation for find target coffin to exposed " + str( 
+#            STRATEGY_ROTATION_EXPOSED ) )
+#        self.control.sleep()
+#
+#        while not self.control.check_yaw( 0.15 ):
+#            self.rate.sleep()
+#
+#        self.control.publish_data( "STRATEGY distance survey is " + str( STRATEGY_DISTANCE_SURVEY ) )
+#        self.control.relative_xy( 0 , STRATEGY_DISTANCE_SURVEY )
+#        self.control.sleep()
+#
+#        while not self.control.check_xy( 0.15 , 0.15 ):
+#            self.rate.sleep()
+#
+#        self.control.publish_data( "STRATEGY distance forward is " + str(STRATEGY_DISTANCE_FORWARD) )
+#        self.control.relative_xy( STRATEGY_DISTANCE_FORWARD , 0 )
+#        self.control.update_target()
+#        collective_point = ( self.control.target_pose[0] , self.control.target_pose[1] )
+#        play_mission = False 
+#        count_found = 0
+#        while not self.control.check_xy( 0.15 , 0.15 ) :
+#            self.rate.sleep()
+#            self.vision_coffin.call_data()
+#            self.vision_coffin.echo_data()
+#            if self.vision_coffin.result['num_object'] > 0 :
+#                count_found += 1            
+#                if count_found == 3:
+#                    self.control.publish_data( "STRATEGY Find coffind stop survey and make center")
+#                    self.control.deactivate( ('x' , 'y' ) )
+#                    count_unfound = 0 
+#                    while ( not rospy.is_shutdown() ) and count_unfound < 3 :
+#                        self.rate.sleep()
+#                        self.vision_coffin.call_data()
+#                        self.vision_coffin.echo_data()
+#                        if self.vision_coffin.result['num_object'] > 0 :
+#                            count_unfound = 0
+#                            force_x = 0 
+#                            force_y = 0 
+#                            ok_x = False
+#                            ok_y = False
+#                            if self.vision_coffin.result['center_x'] < -20 :
+#                                force_y = SURVEY_LEFT
+#                            elif self.vision_coffin.result['center_x' ] > 20 :
+#                                force_y = SURVEY_RIGHT
+#                            else:
+#                                ok_y = True
+#
+#                            if self.vision_coffin.result['center_y'] < -20 :
+#                                force_x = SURVEY_BACKWARD
+#                            elif self.vision_coffin.result['center_y'] > 20 :
+#                                force_x = SURVEY_FORWARD
+#                            else:
+#                                ok_x = True
+#                            if ok_x and ok_y :
+#                                count_found = 3
+#                                self.control.publish_data( "STRATEGY now center point of coffin")
+#                                self.control.force_xy( 0 , 0 )
+#                                break
+#                            else:
+#                                self.control.force_xy( force_x , force_y )
+#                                self.control.publish_data( "STRATEGY command force " 
+#                                    + repr( (force_x , force_y ) ) )    
+#                        else:
+#                            count_unfound += 1
+#                            count_found = 0
+#                    self.control.activate( ('x' , 'y' ) )
+#                    if count_unfound == 3 :
+#                        self.control.publish_data( "STRATEGY think target it is noise continue")
+#                        self.control.absolute_xy( collective_point[0] , collective_point[1] )
+#                        self.control.sleep() 
+#                    else:
+#                        break
+#                else:
+#                    self.control.publish_data( "STRATEGY found coffin object is " 
+#                        + str( count_found ))
+#            else:
+#                count_found = 0
+#
+#        result = False
+#        if count_found == 3 :
+#            self.mission_exposed.operator()
+#            result = True
+#        else:
+#            result = self.mission_exposed.find()
+#
+#        if result:
+#            self.control.publish_data( "STRATEGY finish play exposed consider try to play stake")
+#            self.control.absolute_yaw( collective_target_yaw )
+#            self.control.publish_data( "STRATEGY command target yaw is " 
+#                + str( collective_target_yaw ) )
+#            self.control.absolute_z( STRATEGY_STAKE_DEPTH )
+#            self.control.publish_data( "STRATEGY command depth to " 
+#                + str( STRATEGY_STAKE_DEPTH ) )
+#            self.control.sleep()
+#
+#            while not self.control.check_yaw( 0.15 ):
+#                self.rate.sleep()
+#
+#            self.control.relative_xy( 0 , STRATEGY_STAKE_DISTANCE_SURVEY )
+#            self.control.publish_data( "STRATEGY command survey is " 
+#                + str( STRATEGY_STAKE_DISTANCE_SURVEY ) )
+#            self.control.sleep()
+#            while not self.control.check_xy( 0.15 ):
+#                self.rate.sleep()
+#
+#            self.control.relative_xy( STRATEGY_STAKE_DISTANCE_FORWARD , 0 )
+#            self.control.publish_data( "STRATEGY command forward is " 
+#                + str( STRATEGY_STAKE_DISTANCE_FORWARD ) )
+#            self.control.sleep()
+#
+#            self.control.update_target()
+#            collective_point = ( self.control.target_pose[0] , self.control.target_pose[1] )
+#
+#            count_found = 0
+#            while ( not self.control.check_xy( 0.15 ) ) and count_found < 3 :
+#                self.rate.sleep()
+#                self.vision_stake.call_data( STAKE_FIND_TARGET )
+#                self.vision_stake.echo_data()
+#
+#                if self.vision_stake.result['found'] :
+#                    count_found += 1
+#                    if count_found == 3 :
+#                        self.control.publish_data( "STRATEGY Now found target stop and focus")
+#                        count_unfound = 0
+#                        self.control.deactivate( ('x' , 'y' ) )
+#                        while ( not rospy.is_shutdown() ) and count_unfound < 3 :
+#                            self.rate.sleep()
+#                            self.vision_stake.call_data( STAKE_FIND_TARGET )
+#                            self.vision_stake.echo_data()
+#                            if self.vision.result['found'] :
+#                                count_unfound = 0
+#                                force_x = 0
+#                                force_y = 0
+#                                ok_x = False
+#                                ok_z = False
+#                                if self.vision.result['center'][0] > 10 :
+#                                    force_y = TARGET_LEFT
+#                                elif self.vision.result['center'][0] < -10 :
+#                                    force_y = TARGET_RIGHT
+#                                else:
+#                                    ok_x = True
+#
+#                                if self.vision.result['area'] < STRATEGY_STAKE_AREA_FOCUS / 1.5:
+#                                    force_x = TARGET_FORWARD
+#                                else:
+#                                    ok_z = True
+#                                
+#                                if ok_x and ok_z :
+#                                    count_found = 3 
+#                                    self.control.force_xy( 0 , 0 )
+#                                    self.mission_stake.operator()
+#                                    break
+#                                else:
+#                                    self.control.force_xy( force_x , force_y )
+#                                    self.control.publish_data("STRATEGY command force is " 
+#                                        + repr( ( force_x , force_y ) ) )
+#                            else:
+#                                count_unfound += 1
+#                        self.control.activate( ('x' , 'y' ) )
+#                        if count_unfound == 3:
+#                            self.control.publish_data( "STRATEGY target disapper" )
+#                            self.control.absolute_xy( collective_point[0] , collective_point[1] )
+#                            self.control.sleep()
+#                        else:
+#                            self.control.publish_data( "STRATEGY Give process to stake")
+#                    else:
+#                        self.control.publish_data( "STRATEGY found target " + str( count_found ) )
+#                else:
+#                    count_found = 0
+#        else:
+#            self.control.publish_data( "STRATEGY don't continue to play because exposed false")
 
     # NO USE DVL SUPASAN
     def not_use_dvl( self ):
@@ -944,80 +838,107 @@ class StrategySpeed:
         while not self.control.check_z( 0.12 ):
             self.rate.sleep()
 
-        self.control.deactivate( ('x', 'y') )
-        start_time = rospy.get_rostime()
+        self.control.activate( ('x', 'y') )
+        self.control.relative_xy( 7 , 0 )
+        start_time  = rospy.get_rostime()
         diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-        while not rospy.is_shutdown() and diff_time < STRATEGY_TIME_SURVEY: 
-            self.rate.sleep()
-            self.control.force_xy( 0 , STRATEGY_FORCE_SURVEY )
-            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-            self.control.publish_data( "STRATEGY Survey for expose on time " + str( diff_time ) )
-        self.control.force_xy( 0 , 0 ) 
-
-        self.control.activate( ('x' , 'y' ) )
-
-        self.control.publish_data( "STRATEGY Waiting yaw before forward")
-        while not self.control.check_yaw( 0.12 ) :
-            self.rate.sleep()
-
-        self.control.deactivate( ('x' , 'y') )
-
-        self.control.publish_data( "STRATEGY forward to find exposed" )
-        count_found = 0
-        start_time = rospy.get_rostime()
-        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
-        while (not rospy.is_shutdown()) and diff_time < STRATEGY_TIME_FORWARD and count_found < 5 : 
+        limit_time = 180
+        abort_by_time = False
+        abort_by_distance = False
+        while not rospy.is_shutdown():
             self.rate.sleep()
             self.vision_coffin.call_data()
             self.vision_coffin.echo_data()
-            if self.vision_coffin.result['num_object'] > 0 :
-                count_found += 1
-                force_x = 0
-                force_y = 0
-                ok_x = False
-                ok_y = False
-                self.control.publish_data( "STRATEGY found target command force "
-                    + repr( (force_x , force_y ) ) )
-                if self.vision_coffin.result['center_x'] < -20 :
-                    force_y = SURVER_LEFT
-                elif self.vision_coffin.result['center_x']  > 20 :
-                    force_y = SURVEY_RIGHT
-                else:
-                    ok_y = True
-            
-                if( self.vision_coffin.result['center_y'] < -20 ):
-                    force_x = SURVEY_BACKWARD
-                elif self.vision_coffin.result['center_y'] > 20:
-                    force_x = SURVEY_FORWARD
-                else:
-                    ok_x = True 
-
-                if( ok_x and ok_y ):
-                    count_found = 5
-                    self.control.publish_data( "STRATEGY now center point of coffin")
-                else:
-                    self.control.force_xy( force_x , force_y )
-                    self.control.publish_data( "STRATEGY Have picture command force " + repr( (
-                        force_x , force_y ) ) )
+            if diff_time > limit_time :
+                abort_by_time = True
+                break
+            elif self.control.check_xy( 0.15 , 0.15 ):
+                abort_by_distance = True
+                break
             else:
-                count_found = 0
-                self.control.force_xy( SURVEY_FORWARD , 0 )
-                self.control.publish_data("STRATEGY Don't found target command survey forward")
+                diff_time = ( rospy.get_rostime() - start_time ).to_sec()
 
-            diff_time = (rospy.get_rostime() - start_time).to_sec()
-
-        self.control.force_xy( 0 , 0 )
-        result = False        
-        if( count_found == 5 ):
-            self.control.publish_data( "STRATEGY finish and found object let operator")
-            self.mission_exposed.operator()
-            result = True
+        if abort_by_time :
+            self.mission_exposed.find()
         else:
-            self.control.publish_data( "STRATEGY finish forward search let find object")
-            self.control.sleep()
-            self.control.activate( [ 'x' , 'y' ] )
-            result = self.mission_exposed.find()
+            self.control.deactivate( ('x' , 'y' , 'z' , 'roll' , 'pitch' , 'yaw' ) ) 
+            rospy.sleep( 20 )
+            self.control.activate( ('x' , 'y' , 'z' , 'yaw' ) )
 
+#        self.control.deactivate( ('x', 'y') )
+#        start_time = rospy.get_rostime()
+#        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+#        while not rospy.is_shutdown() and diff_time < STRATEGY_TIME_SURVEY: 
+#            self.rate.sleep()
+#            self.control.force_xy( 0 , STRATEGY_FORCE_SURVEY )
+#            diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+#            self.control.publish_data( "STRATEGY Survey for expose on time " + str( diff_time ) )
+#        self.control.force_xy( 0 , 0 ) 
+#
+#        self.control.activate( ('x' , 'y' ) )
+#
+#        self.control.publish_data( "STRATEGY Waiting yaw before forward")
+#        while not self.control.check_yaw( 0.12 ) :
+#            self.rate.sleep()
+#
+#        self.control.deactivate( ('x' , 'y') )
+#
+#        self.control.publish_data( "STRATEGY forward to find exposed" )
+#        count_found = 0
+#        start_time = rospy.get_rostime()
+#        diff_time = ( rospy.get_rostime() - start_time ).to_sec()
+#        while (not rospy.is_shutdown()) and diff_time < STRATEGY_TIME_FORWARD and count_found < 5 : 
+#            self.rate.sleep()
+#            self.vision_coffin.call_data()
+#            self.vision_coffin.echo_data()
+#            if self.vision_coffin.result['num_object'] > 0 :
+#                count_found += 1
+#                force_x = 0
+#                force_y = 0
+#                ok_x = False
+#                ok_y = False
+#                self.control.publish_data( "STRATEGY found target command force "
+#                    + repr( (force_x , force_y ) ) )
+#                if self.vision_coffin.result['center_x'] < -20 :
+#                    force_y = SURVER_LEFT
+#                elif self.vision_coffin.result['center_x']  > 20 :
+#                    force_y = SURVEY_RIGHT
+#                else:
+#                    ok_y = True
+#            
+#                if( self.vision_coffin.result['center_y'] < -20 ):
+#                    force_x = SURVEY_BACKWARD
+#                elif self.vision_coffin.result['center_y'] > 20:
+#                    force_x = SURVEY_FORWARD
+#                else:
+#                    ok_x = True 
+#
+#                if( ok_x and ok_y ):
+#                    count_found = 5
+#                    self.control.publish_data( "STRATEGY now center point of coffin")
+#                else:
+#                    self.control.force_xy( force_x , force_y )
+#                    self.control.publish_data( "STRATEGY Have picture command force " + repr( (
+#                        force_x , force_y ) ) )
+#            else:
+#                count_found = 0
+#                self.control.force_xy( SURVEY_FORWARD , 0 )
+#                self.control.publish_data("STRATEGY Don't found target command survey forward")
+#
+#            diff_time = (rospy.get_rostime() - start_time).to_sec()
+#
+#        self.control.force_xy( 0 , 0 )
+#        result = False        
+#        if( count_found == 5 ):
+#            self.control.publish_data( "STRATEGY finish and found object let operator")
+#            self.mission_exposed.operator()
+#            result = True
+#        else:
+#            self.control.publish_data( "STRATEGY finish forward search let find object")
+#            self.control.sleep()
+#            self.control.activate( [ 'x' , 'y' ] )
+#            result = self.mission_exposed.find()
+        result = True
         if result :
             self.control.publish_data( "STRATEGY success mission I will try to continue stake" )
             self.control.absolute_yaw( collective_target_yaw )

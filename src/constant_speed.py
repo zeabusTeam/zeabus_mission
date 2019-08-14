@@ -31,9 +31,9 @@ SUPER_RIGHT = -2.3
 GATE_START_DEPTH = -0.25            # This use to target depth of this mission
 GATE_START_FORWARD_TIME = 10         # This is limit of time to go forward
 GATE_START_FORWARD_DISTANCE = 3     # This is limit of distance to go forward
-GATE_START_SURVEY_TIME = 3         # This is limit time for go servey 
+GATE_START_SURVEY_TIME = 1         # This is limit time for go servey 
 GATE_START_SURVEY_DISTANCE = 6      # This is limit time for go survey 
-GATE_START_SURVEY_DIRECTION = 1.0   # positive is left and negative is right
+GATE_START_SURVEY_DIRECTION = -1.0   # positive is left and negative is right
 # ----> two below variable we use to sure we can 
 GATE_FORWARD_ONLY_TIME = 30         # This is limit time for go direct. 
 GATE_FORWARD_ONLY_DISTANCE = 5      # This is limit distane for go direct
@@ -60,10 +60,10 @@ BUOY_AREA_ABORT = 8                 # In mode lock target you can out of loop by
 BUOY_LIMIT_TIME = 15                # This is limit time of dash mode only
 # ----> Below constant variable is use after finish dash mode
 BUOY_TARGET_DEPTH_FINISH = -1     # This is absolute depth when you finish dash mode
-BUOY_FORCE_SURVEY = SURVEY_RIGHT               # force to survey after dash mode
+BUOY_FORCE_SURVEY = SURVEY_LEFT               # force to survey after dash mode
 BUOY_FORCE_FORWARD = SURVEY_FORWARD            # force to forward and backward after dahs mode
 BUOY_TIME_TO_BACK = 5               # forward will plus 5 second
-BUOY_TIME_TO_SURVEY = 12             # time to survey make increase opportunity to find path
+BUOY_TIME_TO_SURVEY = 20             # time to survey make increase opportunity to find path
 
 # Constant for operator drop
 # ----> Below 2 constan variable will help you to manage about flip mission or task 
@@ -85,7 +85,7 @@ DROP_TIME_OPEN = 4                  # This is time to command same force
 # ----> Drop force yaw
 DROP_FORCE_YAW = 0.2         
 # ----> Below 3 constant is use about estimate center to do mission
-DROP_CENTER_X_DROP = 20             # POSITIVE FOR DROP LEFT
+DROP_CENTER_X_DROP = -20             # POSITIVE FOR DROP LEFT
 DROP_CENTER_X_OPEN = 40
 DROP_CENTER_Y = 55 # target of center y when you want to drop and can use for estimate open
 DROP_RELATIVE_YAW_GATE = 3.0*math.pi/8
@@ -131,42 +131,41 @@ STAKE_HEART_CENTER_Y = -10
 # Constant for operator drop
 DROP_HAVE_TO_ROTATION = False
 DROP_RADIAN_TO_ROTATION = math.pi 
-DROP_START_DEPTH = -1.5
 DROP_DEPTH_ACTION = -3 # depth when you want to drop or open
 
 # Constant for connect mission
 # ====> Mission Path 
 STRATEGY_NO_PATH = False
 # ====> Mission Gate
-STRATEGY_TIME_SURVEY_PATH = 0.5               # Time to survey before pass gate
+STRATEGY_TIME_SURVEY_PATH = 2               # Time to survey before pass gate
 STRATEGY_FORCE_SURVEY_PATH = SUPER_RIGHT    # Force to survey before pass gate
 STRATEGY_TIME_GATE_PATH = 40                # Time to forward and doing pass gate
 STRATEGY_FORCE_GATE_PATH = SUPER_FORWARD    # Force to forward and doing pass gate
-STRATEGY_ROTATION_GATE_BUOY = 1.3*math.pi/8   # Use rotation when don't found path
+STRATEGY_ROTATION_GATE_BUOY = -1.3*math.pi/8   # Use rotation when don't found path
 STRATEGY_FIX_YAW_GATE = False                # If this true don't care above variable
 # ====> Mission Buoy
 STRATEGY_DEPTH_BOUY = BUOY_START_DEPTH      # This depth will use in buoy mission
-STRATEGY_TIME_BUOY = 45                      # This is time to forward search direct after path
+STRATEGY_TIME_BUOY = 30                      # This is time to forward search direct after path
 STRATEGY_FORCE_BUOY = SURVEY_FORWARD        # This is force forward search direct after path
-STRATEGY_TIME_BUOY_SURVEY = 5             # This is time to survey after path to buoy
+STRATEGY_TIME_BUOY_SURVEY = 4             # This is time to survey after path to buoy
 STRATEGY_FORCE_BUOY_SURVEY = SURVEY_RIGHT    # This is force survey after path to buoy
-STRATEGY_TIME_BUOY_PATH = 20                # This is time to use forward find buoy only direct 
+STRATEGY_TIME_BUOY_PATH = 30                # This is time to use forward find buoy only direct 
 STRATEGY_FORCE_BUOY_PATH = SURVEY_FORWARD   # This is force use to direct after buoy to search path
 # ====> Mission DROP
 STRATEGY_FIX_YAW_DROP = DROP_HAVE_ROTATION_FOLLOW_GATE
-STRATEGY_ROTATION_BUOY_DROP = 2.8*math.pi/8  # This use rotation buoy to drop in case don't find path
+STRATEGY_ROTATION_BUOY_DROP = -1.5*math.pi/8  # This use rotation buoy to drop in case don't find path
 STRATEGY_DEPTH_FIND_DROP = DROP_START_DEPTH  # This use to depth for find depth
-STRATEGY_FREE_TIME_DROP = 10
+STRATEGY_FREE_TIME_DROP = 30
 STRATEGY_FREE_FORCE_DROP = SURVEY_FORWARD
 STRATEGY_FORCE_SURVEY_DROP = SURVEY_RIGHT
-STRATEGY_TIME_SURVEY_DROP = 5
+STRATEGY_TIME_SURVEY_DROP = 2
 STRATEGY_FORCE_DROP = SURVEY_FORWARD
-STRATEGY_TIME_DROP = 45
+STRATEGY_TIME_DROP = 35
 STRATEGY_DISTANCE_DROP = 6
 # ====> Choice to do last mission have 3 choind
 STRATEGY_CHOICE_PROCESS = 0
 STRATEGY_ROTATION_EXPOSED = 0      # This use to rotation from drop to exposed
-STRATEGY_ROTATION_STAKE = 1.3*math.pi/8        # This will use to collect for command absolute yaw
+STRATEGY_ROTATION_STAKE = -3*math.pi/8        # This will use to collect for command absolute yaw
 #========> 0 is No use dvl : 1 is use DVL : 2 is use hydophone
 # ====> Mission Exposed
 STRATEGY_EXPOSED_FIND = EXPOSED_START_DEPTH
