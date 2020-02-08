@@ -16,7 +16,7 @@ from zeabus.ros import message as nm
 
 from zeabus.connection.control import ControlHandle 
 
-START_TIME = 30
+START_TIME = 15
 
 class Forward:
 
@@ -55,13 +55,13 @@ class Forward:
         self.ch.absolute_pitch( 0 )
     
         print( "set relative depth to -1.0" )
-        self.ch.relative_depth( -1.0 )
+        self.ch.relative_depth( -0.5 )
 
         self.ch.pub( "Client command relative depth is -1.0 sleep for 2 second" )
         rospy.sleep( 2.0 )
 
         self.ch.pub( "Client command forward by force 5")
-        self.ch.plane_xy( 7.0 )
+        self.ch.plane_xy( 5.0 )
         print( "Sleep for 11 second")
         count = 0
         while count < 15:
@@ -81,16 +81,16 @@ class Forward:
         self.ch.plane_xy( 0 )
         rospy.sleep( 5 )
  
-        self.ch.pub( "Client command forward by force -4")
-        self.ch.plane_xy( -6.0 )
-        print( "Sleep for 11 second")
-        count = 0
-        while count < 50:
-            rospy.sleep( 1.0 )
-            count += 1
-            print( "Count is " + str( count ) + " seconds" )
-        self.ch.plane_xy( 0.0 )
-        self.ch.pub( "Client command forward by 0" )
+#        self.ch.pub( "Client command forward by force -4")
+#        self.ch.plane_xy( -6.0 )
+#        print( "Sleep for 11 second")
+#        count = 0
+#        while count < 50:
+#            rospy.sleep( 1.0 )
+#            count += 1
+#            print( "Count is " + str( count ) + " seconds" )
+#        self.ch.plane_xy( 0.0 )
+#        self.ch.pub( "Client command forward by 0" )
 
         self.ch.activate( False )
             
